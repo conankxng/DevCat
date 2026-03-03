@@ -12,11 +12,17 @@ def product_sale_data():
                 return 0.0
     return 0.0
 
-#ฟังก์ชั่นสรุปยอดขายรวม
-def total_sale_Sumary():
-    total_revenue = product_sale_data() #ดึงยอดขายรวมจากไฟล์แล้วเก็บไว้ในตัวแปร total_revenue
+#ฟังก์ชั่นคำนวณรายจ่าย
+def calculate_expenses():
+    inventory = stock.load_products() # ฟังก์ชั่นสำหรับดึงข้อมูลจากไฟล์ ออกมาเก็บในรูปแบบ Dictionary
+   
+
+    total_cost = 0.0 #ตัวแปรสำหรับเก็บต้นทุนทั้งหมด
+    # ต้นทุนคือ 70% ของราคาขาย ปล.ไม่อยากทำไฟล์ต้นทุนเลยเอาเป็น70%จากราคาสินค้า
+
+    total_cost = sum(int(item['stock'])*(item['price']*0.7)) for item in inventory.val
+    return total_cost
 
 #ฟังก์ชั่นการแสดงประวัติสินค้า
 def product_report():
     pass
-ใใใใใ
