@@ -121,7 +121,7 @@ def record_sale(pid,quantity,total_price):
 
 def get_store_financial_summary():
     """
-    สรุปต้นทุนรวมทั้งหมด ยอดขายรวมที่คาดหววัง และกำไรที่่ควรจะได้จากสินค้าที่มีอยู่
+    สรุปต้นทุนรวมทั้งหมด ยอดขายรวมที่คาดหวัง และกำไรที่่ควรจะได้จากสินค้าที่มีอยู่
     """
     inventory = storage.load_products()
     
