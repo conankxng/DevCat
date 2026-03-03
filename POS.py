@@ -7,10 +7,35 @@ HOLD_DIR = "hold_bills"
 if not os.path.exists(HOLD_DIR):
     os.makedirs(HOLD_DIR)
 
+subtotal_label_ref = None
+vat_label_ref = None
+total_label_ref = None
+current_total_sum = 0.0
 
 is_holding = False  # เช็คว่าตอนนี้มีการพักบิลอยู่ไหม
 last_pos = 0
 row_bill = 0 # ใช้ตัวแปรนับแถวแทน current_y เพื่อความสวยงามใน Grid
+
+def update_price_display():
+    """ฟังก์ชันคำนวณราคาแบบ Add-on VAT 7%"""
+    global current_total_sum
+    
+    # 1. ราคาก่อน VAT (Subtotal)
+    subtotal = current_total_sum
+    
+    # 2. คำนวณ VAT 7%
+    vat_amount = subtotal * 0.07
+    
+    # 3. ราคาสุทธิ (Net Total)
+    net_total = subtotal + vat_amount
+    
+    # อัปเดตขึ้นหน้าจอ
+    if subtotal_label_ref:
+        subtotal_label_ref.config(text=f"{subtotal:,.2f} ฿")
+    if vat_label_ref:
+        vat_label_ref.config(text=f"{vat_amount:,.2f} ฿")
+    if total_label_ref:
+        total_label_ref.config(text=f"{net_total:,.2f} ฿")
 
 # --- ฝั่งที่ 1: ตั้งค่าหน้าเลือกสินค้า (ปุ่มเมนู) ---
 def setup_pos_interface(p2, root):
@@ -236,29 +261,34 @@ def process_payment():
         messagebox.showwarning("DevCat", "ไม่มีรายการสินค้าให้ชำระเงิน")
 
 def setup_total_price_interface(p2):
-    global total_label_ref
-    show_price_frame = tk.Frame(p2, bg="white") 
+    global total_label_ref, vat_label_ref, subtotal_label_ref
+    
+    show_price_frame = tk.Frame(p2, bg="white")
     show_price_frame.place(x=1390, y=0, width=522, height=1000)
     
-    tk.Label(show_price_frame, text="Total Price", font=("Arial", 25, "bold"), bg="white").pack(pady=20)
-    
-    # สร้าง Label เปล่ารอไว้ และเก็บ Reference ไว้ในตัวแปร global
-    total_label_ref = tk.Label(show_price_frame, text="0.00 ฿", font=("Arial", 40), fg="white", bg="red", width=15)
-    total_label_ref.pack(pady=20)
-    
-    # เพิ่มปุ่ม Hold
-    bthold = tk.Button(show_price_frame, text="Hold Bill", command=hold_bill, font=("Arial", 15), bg="orange", fg="black", width=20, height=2)
-    bthold.pack(pady=10)
+    # --- ส่วนแสดงราคา Subtotal ---
+    tk.Label(show_price_frame, text="Subtotal", font=("Arial", 18), bg="white", fg="black").pack(pady=(20, 0))
+    subtotal_label_ref = tk.Label(show_price_frame, text="0.00 ฿", font=("Arial", 25), bg="white", fg="#333")
+    subtotal_label_ref.pack()
 
-    # เพิ่มปุ่ม Recall
-    btrecall = tk.Button(show_price_frame, text="Recall Bill", command=recall_bill, font=("Arial", 15), bg="blue", fg="white", width=20, height=2)
-    btrecall.pack(pady=10)
+    # --- ส่วนแสดง VAT 7% ---
+    tk.Label(show_price_frame, text="VAT (7%)", font=("Arial", 18), bg="white", fg="black").pack(pady=(10, 0))
+    vat_label_ref = tk.Label(show_price_frame, text="0.00 ฿", font=("Arial", 25), bg="white", fg="#777")
+    vat_label_ref.pack()
+
+    # --- ส่วนแสดงราคาสุทธิ (Net Total) ---
+    tk.Label(show_price_frame, text="NET TOTAL", font=("Arial", 25, "bold"), bg="white", fg="red").pack(pady=(20, 0))
+    total_label_ref = tk.Label(show_price_frame, text="0.00 ฿", font=("Arial", 45, "bold"), 
+                               fg="white", bg="red", width=15)
+    total_label_ref.pack(pady=10)
+
+    # --- ปุ่มควบคุมต่างๆ ---
+    tk.Button(show_price_frame, text="Hold Bill", command=hold_bill, font=("Arial", 15), bg="orange", width=20).pack(pady=5)
+    tk.Button(show_price_frame, text="Recall Bill", command=recall_bill, font=("Arial", 15), bg="blue", fg="white", width=20).pack(pady=5)
+    tk.Button(show_price_frame, text="Clear Cart", command=clear_cart_action, font=("Arial", 15), bg="#777", fg="white", width=20).pack(pady=5)
     
-    # ปุ่ม Clear Cart (เพิ่มใหม่)
-    tk.Button(show_price_frame, text="Clear Cart", command=clear_cart, font=("Arial", 15), bg="#777777", fg="white", width=20, height=2).pack(pady=5)
-    
-    btpay = tk.Button(show_price_frame, text="Payment", command=lambda: process_payment(), font=50, bg="green", fg="white", width=50, height=10)
-    btpay.pack(pady=(300, 0)) # ใช้ pady เพื่อดันจากข้างบนลงมา 200 พิกเซล
+    tk.Button(show_price_frame, text="PAYMENT", command=process_payment, font=("Arial", 30, "bold"), 
+              bg="green", fg="white", width=20, height=3).pack(side="bottom", pady=50)
     
     return show_price_frame
 
