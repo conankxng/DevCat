@@ -1,6 +1,12 @@
 import tkinter as tk
 import os
 from tkinter import messagebox  # ต้องเพิ่มบรรทัดนี้เพื่อใช้การแจ้งเตือน
+import datetime
+
+HOLD_DIR = "hold_bills"
+if not os.path.exists(HOLD_DIR):
+    os.makedirs(HOLD_DIR)
+
 
 is_holding = False  # เช็คว่าตอนนี้มีการพักบิลอยู่ไหม
 last_pos = 0
@@ -91,33 +97,101 @@ def create_canvas_show_product_to_cart(p2):
     # เพื่อให้ Frame ไปแปะที่มุมบนซ้ายสุดของ Canvas พอดี
     canvas_cart.create_window((0, 0), window=cart_grid_frame, anchor="nw")
 
+# เพิ่มตัวแปรเก็บปุ่มทั้งหมดเพื่อให้ง่ายต่อการค้นหา (วางไว้ด้านบนของไฟล์)
+all_products = [] 
+
+def setup_pos_interface(p2, root):
+    # 1. สร้าง Container ฝั่งซ้าย
+    container_left = tk.Frame(p2, bg="black")
+    container_left.place(x=0, y=0, width=690, height=1000)
+
+    # 2. สร้างส่วน Search (ทำแค่ครั้งเดียวตรงนี้)
+    search_frame = tk.Frame(container_left, bg="#222")
+    search_frame.pack(side="top", fill="x", padx=10, pady=10)
+    
+    tk.Label(search_frame, text="Search:", fg="white", bg="#222", font=("Arial", 12)).pack(side="left", padx=5)
+    search_entry = tk.Entry(search_frame, font=("Arial", 14))
+    search_entry.pack(side="left", fill="x", expand=True, padx=5)
+
+    # 3. สร้าง Canvas และ Scrollbar สำหรับรายการสินค้า
+    canvas_menu = tk.Canvas(container_left, bg="black", highlightthickness=0)
+    scrollbar_menu = tk.Scrollbar(container_left, orient="vertical", command=canvas_menu.yview)
+    canvas_menu.configure(yscrollcommand=scrollbar_menu.set)
+    scrollbar_menu.pack(side="right", fill="y")
+    canvas_menu.pack(side="left", fill="both", expand=True)
+
+    # 4. สร้าง Frame สำหรับวางปุ่มสินค้าด้านใน Canvas
+    menu_frame = tk.Frame(canvas_menu, bg="black")
+    canvas_menu.create_window((0, 0), window=menu_frame, anchor="nw")
+
+    # 5. ตั้งค่าการ Scroll
+    menu_frame.bind("<Configure>", lambda e: canvas_menu.configure(scrollregion=canvas_menu.bbox("all")))
+    
+    def _on_mousewheel_menu(event):
+        canvas_menu.yview_scroll(int(-1*(event.delta/120)), "units")
+    
+    container_left.bind("<Enter>", lambda e: canvas_menu.bind_all("<MouseWheel>", _on_mousewheel_menu))
+    container_left.bind("<Leave>", lambda e: canvas_menu.unbind_all("<MouseWheel>"))
+
+    # 6. เชื่อมระบบ Search เข้ากับปุ่ม (ส่ง canvas_menu ไปด้วยเพื่อให้ Scroll ทำงาน)
+    search_entry.bind("<KeyRelease>", lambda e: generate_buttons(root, p2, menu_frame, search_entry.get(), canvas_menu))
+
+    # 7. โหลดปุ่มครั้งแรก
+    generate_buttons(root, p2, menu_frame, "", canvas_menu)
+    
+    return menu_frame
+
+# ฟังก์ชันกรองปุ่ม
+def filter_buttons(query, target_frame, root, p2):
+    # ลบปุ่มเก่าออกให้หมดก่อน
+    for widget in target_frame.winfo_children():
+        widget.destroy()
+    
+    # สร้างปุ่มใหม่ตามคำค้นหา
+    generate_buttons(root, p2, target_frame, search_query=query)
 
 # --- ปรับปรุงฟังก์ชันสร้างปุ่ม ---
-def generate_buttons(root, p2, target_frame):
+def generate_buttons(root, p2, target_frame, search_query="", canvas=None):
+    # ลบปุ่มเก่าออกก่อนสร้างใหม่ (สำคัญมาก)
+    for widget in target_frame.winfo_children():
+        widget.destroy()
+
     try:
         with open('Inventory.txt', 'r', encoding='utf-8') as f:
-            for index, line in enumerate(f):
+            display_index = 0  # ใช้ตัวนับนี้เพื่อวาง Grid ให้เรียงกันสวยงาม
+            for line in f:
                 data = [item.strip() for item in line.split(',')]
-                if len(data) < 4: continue # เช็คว่ามีข้อมูลครบ (ID, Name, Qty, Price)
+                if len(data) < 4: continue
                 
                 p_name = data[1]
-                p_price = data[3] # ดึงราคา (ตำแหน่งที่ 4 หรือ index 3)
-                
-                row_pos = index // 4
-                col_pos = index % 4
+                p_price = data[3]
+
+                # --- ส่วนเช็คการค้นหา ---
+                # ถ้าพิมพ์ค้นหา แล้วชื่อสินค้าไม่มีคำนั้น ให้ข้ามไป (ตัวเล็กตัวใหญ่ไม่มีผล)
+                if search_query.lower() not in p_name.lower():
+                    continue
+
+                # คำนวณตำแหน่ง Grid (4 คอลัมน์)
+                row_pos = display_index // 4
+                col_pos = display_index % 4
                 
                 btn = tk.Button(
                     target_frame, 
-                    text=f"{p_name}\n({p_price}฿)", # แสดงราคาบนปุ่มด้วย
+                    text=f"{p_name}\n({p_price}฿)", 
                     width=21, 
                     height=10,
-                    # ส่ง p_price เพิ่มเข้าไปในฟังก์ชัน
                     command=lambda n=p_name, p=p_price: open_amount_window(root, n, p, p2)
                 )
                 btn.grid(row=row_pos, column=col_pos, padx=5, pady=5)
+                display_index += 1
+
+        # --- ส่วนสำคัญ: อัปเดตการเลื่อนหน้าจอ ---
+        if canvas:
+            canvas.update_idletasks()
+            canvas.configure(scrollregion=canvas.bbox("all"))
+
     except FileNotFoundError:
         tk.Label(target_frame, text="ไม่พบไฟล์ Inventory.txt", fg="white", bg="black").grid()
-
 # --- ปรับปรุงฟังก์ชันยืนยันค่า ---
 # (หมายเหตุ: คุณต้องสร้าง cart_frame ทิ้งไว้ใน p2 เพื่อให้ฟังก์ชันนี้เรียกใช้ได้)
 cart_frame_ref = None
@@ -184,7 +258,7 @@ def setup_total_price_interface(p2):
     tk.Button(show_price_frame, text="Clear Cart", command=clear_cart, font=("Arial", 15), bg="#777777", fg="white", width=20, height=2).pack(pady=5)
     
     btpay = tk.Button(show_price_frame, text="Payment", command=lambda: process_payment(), font=50, bg="green", fg="white", width=50, height=10)
-    btpay.pack(pady=(400, 0)) # ใช้ pady เพื่อดันจากข้างบนลงมา 200 พิกเซล
+    btpay.pack(pady=(300, 0)) # ใช้ pady เพื่อดันจากข้างบนลงมา 200 พิกเซล
     
     return show_price_frame
 
@@ -254,20 +328,18 @@ def open_amount_window(root, product_name, p_price, p2):
     
 
 def hold_bill():
-    global current_total_sum, row_bill, last_pos, is_holding
+    global current_total_sum, row_bill, last_pos
     source_file = "Bill.txt"
-    hold_file = "Hold_Bill.txt"
 
     if os.path.exists(source_file):
-        # ถ้ามีไฟล์พักอยู่แล้ว ให้แจ้งเตือน (หรือจะทำหลายบิลก็ได้แต่เริ่มจาก 1 ก่อนจะง่ายกว่า)
-        if os.path.exists(hold_file):
-            messagebox.showwarning("Hold Bill", "มีบิลที่พักไว้ก่อนหน้าแล้ว กรุณาจัดการบิลเดิมก่อน")
-            return
+        # สร้างชื่อไฟล์จาก วันที่และเวลาปัจจุบัน
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        file_timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        hold_file_path = os.path.join(HOLD_DIR, f"Bill_{file_timestamp}.txt")
 
-        os.rename(source_file, hold_file) # เปลี่ยนชื่อไฟล์
-        is_holding = True
+        os.rename(source_file, hold_file_path) # ย้ายไฟล์ไปที่โฟลเดอร์ hold
         
-        # ล้างหน้าจอ (ใช้ Logic เดียวกับ Payment แต่ไม่ลบไฟล์)
+        # ล้างหน้าจอรถเข็น
         current_total_sum = 0.0
         row_bill = 1
         last_pos = 0
@@ -276,28 +348,58 @@ def hold_bill():
             if int(widget.grid_info().get("row", 0)) > 0:
                 widget.destroy()
         
-        messagebox.showinfo("Hold Bill", "พักบิลเรียบร้อยแล้ว")
+        messagebox.showinfo("Hold Bill", f"พักบิลเรียบร้อยแล้วเมื่อ:\n{timestamp}")
     else:
         messagebox.showwarning("Hold Bill", "ไม่มีรายการให้พัก")
 
 def recall_bill():
-    global current_total_sum, row_bill, last_pos
-    source_file = "Bill.txt"
-    hold_file = "Hold_Bill.txt"
+    global current_total_sum, row_bill, last_pos, cart_frame_ref
+    
+    # ตรวจสอบก่อนว่าปัจจุบันมีบิลค้างหน้าจอไหม
+    if os.path.exists("Bill.txt") or current_total_sum > 0:
+        messagebox.showwarning("Recall Bill", "กรุณาจัดการบิลปัจจุบันก่อนเรียกคืนบิลอื่น")
+        return
 
-    if os.path.exists(hold_file):
-        # ถ้าปัจจุบันมีบิลค้างอยู่หน้าจอ ให้ถามก่อนว่าจะเอามารวมกันไหม หรือให้เคลียร์บิลปัจจุบันก่อน
-        if os.path.exists(source_file):
-            messagebox.showwarning("Recall Bill", "กรุณาชำระเงินหรือเคลียร์บิลปัจจุบันก่อนเรียกคืน")
-            return
+    # ดึงรายชื่อไฟล์ในโฟลเดอร์ hold
+    files = [f for f in os.listdir(HOLD_DIR) if f.endswith('.txt')]
+    if not files:
+        messagebox.showwarning("Recall Bill", "ไม่มีบิลที่พักไว้")
+        return
 
-        os.rename(hold_file, source_file) # เปลี่ยนชื่อกลับมา
-        
-        # สั่งให้โปรแกรมอ่านไฟล์ Bill.txt ใหม่ทั้งหมดเพื่อวาดขึ้นหน้าจอ
-        refresh_cart_display() 
-        messagebox.showinfo("Recall Bill", "เรียกคืนบิลเรียบร้อยแล้ว")
-    else:
-        messagebox.showwarning("Recall Bill", "ไม่พบรายการที่พักไว้")
+    # สร้างหน้าต่างเลือกบิล
+    recall_window = tk.Toplevel()
+    recall_window.title("Choice Bill to Recall")
+    recall_window.geometry("400x400")
+
+    tk.Label(recall_window, text="Bill Hold", font=("Arial", 14, "bold")).pack(pady=10)
+
+    # สร้าง Listbox แสดงรายการ
+    lb = tk.Listbox(recall_window, font=("Arial", 12), width=40)
+    lb.pack(padx=20, pady=10, expand=True, fill="both")
+
+    # แปลงชื่อไฟล์กลับเป็นวันเวลาให้อ่านง่าย
+    for f in files:
+        # สมมติชื่อไฟล์คือ Bill_20231027_143005.txt
+        display_name = f.replace("Bill_", "").replace(".txt", "")
+        lb.insert("end", display_name)
+
+    def select_and_recall():
+        global current_total_sum, row_bill, last_pos
+        selection = lb.curselection()
+        if selection:
+            filename = files[selection[0]]
+            full_path = os.path.join(HOLD_DIR, filename)
+            
+            # ย้ายกลับมาเป็น Bill.txt
+            os.rename(full_path, "Bill.txt")
+            
+            # วาดหน้าจอใหม่
+            refresh_cart_display()
+            recall_window.destroy()
+            messagebox.showinfo("Success", "เรียกคืนบิลสำเร็จ")
+
+    tk.Button(recall_window, text="OK", command=select_and_recall, 
+              bg="green", fg="white", font=("Arial", 12)).pack(pady=10)
 
 # ฟังก์ชันช่วยวาดหน้าจอใหม่หลังจากเรียกคืนบิล
 def refresh_cart_display():
