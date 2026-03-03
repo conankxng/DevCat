@@ -90,15 +90,6 @@ def create_canvas_show_product_to_cart(p2):
     canvas_cart.create_window((0, 0), window=cart_grid_frame, anchor="nw")
 
 
-def total_show_price(p2):
-    show_price = tk.Frame(p2, bg="white") 
-    show_price.place(x=1390, y=0, width=522, height=1000)
-    tk.Label(show_price, text="Total Price", font=("Arial", 20), bg="white").pack(pady=20)
-    tk.Label(show_price, text="Total Price", font=("Arial", 10), fg="white", bg="red").pack(pady=20)
-
-
-
-
 # --- ปรับปรุงฟังก์ชันสร้างปุ่ม ---
 def generate_buttons(root, p2, target_frame):
     try:
@@ -129,6 +120,26 @@ def generate_buttons(root, p2, target_frame):
 # (หมายเหตุ: คุณต้องสร้าง cart_frame ทิ้งไว้ใน p2 เพื่อให้ฟังก์ชันนี้เรียกใช้ได้)
 cart_frame_ref = None
 
+# สร้างตัวแปรเก็บ Label ราคาไว้เพื่ออัปเดตภายหลัง
+total_label_ref = None 
+current_total_sum = 0.0
+
+def setup_total_price_interface(p2):
+    global total_label_ref
+    show_price_frame = tk.Frame(p2, bg="white") 
+    show_price_frame.place(x=1390, y=0, width=522, height=1000)
+    
+    tk.Label(show_price_frame, text="Total Price", font=("Arial", 25, "bold"), bg="white").pack(pady=20)
+    
+    # สร้าง Label เปล่ารอไว้ และเก็บ Reference ไว้ในตัวแปร global
+    total_label_ref = tk.Label(show_price_frame, text="0.00 ฿", font=("Arial", 40), fg="white", bg="red", width=15)
+    total_label_ref.pack(pady=20)
+    
+    btpay = tk.Button(show_price_frame, text="Payment", font=50, bg="green", fg="white", width=50, height=10)
+    btpay.pack(pady=(550, 0)) # ใช้ pady เพื่อดันจากข้างบนลงมา 200 พิกเซล
+    
+    return show_price_frame
+
 # เพิ่ม p_price เข้ามาเป็น parameter
 def open_amount_window(root, product_name, p_price, p2):
     global cart_frame_ref
@@ -143,7 +154,7 @@ def open_amount_window(root, product_name, p_price, p2):
     count_product.pack(pady=5)
 
     def confirm_value():
-        global last_pos, row_bill, cart_frame_ref
+        global last_pos, row_bill, cart_frame_ref, current_total_sum, total_label_ref
         raw_value = count_product.get()
         if not raw_value: return 
         
@@ -169,6 +180,14 @@ def open_amount_window(root, product_name, p_price, p2):
                     # คำนวณราคารวม (ถ้าต้องการ)
                     total_item_price = float(price) * int(amount)
 
+                    # คำนวณราคารวมสะสม
+                    item_total = float(price) * int(amount)
+                    current_total_sum += item_total
+                    
+                    # อัปเดตตัวเลขบนหน้าจอทันที
+                    if total_label_ref:
+                        total_label_ref.config(text=f"{current_total_sum:,.2f} ฿")
+
                     # --- แสดงผล 3 คอลัมน์ ---
                     # Col 0: ชื่อสินค้า
                     tk.Label(cart_frame_ref, text = name, font=("Arial", 16), bg="red", width=20, height=2, anchor="w").grid(row=row_bill, column=0, sticky="w", padx=10, pady=5)
@@ -183,7 +202,7 @@ def open_amount_window(root, product_name, p_price, p2):
             
             last_pos = f.tell()
         window_select.destroy()
-
-
+        
 
     tk.Button(window_select, text="Confirm", command=confirm_value, width=10).pack(pady=10)
+    

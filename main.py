@@ -47,7 +47,8 @@ POS.setup_pos_interface(p2, root)
 # สร้างฝั่งรถเข็น และ "ต้อง" เก็บค่าไว้ใน cart_frame_ref
 POS.cart_frame_ref = POS.create_canvas_show_product_to_cart(p2)
 
-POS.total_show_price(p2)
+# เรียกใช้ฟังก์ชันแสดงราคาที่คุณต้องการ (ฝั่งขวาสุด)
+POS.setup_total_price_interface(p2)
 
 
 
