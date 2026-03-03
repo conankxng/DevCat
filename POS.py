@@ -178,11 +178,15 @@ def generate_buttons(root, p2, target_frame, search_query="", canvas=None):
                 row_pos = display_index // 4
                 col_pos = display_index % 4
                 
+                p_stock = int(data[2]) # อ่านค่าสต็อกมาเก็บไว้
+
                 btn = tk.Button(
                     target_frame, 
-                    text=f"{p_name}\n({p_price}฿)", 
+                    text=f"{p_name}\n({p_price}฿)\nStock: {p_stock}", # แสดงสต็อกบนปุ่ม
                     width=21, 
                     height=10,
+                    state="normal" if p_stock > 0 else "disabled", # ถ้าสต็อกเป็น 0 ให้กดไม่ได้
+                    bg="white" if p_stock > 0 else "#cccccc", # เปลี่ยนสีเป็นสีเทา
                     command=lambda n=p_name, p=p_price: open_amount_window(root, n, p, p2)
                 )
                 btn.grid(row=row_pos, column=col_pos, padx=5, pady=5)
@@ -330,13 +334,16 @@ def process_sale(pid, quantity):
     with open(file_path, 'r', encoding='utf-8') as f:
         for line in f:
             data = [item.strip() for item in line.split(',')]
-            # สมมติ format: PID, Name, Unit, Stock, Price
-            # ถ้า PID ตรงกัน ให้ลบจำนวน Stock ในตำแหน่ง data[2] หรือ data[3] (ตามไฟล์จริงของคุณ)
             if data[0] == pid:
                 try:
-                    # ปรับตัวเลขดัชนี [2] ให้ตรงกับตำแหน่ง Stock ในไฟล์ของคุณ
-                    current_stock = int(data[2]) 
-                    data[2] = str(current_stock - int(quantity))
+                    current_stock = int(data[2])
+                    new_stock = current_stock - int(quantity)
+                    
+                    # ป้องกันไม่ให้สต็อกติดลบ (Safety Check)
+                    if new_stock < 0:
+                        new_stock = 0
+                    
+                    data[2] = str(new_stock)
                 except (ValueError, IndexError):
                     pass
             updated_data.append(",".join(data))
@@ -361,69 +368,73 @@ def process_payment():
     temp_bill_file = "Bill.txt"
     
     if os.path.exists(temp_bill_file):
-        try:
-            # 1. เตรียมข้อมูลพื้นฐาน
-            now = datetime.datetime.now()
-            timestamp_str = now.strftime("%Y-%m-%d %H:%M:%S")
-            file_name_timestamp = now.strftime("%Y%m%d_%H%M%S")
-            customer_bill_name = f"Customer_Bill_{file_name_timestamp}.txt"
-            
-            sub_total = current_total_sum
-            vat_amount = sub_total * 0.07
-            net_total = sub_total + vat_amount
+        global current_total_sum, row_bill, last_pos, cart_frame_ref, total_label_ref
+        temp_bill_file = "Bill.txt"
+        
+        if os.path.exists(temp_bill_file):
+            try:
+                # 1. เตรียมข้อมูลพื้นฐาน
+                now = datetime.datetime.now()
+                timestamp_str = now.strftime("%Y-%m-%d %H:%M:%S")
+                file_name_timestamp = now.strftime("%Y%m%d_%H%M%S")
+                customer_bill_name = f"Customer_Bill_{file_name_timestamp}.txt"
+                
+                sub_total = current_total_sum
+                vat_amount = sub_total * 0.07
+                net_total = sub_total + vat_amount
 
-            # 2. อ่านข้อมูลจาก Bill.txt มาเตรียมไว้
-            with open(temp_bill_file, 'r', encoding='utf-8') as f:
-                lines = [line.strip() for line in f.readlines() if line.strip()]
+                # 2. อ่านข้อมูลจาก Bill.txt มาเตรียมไว้
+                with open(temp_bill_file, 'r', encoding='utf-8') as f:
+                    lines = [line.strip() for line in f.readlines() if line.strip()]
 
-            # 3. เขียนใบเสร็จลูกค้า และ ตัดสต็อกไปพร้อมกัน
-            with open(customer_bill_name, 'w', encoding='utf-8') as f_out:
-                f_out.write("==============================\n")
-                f_out.write("       Store: DevCat         \n")
-                f_out.write(f"  Date: {timestamp_str}\n")
-                f_out.write("==============================\n")
-                f_out.write(f"{'Item':<15} {'Qty':<5} {'Total':>8}\n")
-                f_out.write("------------------------------\n")
+                # 3. เขียนใบเสร็จลูกค้า และ ตัดสต็อกไปพร้อมกัน
+                with open(customer_bill_name, 'w', encoding='utf-8') as f_out:
+                    f_out.write("==============================\n")
+                    f_out.write("       Store: DevCat         \n")
+                    f_out.write(f"  Date: {timestamp_str}\n")
+                    f_out.write("==============================\n")
+                    f_out.write(f"{'Item':<15} {'Qty':<5} {'Total':>8}\n")
+                    f_out.write("------------------------------\n")
 
-                for i in range(0, len(lines), 3):
-                    name = lines[i]
-                    qty = lines[i+1]
-                    price = lines[i+2]
-                    item_total = float(price) * int(qty)
-                    
-                    # เขียนลงใบเสร็จ
-                    f_out.write(f"{name[:15]:<15} {qty:<5} {item_total:>8.2f}\n")
-                    f_out.write(f"  (@{price})\n")
+                    for i in range(0, len(lines), 3):
+                        name = lines[i]
+                        qty = lines[i+1]
+                        price = lines[i+2]
+                        item_total = float(price) * int(qty)
+                        
+                        # เขียนลงใบเสร็จ
+                        f_out.write(f"{name[:15]:<15} {qty:<5} {item_total:>8.2f}\n")
+                        f_out.write(f"  (@{price})\n")
 
-                    # --- ตัดสต็อกสินค้า ---
-                    target_pid = get_pid_by_name(name)
-                    if target_pid:
-                        process_sale(target_pid, qty)
+                        # --- ตัดสต็อกสินค้า ---
+                        target_pid = get_pid_by_name(name)
+                        if target_pid:
+                            process_sale(target_pid, qty)
 
-                f_out.write("------------------------------\n")
-                f_out.write(f"Sub-total:            {sub_total:>8.2f} ฿\n")
-                f_out.write(f"VAT (7%):             {vat_amount:>8.2f} ฿\n")
-                f_out.write(f"Net Amount:           {net_total:>8.2f} ฿\n")
-                f_out.write("==============================\n")
+                    f_out.write("------------------------------\n")
+                    f_out.write(f"Sub-total:            {sub_total:>8.2f} ฿\n")
+                    f_out.write(f"VAT (7%):             {vat_amount:>8.2f} ฿\n")
+                    f_out.write(f"Net Amount:           {net_total:>8.2f} ฿\n")
+                    f_out.write("==============================\n")
 
-            # 4. ล้างค่าและ UI
-            os.remove(temp_bill_file)
-            messagebox.showinfo("DevCat", "ชำระเงินและตัดสต็อกเสร็จสิ้น!")
+                # 4. ล้างค่าและ UI
+                os.remove(temp_bill_file)
+                messagebox.showinfo("DevCat", "ชำระเงินและตัดสต็อกเสร็จสิ้น!")
 
-            current_total_sum = 0.0
-            row_bill = 1
-            last_pos = 0
-            update_price_labels()
+                current_total_sum = 0.0
+                row_bill = 1
+                last_pos = 0
+                update_price_labels()
 
-            if cart_frame_ref:
-                for widget in cart_frame_ref.winfo_children():
-                    if int(widget.grid_info().get("row", 0)) > 0:
-                        widget.destroy()
-            
-        except Exception as e:
-            messagebox.showerror("Error", f"เกิดข้อผิดพลาด: {e}")
-    else:
-        messagebox.showwarning("DevCat", "ไม่มีรายการสินค้าให้ชำระเงิน")
+                if cart_frame_ref:
+                    for widget in cart_frame_ref.winfo_children():
+                        if int(widget.grid_info().get("row", 0)) > 0:
+                            widget.destroy()
+                
+            except Exception as e:
+                messagebox.showerror("Error", f"เกิดข้อผิดพลาด: {e}")
+        else:
+            messagebox.showwarning("DevCat", "ไม่มีรายการสินค้าให้ชำระเงิน")
 
 
 def hold_bill():
