@@ -160,7 +160,7 @@ def generate_buttons(root, p2, target_frame, search_query="", canvas=None):
         widget.destroy()
 
     try:
-        with open('Inventory.txt', 'r', encoding='utf-8') as f:
+        with open('data/products.txt', 'r', encoding='utf-8') as f:
             display_index = 0  # ใช้ตัวนับนี้เพื่อวาง Grid ให้เรียงกันสวยงาม
             for line in f:
                 data = [item.strip() for item in line.split(',')]
@@ -194,7 +194,7 @@ def generate_buttons(root, p2, target_frame, search_query="", canvas=None):
             canvas.configure(scrollregion=canvas.bbox("all"))
 
     except FileNotFoundError:
-        tk.Label(target_frame, text="ไม่พบไฟล์ Inventory.txt", fg="white", bg="black").grid()
+        tk.Label(target_frame, text="ไม่พบไฟล์ products.txt", fg="white", bg="black").grid()
 # --- ปรับปรุงฟังก์ชันยืนยันค่า ---
 # (หมายเหตุ: คุณต้องสร้าง cart_frame ทิ้งไว้ใน p2 เพื่อให้ฟังก์ชันนี้เรียกใช้ได้)
 cart_frame_ref = None

@@ -14,22 +14,30 @@ def product_sale_data():
                 return 0.0
     return 0.0
 
-#ฟังก์ชั่นคำนวณรายจ่าย
+#ฟังก์ชันสำหรับคำนวณรายจ่ายรวมทั้งหมด
 def calculate_expenses():
-    inventory = stock.load_products() # ฟังก์ชั่นสำหรับดึงข้อมูลจากไฟล์ ออกมาเก็บในรูปแบบ Dictionary
-    total_cost = 0.0 #ตัวแปรสำหรับเก็บต้นทุนทั้งหมด
+    inventory = stock.load_products() #ฟังก์ชั่นดึงข้อมูลจากไฟล์
+    total_cost = 0.0 # ตัวแปรสำหรับเก็บต้นทุนทั้งหมด
+    #วนลูปสินค้าall
+    for pid,data inventory.item():
+        #ดึงจำนวนสินค้าและราคาต้นทุนต่อชิ่้น
+        stock_product = int(data['stock']) #จำนวนสินค้าในสต้อก และแปลงเปน int
+        cost_price = float(data['cost']) #ราคาต้นทุนต่อชิ้น และแปลงข้อมูลเปน float
 
-    for pid,item in inventory.item():# วนลูปผ่านสินค้าทั้งหมดใน inventory
-        stock_a = int(item['stock']) #แปลงเป็น int
-        sale_price = float (item['price']) #แปลงราคาขายเป็น float
-    
-    # cost = 
+        #คำนวนต้นทุนทั้งหมดของสินค้า
+        #product_cost = ต้นทุนสินค้าall
+        product_cost = stock_product*cost_price #จำนวนสินค้า*ราคาต้นทุนต่อชิ้น
+
+        #บวกเข้ากับtotal_cost ที่ใช้เก็บต้นทุนทั้งหมด
+        total_cost = total_cost + product_cost
+#คืนค่าต้นทุนรวมall
+return total_cost
 
 
 
 #ฟังก์ชั่นการแสดงประวัติสินค้า
 def product_report():
-    invemtory = stock.load_products() #ฟังก์ชั่นสำหรับดึงข้อมูลจากไฟล์ ออกมาเก็บในรูปแบบ Dictionary
+    inventory = stock.load_products() #ฟังก์ชั่นดึงข้อมูลจากไฟล์ 
     good_product = []
     not_good_product = []
     for pid,item in inventory.item(): #วนลูปผ่านสินค้าทั้งหมดใน inventory
