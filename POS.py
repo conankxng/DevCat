@@ -3,39 +3,34 @@ import os
 from tkinter import messagebox  # ต้องเพิ่มบรรทัดนี้เพื่อใช้การแจ้งเตือน
 import datetime
 
-HOLD_DIR = "hold_bills"
-if not os.path.exists(HOLD_DIR):
-    os.makedirs(HOLD_DIR)
-
 subtotal_label_ref = None
 vat_label_ref = None
 total_label_ref = None
 current_total_sum = 0.0
+
+HOLD_DIR = "hold_bills"
+if not os.path.exists(HOLD_DIR):
+    os.makedirs(HOLD_DIR)
 
 is_holding = False  # เช็คว่าตอนนี้มีการพักบิลอยู่ไหม
 last_pos = 0
 row_bill = 0 # ใช้ตัวแปรนับแถวแทน current_y เพื่อความสวยงามใน Grid
 
 def update_price_display():
-    """ฟังก์ชันคำนวณราคาแบบ Add-on VAT 7%"""
+    """คำนวณ Subtotal, VAT 7% และ Net Total"""
     global current_total_sum
     
-    # 1. ราคาก่อน VAT (Subtotal)
     subtotal = current_total_sum
-    
-    # 2. คำนวณ VAT 7%
     vat_amount = subtotal * 0.07
-    
-    # 3. ราคาสุทธิ (Net Total)
     net_total = subtotal + vat_amount
     
-    # อัปเดตขึ้นหน้าจอ
     if subtotal_label_ref:
         subtotal_label_ref.config(text=f"{subtotal:,.2f} ฿")
     if vat_label_ref:
         vat_label_ref.config(text=f"{vat_amount:,.2f} ฿")
     if total_label_ref:
         total_label_ref.config(text=f"{net_total:,.2f} ฿")
+
 
 # --- ฝั่งที่ 1: ตั้งค่าหน้าเลือกสินค้า (ปุ่มเมนู) ---
 def setup_pos_interface(p2, root):
@@ -458,7 +453,7 @@ def refresh_cart_display():
             total_label_ref.config(text=f"{current_total_sum:,.2f} ฿")
             last_pos = f.tell()
 
-def clear_cart():
+def clear_cart_action():
     global current_total_sum, row_bill, last_pos, cart_frame_ref, total_label_ref
     file_name = "Bill.txt"
     
