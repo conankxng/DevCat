@@ -4,7 +4,7 @@ import os
 
 #ฟังก์ชั่นดึงข้อมูลการขาย
 def product_sale_data():
-    sale_data = stock.SALES_FILE  # อ้างอิงไฟล์จาก storage_product
+    sale_data = "product.txt"  # อ้างอิงไฟล์จาก storage_product
     if os.path.exists(sale_data):  # เช็คว่าไฟล์มีอยู่จริงไหม
         with open(sale_data, 'r', encoding='utf-8') as cat_data:  # เปิดไฟล์เพื่ออ่าน
             content = cat_data.read().strip()  #content มีไว้เก็บ ข้อมูลที่อ่านออกมาจากไฟล์  #.strip()ตัดช่องว่างหน้า-หลัง

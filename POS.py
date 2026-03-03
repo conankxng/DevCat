@@ -203,82 +203,6 @@ cart_frame_ref = None
 total_label_ref = None 
 current_total_sum = 0.0
 
-def process_payment():
-    global current_total_sum, row_bill, last_pos, cart_frame_ref, total_label_ref
-    temp_bill_file = "Bill.txt" # ไฟล์ชั่วคราวที่ใช้เก็บข้อมูลระหว่างเลือกสินค้า
-    
-    if os.path.exists(temp_bill_file):
-        try:
-            # 1. เตรียมข้อมูลสำหรับใบเสร็จลูกค้า
-            now = datetime.datetime.now()
-            timestamp_str = now.strftime("%Y-%m-%d %H:%M:%S")
-            file_name_timestamp = now.strftime("%Y%m%d_%H%M%S")
-            
-            # สร้างชื่อไฟล์ Customer Bill (ไม่ซ้ำกันตามเวลาที่ซื้อ)
-            customer_bill_name = f"Customer_Bill_{file_name_timestamp}.txt"
-            
-            # คำนวณยอดเงินต่างๆ
-            sub_total = current_total_sum
-            vat_amount = sub_total * 0.07
-            net_total = sub_total + vat_amount
-
-            # 2. อ่านข้อมูลจากไฟล์ชั่วคราวและเขียนลงไฟล์ใบเสร็จจริง
-            with open(temp_bill_file, 'r', encoding='utf-8') as f_in, \
-                 open(customer_bill_name, 'w', encoding='utf-8') as f_out:
-                
-                # เขียนหัวใบเสร็จ
-                f_out.write("==============================\n")
-                f_out.write("       Store: DevCat         \n")
-                f_out.write(f"  Date: {timestamp_str}\n")
-                f_out.write("==============================\n")
-                f_out.write(f"{'Item':<15} {'Qty':<5} {'Total':>8}\n")
-                f_out.write("------------------------------\n")
-                
-                lines = [line.strip() for line in f_in.readlines() if line.strip()]
-                for i in range(0, len(lines), 3):
-                    name = lines[i]
-                    qty = lines[i+1]
-                    price = lines[i+2]
-                    item_total = float(price) * int(qty)
-                    
-                    # เขียนรายการสินค้าลงไฟล์ (ราคาต่อชิ้น/จำนวน/ราคารวม)
-                    # format: ชื่อสินค้า (ราคาต่อชิ้น) | จำนวน | ราคารวม
-                    f_out.write(f"{name[:15]:<15} {qty:<5} {item_total:>8.2f}\n")
-                    f_out.write(f"  {price})\n")
-
-                # เขียนสรุปยอดเงิน
-                f_out.write("------------------------------\n")
-                f_out.write(f"Sub-total:            {sub_total:>8.2f} ฿\n")
-                f_out.write(f"VAT (7%):             {vat_amount:>8.2f} ฿\n")
-                f_out.write(f"Net Amount:           {net_total:>8.2f} ฿\n")
-                f_out.write("==============================\n")
-                f_out.write("   Thank you for shopping!   \n")
-                f_out.write("==============================\n")
-
-            # 3. ลบไฟล์ชั่วคราว (Bill.txt)
-            os.remove(temp_bill_file)
-            
-            # 4. แจ้งเตือนและรีเซ็ตหน้าจอ
-            messagebox.showinfo("DevCat", f"ชำระเงินเสร็จสิ้น!")
-
-            current_total_sum = 0.0
-            update_price_labels()
-            row_bill = 1
-            last_pos = 0
-
-            if total_label_ref:
-                total_label_ref.config(text="0.00 ฿")
-
-            if cart_frame_ref:
-                for widget in cart_frame_ref.winfo_children():
-                    info = widget.grid_info()
-                    if int(info.get("row", 0)) > 0:
-                        widget.destroy()
-            
-        except Exception as e:
-            messagebox.showerror("Error", f"เกิดข้อผิดพลาดในการบันทึกใบเสร็จ: {e}")
-    else:
-        messagebox.showwarning("DevCat", "ไม่มีรายการสินค้าให้ชำระเงิน")
 
 def setup_total_price_interface(p2):
     global total_label_ref, vat_label_ref, net_label_ref
@@ -397,6 +321,110 @@ def open_amount_window(root, product_name, p_price, p2):
         window_select.destroy()
     tk.Button(window_select, text="Confirm", command=confirm_value, width=10).pack(pady=10)
     
+def process_sale(pid, quantity):
+    file_path = 'data/products.txt'
+    if not os.path.exists(file_path):
+        return
+
+    updated_data = []
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            data = [item.strip() for item in line.split(',')]
+            # สมมติ format: PID, Name, Unit, Stock, Price
+            # ถ้า PID ตรงกัน ให้ลบจำนวน Stock ในตำแหน่ง data[2] หรือ data[3] (ตามไฟล์จริงของคุณ)
+            if data[0] == pid:
+                try:
+                    # ปรับตัวเลขดัชนี [2] ให้ตรงกับตำแหน่ง Stock ในไฟล์ของคุณ
+                    current_stock = int(data[2]) 
+                    data[2] = str(current_stock - int(quantity))
+                except (ValueError, IndexError):
+                    pass
+            updated_data.append(",".join(data))
+
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write("\n".join(updated_data) + "\n")
+
+# ฟังก์ชันช่วยหา PID (แยกออกมาไว้ข้างนอก)
+def get_pid_by_name(name):
+    try:
+        with open('data/products.txt', 'r', encoding='utf-8') as f:
+            for line in f:
+                data = line.strip().split(',')
+                if data[1] == name:
+                    return data[0]
+    except:
+        return None
+    return None
+
+def process_payment():
+    global current_total_sum, row_bill, last_pos, cart_frame_ref, total_label_ref
+    temp_bill_file = "Bill.txt"
+    
+    if os.path.exists(temp_bill_file):
+        try:
+            # 1. เตรียมข้อมูลพื้นฐาน
+            now = datetime.datetime.now()
+            timestamp_str = now.strftime("%Y-%m-%d %H:%M:%S")
+            file_name_timestamp = now.strftime("%Y%m%d_%H%M%S")
+            customer_bill_name = f"Customer_Bill_{file_name_timestamp}.txt"
+            
+            sub_total = current_total_sum
+            vat_amount = sub_total * 0.07
+            net_total = sub_total + vat_amount
+
+            # 2. อ่านข้อมูลจาก Bill.txt มาเตรียมไว้
+            with open(temp_bill_file, 'r', encoding='utf-8') as f:
+                lines = [line.strip() for line in f.readlines() if line.strip()]
+
+            # 3. เขียนใบเสร็จลูกค้า และ ตัดสต็อกไปพร้อมกัน
+            with open(customer_bill_name, 'w', encoding='utf-8') as f_out:
+                f_out.write("==============================\n")
+                f_out.write("       Store: DevCat         \n")
+                f_out.write(f"  Date: {timestamp_str}\n")
+                f_out.write("==============================\n")
+                f_out.write(f"{'Item':<15} {'Qty':<5} {'Total':>8}\n")
+                f_out.write("------------------------------\n")
+
+                for i in range(0, len(lines), 3):
+                    name = lines[i]
+                    qty = lines[i+1]
+                    price = lines[i+2]
+                    item_total = float(price) * int(qty)
+                    
+                    # เขียนลงใบเสร็จ
+                    f_out.write(f"{name[:15]:<15} {qty:<5} {item_total:>8.2f}\n")
+                    f_out.write(f"  (@{price})\n")
+
+                    # --- ตัดสต็อกสินค้า ---
+                    target_pid = get_pid_by_name(name)
+                    if target_pid:
+                        process_sale(target_pid, qty)
+
+                f_out.write("------------------------------\n")
+                f_out.write(f"Sub-total:            {sub_total:>8.2f} ฿\n")
+                f_out.write(f"VAT (7%):             {vat_amount:>8.2f} ฿\n")
+                f_out.write(f"Net Amount:           {net_total:>8.2f} ฿\n")
+                f_out.write("==============================\n")
+
+            # 4. ล้างค่าและ UI
+            os.remove(temp_bill_file)
+            messagebox.showinfo("DevCat", "ชำระเงินและตัดสต็อกเสร็จสิ้น!")
+
+            current_total_sum = 0.0
+            row_bill = 1
+            last_pos = 0
+            update_price_labels()
+
+            if cart_frame_ref:
+                for widget in cart_frame_ref.winfo_children():
+                    if int(widget.grid_info().get("row", 0)) > 0:
+                        widget.destroy()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"เกิดข้อผิดพลาด: {e}")
+    else:
+        messagebox.showwarning("DevCat", "ไม่มีรายการสินค้าให้ชำระเงิน")
+
 
 def hold_bill():
     global current_total_sum, row_bill, last_pos
