@@ -124,3 +124,23 @@ def get_store_financial_summary():
     """
     สรุปต้นทุนรวมทั้งหมด ยอดขายรวมที่คาดหววัง และกำไรที่่ควรจะได้จากสินค้าที่มีอยู่
     """
+    inventory = storage.load_products()
+    
+    total_inventory_cost = 0 #ตัวแปรสำหรับรวม "ต้นทุนทั้งหมด" ของสินค้าที่มีอยู่ในร้าน
+    total_expected_revenue = 0 #ตัวแปรสำหรับรวม "รายได้ทั้งหมด" ที่คาดว่าจะได้รับหากขายสินค้าในร้านได้จนหมด
+    
+    for pid, data in inventory.items(): #วนรูปข้อมูลจากไฟล์
+        item_total_cost = data['cost'] * data['stock'] #เอา ราคาต้นทุนต่อชิ้น คูณกับ จำนวนที่เหลือในสต็อก
+        item_expected_revenue = data['price'] * data['stock'] #เอา ราคาขายต่อชิ้น คูณกับ จำนวนที่เหลือในสต็อก
+        
+        total_inventory_cost += item_total_cost # เอาราคาต้นทุนของสินค้าทั้งหมดมารวมกันทั้งสต๊อก
+        total_expected_revenue += item_expected_revenue #เอาราคากลางของสินค้ามารวมกันทั้งสต๊อก
+    
+    total_potential_profit = total_expected_revenue - total_inventory_cost #"รายได้คาดหวังทั้งหมด" ลบด้วย "ต้นทุนทั้งหมด" ผลลัพธ์ที่ได้คือ "กำไรสุทธิที่จะได้รับหากขายสินค้าที่มีอยู่ตอนนี้จนหมด"
+    
+    return {
+        "total_cost": total_inventory_cost, #ราคาต้นทุน
+        "total_revenue": total_expected_revenue, #ราคากลางสินค้า
+        "potential_profit": total_potential_profit #กำไรสุทธิ คาดการ
+    }        
+        
