@@ -89,10 +89,12 @@ def create_canvas_show_product_to_cart(p2):
     # เพื่อให้ Frame ไปแปะที่มุมบนซ้ายสุดของ Canvas พอดี
     canvas_cart.create_window((0, 0), window=cart_grid_frame, anchor="nw")
 
+
 def total_show_price(p2):
     show_price = tk.Frame(p2, bg="white") 
     show_price.place(x=1390, y=0, width=522, height=1000)
-
+    tk.Label(show_price, text="Total Price", font=("Arial", 20), bg="white").pack(pady=20)
+    tk.Label(show_price, text="Total Price", font=("Arial", 10), fg="white", bg="red").pack(pady=20)
 
 
 
