@@ -1,6 +1,6 @@
 import storage_product as storage
 
-def add_product(pid,name,price,stock,category,cost):
+def add_product(pid,name,price,stock,cost):
     """
     ฟังก์ชันสำหรับเพิ่มสินค้า
     คืนค่า: (สถานะความสำเร็จ True/False, ข้อความแจ้งเตือน)
@@ -11,7 +11,7 @@ def add_product(pid,name,price,stock,category,cost):
         return False, f'เกิดข้อผิดพลาด: รหัสสินค้า "{pid}" มีอยู่แล้ว!' #เช็คว่ารหัสสินค้าซ้ำกับที่่อยู่ในระบบไหม หาซ้ำจะหยุดทำงานและส่งค่่า False
     
     #เพิ่มช้อมูลลง Dictionary
-    inventory[pid] = {'name':name, "price":price, "stock":stock, 'category':category, 'cost':cost} #หากไม่่ซ้ำก็จะทำการสร้างข้อมูลเก็บเข้าไปใน inventory โดยใช้ pid เป็นคีย์หลัก
+    inventory[pid] = {'name':name, "price":price, "stock":stock, 'cost':cost} #หากไม่่ซ้ำก็จะทำการสร้างข้อมูลเก็บเข้าไปใน inventory โดยใช้ pid เป็นคีย์หลัก
     storage.save_products(inventory) #เมื่อเพิ่มข้อมูลในตัวแปรเสร็จ ก็สั่งบันทึกทับลงไปในไฟล์ฟังก์ชั่่น save_products
     return True, "สำเร็จ: เพิ่มสินค้าเรียบร้อยแล้ว!" #เมื่อทำงานครบทุกขั้นตอน จะส่งค่า True (สำเร็จ) พร้อมข้อความยืนยันกลับไป
 
@@ -22,7 +22,7 @@ def get_all_products():
     """
     return storage.load_products() #ไปดึงไฟล์ออกมาเพื่อจะเอาไปแสดง
 
-def update_product(pid,name,price,stock,category,cost):
+def update_product(pid,name,price,stock,cost):
     """
     ฟังก์ชันสำหรับแก้ไขข้อมูลสินค้า
     คืนค่าเป็น True/False ,เพื่อแจ้งเตือน
@@ -36,7 +36,6 @@ def update_product(pid,name,price,stock,category,cost):
     inventory[pid]["name"] = name 
     inventory[pid]["price"] = price 
     inventory[pid]["stock"] = stock
-    inventory[pid]["category"] = category
     inventory[pid]["cost"] = cost
     
     storage.save_products(inventory) #แล้วทำการนำข้อมูลใหม่กลับไปเซฟลงไฟล์ txt

@@ -19,12 +19,11 @@ def load_products():
             for line in f: #วนลูปไฟล์ที่เปิดอ่านที่ละบรรทัด
                 parts = line.strip().split(",") #แยกข้อมูล strip()ลบช่องว่างและลบ\n split(",") แยกข้อมูลตามเครืี่องหมาย , แล้วก็เก็บเข้าตัวแปรเป็น list
                 if len(parts) == 6: # เช็คข้อมูลว่ามีครบ 6 ช่องไหม
-                    pid, name, stock, price, category, cost = parts #Unpacking การเอาค่าใน list มาใส่ตัวแปรที่ละตัว
+                    pid, name, stock, price, cost = parts #Unpacking การเอาค่าใน list มาใส่ตัวแปรที่ละตัว
                     inventory[pid] = {  #เก็บข้อมูลลง Dictionary
                         "name":name,
                         "stock":int(stock),
                         "price":float(price),
-                        "category": category,
                         "cost":float(cost)
                     }
     return inventory
@@ -35,7 +34,7 @@ def save_products(inventory):
     """
     with open(FILE_NAME, "w", encoding="utf-8") as f: #เปิดไฟล์ แล้วก็เขียนทับไฟล์เดิมทั้งหมด
         for pid, data in inventory.items(): #วนลูปข้อมูล pid คือ Idสินค้าก็คือ key | ส่วนData ก็คือข้อมูลที่กำหนดไว้
-            f.write(f"{pid},{data['name']},{data['stock']},{data['price']},{data['category']},{data['cost']}\n") #เขียนทับไฟล์ด้วยข้อมูลดั้งนี้
+            f.write(f"{pid},{data['name']},{data['stock']},{data['price']},{data['cost']}\n") #เขียนทับไฟล์ด้วยข้อมูลดั้งนี้
 
 
 def save_sales(total):

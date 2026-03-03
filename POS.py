@@ -7,7 +7,9 @@ HOLD_DIR = "hold_bills"
 if not os.path.exists(HOLD_DIR):
     os.makedirs(HOLD_DIR)
 
-
+vat_label_ref = None
+net_label_ref = None
+current_total_sum = 0.0
 
 is_holding = False  # เช็คว่าตอนนี้มีการพักบิลอยู่ไหม
 last_pos = 0
@@ -158,7 +160,7 @@ def generate_buttons(root, p2, target_frame, search_query="", canvas=None):
         widget.destroy()
 
     try:
-        with open('Inventory.txt', 'r', encoding='utf-8') as f:
+        with open('data/products.txt', 'r', encoding='utf-8') as f:
             display_index = 0  # ใช้ตัวนับนี้เพื่อวาง Grid ให้เรียงกันสวยงาม
             for line in f:
                 data = [item.strip() for item in line.split(',')]
@@ -192,7 +194,7 @@ def generate_buttons(root, p2, target_frame, search_query="", canvas=None):
             canvas.configure(scrollregion=canvas.bbox("all"))
 
     except FileNotFoundError:
-        tk.Label(target_frame, text="ไม่พบไฟล์ Inventory.txt", fg="white", bg="black").grid()
+        tk.Label(target_frame, text="ไม่พบไฟล์ products.txt", fg="white", bg="black").grid()
 # --- ปรับปรุงฟังก์ชันยืนยันค่า ---
 # (หมายเหตุ: คุณต้องสร้าง cart_frame ทิ้งไว้ใน p2 เพื่อให้ฟังก์ชันนี้เรียกใช้ได้)
 cart_frame_ref = None
@@ -203,67 +205,133 @@ current_total_sum = 0.0
 
 def process_payment():
     global current_total_sum, row_bill, last_pos, cart_frame_ref, total_label_ref
-    file_name = "Bill.txt"
+    temp_bill_file = "Bill.txt" # ไฟล์ชั่วคราวที่ใช้เก็บข้อมูลระหว่างเลือกสินค้า
     
-    if os.path.exists(file_name):
+    if os.path.exists(temp_bill_file):
         try:
-            # 1. ลบไฟล์ Bill.txt
-            os.remove(file_name)
+            # 1. เตรียมข้อมูลสำหรับใบเสร็จลูกค้า
+            now = datetime.datetime.now()
+            timestamp_str = now.strftime("%Y-%m-%d %H:%M:%S")
+            file_name_timestamp = now.strftime("%Y%m%d_%H%M%S")
             
-            # 2. แจ้งเตือนผู้ใช้
-            messagebox.showinfo("DevCat", "ชำระเงินเสร็จสิ้น!")
+            # สร้างชื่อไฟล์ Customer Bill (ไม่ซ้ำกันตามเวลาที่ซื้อ)
+            customer_bill_name = f"Customer_Bill_{file_name_timestamp}.txt"
+            
+            # คำนวณยอดเงินต่างๆ
+            sub_total = current_total_sum
+            vat_amount = sub_total * 0.07
+            net_total = sub_total + vat_amount
 
-            # 3. รีเซ็ตตัวแปรทางบัญชีให้เป็น 0
+            # 2. อ่านข้อมูลจากไฟล์ชั่วคราวและเขียนลงไฟล์ใบเสร็จจริง
+            with open(temp_bill_file, 'r', encoding='utf-8') as f_in, \
+                 open(customer_bill_name, 'w', encoding='utf-8') as f_out:
+                
+                # เขียนหัวใบเสร็จ
+                f_out.write("==============================\n")
+                f_out.write("       Store: DevCat         \n")
+                f_out.write(f"  Date: {timestamp_str}\n")
+                f_out.write("==============================\n")
+                f_out.write(f"{'Item':<15} {'Qty':<5} {'Total':>8}\n")
+                f_out.write("------------------------------\n")
+                
+                lines = [line.strip() for line in f_in.readlines() if line.strip()]
+                for i in range(0, len(lines), 3):
+                    name = lines[i]
+                    qty = lines[i+1]
+                    price = lines[i+2]
+                    item_total = float(price) * int(qty)
+                    
+                    # เขียนรายการสินค้าลงไฟล์ (ราคาต่อชิ้น/จำนวน/ราคารวม)
+                    # format: ชื่อสินค้า (ราคาต่อชิ้น) | จำนวน | ราคารวม
+                    f_out.write(f"{name[:15]:<15} {qty:<5} {item_total:>8.2f}\n")
+                    f_out.write(f"  {price})\n")
+
+                # เขียนสรุปยอดเงิน
+                f_out.write("------------------------------\n")
+                f_out.write(f"Sub-total:            {sub_total:>8.2f} ฿\n")
+                f_out.write(f"VAT (7%):             {vat_amount:>8.2f} ฿\n")
+                f_out.write(f"Net Amount:           {net_total:>8.2f} ฿\n")
+                f_out.write("==============================\n")
+                f_out.write("   Thank you for shopping!   \n")
+                f_out.write("==============================\n")
+
+            # 3. ลบไฟล์ชั่วคราว (Bill.txt)
+            os.remove(temp_bill_file)
+            
+            # 4. แจ้งเตือนและรีเซ็ตหน้าจอ
+            messagebox.showinfo("DevCat", f"ชำระเงินเสร็จสิ้น!")
+
             current_total_sum = 0.0
-            row_bill = 1  # เริ่มนับแถวใหม่ (เว้นแถว 0 ที่เป็น Header)
-            last_pos = 0  # รีเซ็ตตำแหน่งการอ่านไฟล์
+            update_price_labels()
+            row_bill = 1
+            last_pos = 0
 
-            # 4. อัปเดตตัวเลขราคารวมบนหน้าจอให้เป็น 0.00
             if total_label_ref:
                 total_label_ref.config(text="0.00 ฿")
 
-            # 5. ล้างรายการสินค้าในรถเข็น (ลบ Widget ลูกทั้งหมดใน cart_frame_ref)
             if cart_frame_ref:
                 for widget in cart_frame_ref.winfo_children():
-                    # ตรวจสอบเพื่อไม่ให้ลบ Header (Product, Amount, Price) 
-                    # ถ้าคุณใช้ grid(row=0) สำหรับ Header เราจะลบเฉพาะ row > 0
                     info = widget.grid_info()
                     if int(info.get("row", 0)) > 0:
                         widget.destroy()
             
         except Exception as e:
-            messagebox.showerror("Error", f"เกิดข้อผิดพลาด: {e}")
+            messagebox.showerror("Error", f"เกิดข้อผิดพลาดในการบันทึกใบเสร็จ: {e}")
     else:
         messagebox.showwarning("DevCat", "ไม่มีรายการสินค้าให้ชำระเงิน")
 
 def setup_total_price_interface(p2):
-    global total_label_ref
+    global total_label_ref, vat_label_ref, net_label_ref
     show_price_frame = tk.Frame(p2, bg="white") 
     show_price_frame.place(x=1390, y=0, width=522, height=1000)
     
-    tk.Label(show_price_frame, text="Total Price", font=("Arial", 25, "bold"), bg="white").pack(pady=20)
+    # แสดงราคาก่อน VAT (Net Price)
+    net_label_ref = tk.Label(show_price_frame, text="Total Price: 0.00 ฿", font=("Arial", 18), bg="red", fg="white", width=30, height=2)
+    net_label_ref.pack(pady=5)
     
-    # สร้าง Label เปล่ารอไว้ และเก็บ Reference ไว้ในตัวแปร global
-    total_label_ref = tk.Label(show_price_frame, text="0.00 ฿", font=("Arial", 40), fg="white", bg="red", width=15)
-    total_label_ref.pack(pady=20)
-    
-    # tk.Label(show_price_frame, text="Vat 7% : 0.00 ฿", font=("Arial", 25, "bold"), bg="white").pack(pady=20)
-    
-    # เพิ่มปุ่ม Hold
-    bthold = tk.Button(show_price_frame, text="Hold Bill", command=hold_bill, font=("Arial", 15), bg="orange", fg="black", width=20, height=2)
-    bthold.pack(pady=10)
+    # แสดง VAT 7%
+    vat_label_ref = tk.Label(show_price_frame, text="VAT (7%): 0.00 ฿", font=("Arial", 18), bg="yellow", fg="black", width=30, height=2)
+    vat_label_ref.pack(pady=5)
 
-    # เพิ่มปุ่ม Recall
-    btrecall = tk.Button(show_price_frame, text="Recall Bill", command=recall_bill, font=("Arial", 15), bg="blue", fg="white", width=20, height=2)
-    btrecall.pack(pady=10)
+    tk.Label(show_price_frame, text="Net Amount", font=("Arial", 25, "bold"), bg="white").pack(pady=(100, 5))
     
-    # ปุ่ม Clear Cart (เพิ่มใหม่)
-    tk.Button(show_price_frame, text="Clear Cart", command=clear_cart, font=("Arial", 15), bg="#777777", fg="white", width=20, height=2).pack(pady=5)
+    # ราคารวม (Net amount) ที่ลูกค้าต้องจ่ายจริง (รวม VAT แล้ว)
+    total_label_ref = tk.Label(show_price_frame, text="0.00 ฿", font=("Arial", 40), fg="white", bg="red", width=15)
+    total_label_ref.pack(pady=10)
+
+    # --- ปุ่มควบคุมต่างๆ ---
+    tk.Button(show_price_frame, text="Hold Bill", command=hold_bill, font=("Arial", 15), bg="orange", width=20).pack(pady=5)
+    tk.Button(show_price_frame, text="Recall Bill", command=recall_bill, font=("Arial", 15), bg="blue", fg="white", width=20).pack(pady=5)
+    tk.Button(show_price_frame, text="Clear Cart", command=clear_cart, font=("Arial", 15), bg="#777777", fg="white", width=20).pack(pady=5)
     
-    btpay = tk.Button(show_price_frame, text="Payment", command=lambda: process_payment(), font=50, bg="green", fg="white", width=50, height=10)
-    btpay.pack(pady=(300, 0)) # ใช้ pady เพื่อดันจากข้างบนลงมา 200 พิกเซล
+    btpay = tk.Button(show_price_frame, text="Payment", command=process_payment, font=("Arial", 25, "bold"), bg="green", fg="white", width=50, height=5)
+    btpay.pack(side="bottom", pady=50)
     
     return show_price_frame
+
+def update_price_labels():
+    global current_total_sum, total_label_ref, vat_label_ref, net_label_ref
+    
+    # 1. Sub-total (ราคาสินค้าทั้งหมดที่ยังไม่รวมภาษี)
+    sub_total = current_total_sum
+    
+    # 2. คำนวณ VAT 7% จากยอดสะสม
+    vat_amount = sub_total * 0.07
+    
+    # 3. Net Amount (ราคาสุทธิที่ลูกค้าต้องจ่าย = ยอดสะสม + ภาษี)
+    net_total = sub_total + vat_amount
+
+    # อัปเดต Label (เปลี่ยนชื่อให้ไม่งง)
+    if total_label_ref:
+        # แสดงยอดรวมที่ต้องจ่ายจริง (Net Total)
+        total_label_ref.config(text=f"{net_total:,.2f} ฿")
+    
+    if vat_label_ref:
+        vat_label_ref.config(text=f"VAT (7%): {vat_amount:,.2f} ฿")
+        
+    if net_label_ref:
+        # แสดงยอดราคาสินค้าสะสมก่อนภาษี
+        net_label_ref.config(text=f"Total Price: {sub_total:,.2f} ฿")
 
 # เพิ่ม p_price เข้ามาเป็น parameter
 def open_amount_window(root, product_name, p_price, p2):
@@ -311,7 +379,7 @@ def open_amount_window(root, product_name, p_price, p2):
                     
                     # อัปเดตตัวเลขบนหน้าจอทันที
                     if total_label_ref:
-                        total_label_ref.config(text=f"{current_total_sum:,.2f} ฿")
+                        update_price_labels()
 
                     # --- แสดงผล 3 คอลัมน์ ---
                     # Col 0: ชื่อสินค้า
@@ -335,18 +403,20 @@ def hold_bill():
     source_file = "Bill.txt"
 
     if os.path.exists(source_file):
-        # สร้างชื่อไฟล์จาก วันที่และเวลาปัจจุบัน
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         file_timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         hold_file_path = os.path.join(HOLD_DIR, f"Bill_{file_timestamp}.txt")
 
-        os.rename(source_file, hold_file_path) # ย้ายไฟล์ไปที่โฟลเดอร์ hold
+        os.rename(source_file, hold_file_path) 
         
         # ล้างหน้าจอรถเข็น
         current_total_sum = 0.0
         row_bill = 1
         last_pos = 0
-        total_label_ref.config(text="0.00 ฿")
+        
+        # อัปเดตหน้าจอให้เป็น 0.00 ทั้งหมด
+        update_price_labels() 
+        
         for widget in cart_frame_ref.winfo_children():
             if int(widget.grid_info().get("row", 0)) > 0:
                 widget.destroy()
@@ -410,6 +480,10 @@ def refresh_cart_display():
     file_name = "Bill.txt"
     
     if os.path.exists(file_name):
+        # รีเซ็ตค่าเริ่มต้นก่อนโหลดใหม่ เพื่อป้องกันราคาบวกซ้ำซ้อน
+        current_total_sum = 0.0
+        row_bill = 1
+        
         with open(file_name, 'r', encoding='utf-8') as f:
             lines = [line.strip() for line in f.readlines() if line.strip()]
             
@@ -421,14 +495,15 @@ def refresh_cart_display():
                 total_item_price = float(price) * int(amount)
                 current_total_sum += total_item_price
                 
-                # วาดลง Grid (Copy logic จาก confirm_value มา)
+                # วาดลง Grid
                 tk.Label(cart_frame_ref, text=name, font=("Arial", 16), bg="red", width=20, height=2, anchor="w").grid(row=row_bill, column=0, sticky="w", padx=10, pady=5)
                 tk.Label(cart_frame_ref, text=amount, font=("Arial", 16), bg="red", width=8, height=2).grid(row=row_bill, column=1, padx=10, pady=5)
                 tk.Label(cart_frame_ref, text=f"{total_item_price:.2f}", font=("Arial", 16), bg="red", fg="green", width=13, height=2, anchor="e").grid(row=row_bill, column=2, sticky="e", padx=10, pady=5)
                 
                 row_bill += 1
             
-            total_label_ref.config(text=f"{current_total_sum:,.2f} ฿")
+            # --- จุดสำคัญ: ต้องสั่งอัปเดต Label ทุกอัน (Net/VAT/Total) ---
+            update_price_labels()
             last_pos = f.tell()
 
 def clear_cart():
@@ -450,6 +525,7 @@ def clear_cart():
             
             # 2. รีเซ็ตตัวแปร
             current_total_sum = 0.0
+            update_price_labels()
             row_bill = 1
             last_pos = 0
             
