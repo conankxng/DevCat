@@ -2,7 +2,7 @@ import storage_product as stock
 import product_manager as manage
 import os
 
-#ฟังก์ชั่นดึงข้อมูลการขาย
+#ฟังก์ชั่นดึงข้อมูลการขาย #คำนวนยแด
 def product_sale_data():
     sale_data = stock.SALES_FILE  # อ้างอิงไฟล์จาก storage_product
     if os.path.exists(sale_data):  # เช็คว่าไฟล์มีอยู่จริงไหม
@@ -19,7 +19,7 @@ def calculate_expenses():
     inventory = stock.load_products() #ฟังก์ชั่นดึงข้อมูลจากไฟล์
     total_cost = 0.0 # ตัวแปรสำหรับเก็บต้นทุนทั้งหมด
     #วนลูปสินค้าall
-    for pid,data in inventory.item():
+    for pid,data in inventory.items():
         #ดึงจำนวนสินค้าและราคาต้นทุนต่อชิ่้น
         stock_product = int(data['stock']) #จำนวนสินค้าในสต้อก และแปลงเปน int
         cost_price = float(data['cost']) #ราคาต้นทุนต่อชิ้น และแปลงข้อมูลเปน float
@@ -43,9 +43,9 @@ def product_report():
         item = {'name': data['name'],'stock': data['stock']} #Dictionary
 
         #สร้างเงื่อนไขว่าอันไหนเป็น สินค้าที่ดี และ เป็นสินค้าที่ไม่ดี
-        if data ['stock']<50 :
+        # ขายออกได้มากเอาจากยอดขาย
+        if  int(data['stock']) <50 :
             good_product.append(data) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร good_product
         else :
             not_good_product.append(data) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร not_good_product
     return (good_product,not_good_product)
-        
