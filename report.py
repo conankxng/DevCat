@@ -40,7 +40,7 @@ def product_report():
     good_product = []
     not_good_product = []
     for pid,data in inventory.items(): #วนลูปผ่านสินค้าทั้งหมดใน inventory
-        data= {'name': data['name'],'stock': data['stock']} #Dictionary
+        item = {'name': data['name'],'stock': data['stock']} #Dictionary
 
         #สร้างเงื่อนไขว่าอันไหนเป็น สินค้าที่ดี และ เป็นสินค้าที่ไม่ดี
         if data ['stock']<50 :
