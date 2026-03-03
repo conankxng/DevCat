@@ -100,3 +100,13 @@ def process_sale(pid,quantity):
             return True,'ตัดสต๊อกสำเร็จ!' 
         return False, "สินค้าในสต๊อกไม่่เพียงพอ!" #ตรวจสอบแล้วของน้อยกว่าคนที่ต้องการซื้อแจ้งเตือน
     return False,'ไม่พบสินค้า!' #ถ้ากรอก รหัสสินค้าผิดก็จะส่่งแจ้งเตือนกลับไป
+
+def record_sale(item_sold,total_price): #item_sold เก็บไว้เพื่อทำรายการขาย
+    """
+    บันทีกประวัติการขาย พร้อมอัพลง Data
+    """
+    import datetime #ดึงโมดูลเวลามาใช้
+    with open(storage.SALES_FILE,'a', encoding='utf-8') as f: #เปิดไฟล์ แล้วก็ทำการเขียนข้อมูลลงไปโดยใช้ a คือการเขียนต่่อท้าย ข้อมูลเดิมที่มีอยู๋ ทำให้ประวัติไม่หาย
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") #แสดงเวลาประวัติการขายเพื่อให้รู้ประวัติเวลา
+        f.write(f'{timestamp}, Total: {total_price}\n') #บันทึกเวลา และยอดเงินที่่ขายลงไป ในไฟล์
+    return True
