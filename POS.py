@@ -1,5 +1,6 @@
 import tkinter as tk
 import os
+from tkinter import messagebox  # ต้องเพิ่มบรรทัดนี้เพื่อใช้การแจ้งเตือน
 
 last_pos = 0
 row_bill = 0 # ใช้ตัวแปรนับแถวแทน current_y เพื่อความสวยงามใน Grid
@@ -124,6 +125,41 @@ cart_frame_ref = None
 total_label_ref = None 
 current_total_sum = 0.0
 
+def process_payment():
+    global current_total_sum, row_bill, last_pos, cart_frame_ref, total_label_ref
+    file_name = "Bill.txt"
+    
+    if os.path.exists(file_name):
+        try:
+            # 1. ลบไฟล์ Bill.txt
+            os.remove(file_name)
+            
+            # 2. แจ้งเตือนผู้ใช้
+            messagebox.showinfo("DevCat", "ชำระเงินเสร็จสิ้น!")
+
+            # 3. รีเซ็ตตัวแปรทางบัญชีให้เป็น 0
+            current_total_sum = 0.0
+            row_bill = 1  # เริ่มนับแถวใหม่ (เว้นแถว 0 ที่เป็น Header)
+            last_pos = 0  # รีเซ็ตตำแหน่งการอ่านไฟล์
+
+            # 4. อัปเดตตัวเลขราคารวมบนหน้าจอให้เป็น 0.00
+            if total_label_ref:
+                total_label_ref.config(text="0.00 ฿")
+
+            # 5. ล้างรายการสินค้าในรถเข็น (ลบ Widget ลูกทั้งหมดใน cart_frame_ref)
+            if cart_frame_ref:
+                for widget in cart_frame_ref.winfo_children():
+                    # ตรวจสอบเพื่อไม่ให้ลบ Header (Product, Amount, Price) 
+                    # ถ้าคุณใช้ grid(row=0) สำหรับ Header เราจะลบเฉพาะ row > 0
+                    info = widget.grid_info()
+                    if int(info.get("row", 0)) > 0:
+                        widget.destroy()
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"เกิดข้อผิดพลาด: {e}")
+    else:
+        messagebox.showwarning("DevCat", "ไม่มีรายการสินค้าให้ชำระเงิน")
+
 def setup_total_price_interface(p2):
     global total_label_ref
     show_price_frame = tk.Frame(p2, bg="white") 
@@ -135,7 +171,7 @@ def setup_total_price_interface(p2):
     total_label_ref = tk.Label(show_price_frame, text="0.00 ฿", font=("Arial", 40), fg="white", bg="red", width=15)
     total_label_ref.pack(pady=20)
     
-    btpay = tk.Button(show_price_frame, text="Payment", font=50, bg="green", fg="white", width=50, height=10)
+    btpay = tk.Button(show_price_frame, text="Payment", command=lambda: process_payment(), font=50, bg="green", fg="white", width=50, height=10)
     btpay.pack(pady=(550, 0)) # ใช้ pady เพื่อดันจากข้างบนลงมา 200 พิกเซล
     
     return show_price_frame
