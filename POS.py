@@ -36,7 +36,6 @@ def setup_pos_interface(p2, root):
     return menu_frame # ส่งค่ากลับไปใช้
 
 # --- ฝั่งที่ 2: ตั้งค่าหน้าแสดงรายการสินค้า (รถเข็น) ---
-# --- ฝั่งที่ 2: ตั้งค่าหน้าแสดงรายการสินค้า (รถเข็น) ---
 def create_canvas_show_product_to_cart(p2):
     global row_bill
     # กำหนดให้เริ่มที่แถว 1 เพราะแถว 0 จะเอาไว้ทำหัวตาราง
