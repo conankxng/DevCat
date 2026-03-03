@@ -87,3 +87,16 @@ def search_product(query):
             results[pid] = data #หากพบว่าคำค้นหาตรงกับรหัสหรือชื่อสินค้าชิ้นนั้น จะนำข้อมูลสินค้านั้นมาใส่ไว้ในตัวแปร
     
     return results #แล้วก็ส่งค่ากลับไปในฟังก์ชั่น
+
+def process_sale(pid,quantity):
+    """
+    ฟังก์ชันสำหรับตัดสต็อกสินค้าเมื่อมีการขาย
+    """
+    inventory = storage.load_products() #เรียกใช้ฟังก์ชันจากไฟล์ เพื่อดึงข้อมูล
+    if pid in inventory:
+        if inventory[pid]['stock']>=quantity:
+            inventory[pid]['stock']-=quantity
+            storage.save_products(inventory)
+            return True,'ตัดสต๊อกสำเร็จ!'
+        return False, "สินค้าในสต๊อกไม่่เพียงพอ!"
+    return False,'ไม่พบสินค้า'
