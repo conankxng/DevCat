@@ -59,6 +59,10 @@ POS.setup_total_price_interface(p2)
 p3 = tk.Frame(root, bg='blue') #สร้างหน้าเข้าไปใน root และเปลี่ยนสี Bg
 p3.place(x=0, y=90, width=1920, height=1000) #วางแบบกำหนดค่าเองคือ แกน x และ y พร้อมกำหนดขนาด
 
+
+
+
+
 #เริ่มต้นให้หน้า 1 อยู่บนสุด
 switch(p1)
 
