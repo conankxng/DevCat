@@ -501,3 +501,5 @@ def on_closing(root):
     
     # ปิดหน้าต่างโปรแกรม
     root.destroy()
+    
+#5050550
