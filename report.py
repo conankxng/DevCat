@@ -19,3 +19,4 @@ def total_sale_Sumary():
 #ฟังก์ชั่นการแสดงประวัติสินค้า
 def product_report():
     pass
+ใใใใใ
