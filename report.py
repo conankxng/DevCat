@@ -1,18 +1,17 @@
 #ฟังก์ชั่นดึงข้อมูลการขาย
-import storage_product
+
+import storage_product as stock
 import os
 def product_sale_data():
-    pass
+    sale_data = stock.SALES_FILE  # อ้างอิงไฟล์จาก storage_product
+    if os.path.exists(sale_data):  # เช็คว่าไฟล์มีอยู่จริงไหม
+        with open(sale_data, "r", encoding="utf-8") as cat_data:  # เปิดไฟล์เพื่ออ่าน
+            content = cat_data.read().strip()  #อ่านข้อมูล #.strip()ตัดช่องว่างหน้า-หลัง
+            if content: 
+                return float(content)
+            else:
+                return 0.0
+    return 0.0
 
-#ฟังก์ชั่นสรุปยอดขายรวม และแสดงผลกำไร-ขาดทุน
-def total_sale_Sumary():
-   # ดึงข้อมูลจากสินค้าในสต้อกเพื่อเอาราคา และกำไร
-    stock = storage_product.load_products() #inventory = stock 
-    total_cost = 0 #ไว้รอเก็บต้นทุนรวม
-    total_revenue = 0  #ไว้รอเก็บยอดขายรวม 
-
-    
-
-#ฟังก์ชั่นการแสดงประวัติสินค้า (ว่าสินค้าไหนทำกำไรได้มากที่สุด,น้อยที่สุด)
-def product_report():
-    pass
+#ฟังก์ชั่นสรุปยอดขายรวม
+bdsjdwsbfr
