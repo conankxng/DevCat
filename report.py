@@ -34,19 +34,18 @@ def calculate_expenses():
     return total_cost
 
 
-
 #ฟังก์ชั่นการแสดงประวัติสินค้า
 def product_report():
     inventory = stock.load_products() #ฟังก์ชั่นดึงข้อมูลจากไฟล์ 
     good_product = []
     not_good_product = []
-    for pid,item in inventory.item(): #วนลูปผ่านสินค้าทั้งหมดใน inventory
-        item = {'name': data['name'],'stock': data['stock']} #Dictionary
+    for pid,data in inventory.item(): #วนลูปผ่านสินค้าทั้งหมดใน inventory
+        data= {'name': data['name'],'stock': data['stock']} #Dictionary
 
         #สร้างเงื่อนไขว่าอันไหนเป็น สินค้าที่ดี และ เป็นสินค้าที่ไม่ดี
         if data ['stock']<50 :
-            good_product.append(item) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร good_product
+            good_product.append(data) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร good_product
         else :
-            not_good_product.append(item) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร not_good_product
+            not_good_product.append(data) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร not_good_product
     return (good_product,not_good_product)
         
