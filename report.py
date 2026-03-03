@@ -14,3 +14,4 @@ def product_sale_data():
     return 0.0
 
 #ฟังก์ชั่นสรุปยอดขายรวม
+bdsjdwsbfr
