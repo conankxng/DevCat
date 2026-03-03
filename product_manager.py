@@ -27,19 +27,20 @@ def update_product(pid,name,price,stock,category,cost):
     ฟังก์ชันสำหรับแก้ไขข้อมูลสินค้า
     คืนค่าเป็น True/False ,เพื่อแจ้งเตือน
     """
-    inventory = storage.load_products()
+    inventory = storage.load_products() #อ่านไฟลฺ์แล้วดึงข้อมูลมาเก็บไว้ในตัวแปร
     
-    if pid not in inventory:
-        return False, 'แจ้งเตือน: ไม่พบรหัสสินค้านี้ในระบบ!'
+    if pid not in inventory: #เอามาเช็คเงื่อนไข ว่าไม่่มี รหัสสินค้า ข้อมูลจริงไหม
+        return False, 'แจ้งเตือน: ไม่พบรหัสสินค้านี้ในระบบ!' #แล้วก็ส่งข้อมูลกลับไป
     
-    inventory[pid]["name"] = name
-    inventory[pid]["price"] = price
+    #ถ้ามีมาเข้าส่วนนี้ ก็คือเก็บข้อมูลใหม่ลงในตัวแปร
+    inventory[pid]["name"] = name 
+    inventory[pid]["price"] = price 
     inventory[pid]["stock"] = stock
     inventory[pid]["category"] = category
     inventory[pid]["cost"] = cost
     
-    storage.save_products(inventory)
-    return True,"สำเร็จ: แก้ไขสินค้าเรียบร้อยแล้ว!"
+    storage.save_products(inventory) #แล้วทำการนำข้อมูลใหม่กลับไปเซฟลงไฟล์ txt
+    return True,"สำเร็จ: แก้ไขสินค้าเรียบร้อยแล้ว!" #แล้วส่งแจ้งเตือนกลับไป
 
 def delete_product(pid):
     """
@@ -116,5 +117,10 @@ def record_sale(pid,quantity,total_price):
     
     with open(storage.SALES_FILE,'a', encoding='utf-8') as f: #เปิดไฟล์ แล้วก็ทำการเขียนข้อมูลลงไปโดยใช้ a คือการเขียนต่่อท้าย ข้อมูลเดิมที่มีอยู๋ ทำให้ประวัติไม่หาย
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") #แสดงเวลาประวัติการขายเพื่อให้รู้ประวัติเวลา
-        f.write(f'{timestamp}, ID:{pid}, Qty: {quantity}, Total: {total_price}, Profit: {profit}\n')
+        f.write(f'{timestamp}, ID:{pid}, Qty: {quantity}, Total: {total_price}, Profit: {profit}\n') #เก็บข้อมูลประวัติ เวลา จำนวนที่ขาย ราคาทั้งหมด กำไรที่ได้
     return True
+
+def get_store_financial_summary():
+    """
+    สรุปต้นทุนรวมทั้งหมด ยอดขายรวมที่คาดหววัง และกำไรที่่ควรจะได้จากสินค้าที่มีอยู่
+    """
