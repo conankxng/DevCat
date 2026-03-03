@@ -2,6 +2,7 @@ import tkinter as tk
 import os
 from tkinter import messagebox  # ต้องเพิ่มบรรทัดนี้เพื่อใช้การแจ้งเตือน
 
+is_holding = False  # เช็คว่าตอนนี้มีการพักบิลอยู่ไหม
 last_pos = 0
 row_bill = 0 # ใช้ตัวแปรนับแถวแทน current_y เพื่อความสวยงามใน Grid
 
@@ -171,8 +172,19 @@ def setup_total_price_interface(p2):
     total_label_ref = tk.Label(show_price_frame, text="0.00 ฿", font=("Arial", 40), fg="white", bg="red", width=15)
     total_label_ref.pack(pady=20)
     
+    # เพิ่มปุ่ม Hold
+    bthold = tk.Button(show_price_frame, text="Hold Bill", command=hold_bill, font=("Arial", 15), bg="orange", fg="black", width=20, height=2)
+    bthold.pack(pady=10)
+
+    # เพิ่มปุ่ม Recall
+    btrecall = tk.Button(show_price_frame, text="Recall Bill", command=recall_bill, font=("Arial", 15), bg="blue", fg="white", width=20, height=2)
+    btrecall.pack(pady=10)
+    
+    # ปุ่ม Clear Cart (เพิ่มใหม่)
+    tk.Button(show_price_frame, text="Clear Cart", command=clear_cart, font=("Arial", 15), bg="#777777", fg="white", width=20, height=2).pack(pady=5)
+    
     btpay = tk.Button(show_price_frame, text="Payment", command=lambda: process_payment(), font=50, bg="green", fg="white", width=50, height=10)
-    btpay.pack(pady=(550, 0)) # ใช้ pady เพื่อดันจากข้างบนลงมา 200 พิกเซล
+    btpay.pack(pady=(400, 0)) # ใช้ pady เพื่อดันจากข้างบนลงมา 200 พิกเซล
     
     return show_price_frame
 
@@ -238,7 +250,127 @@ def open_amount_window(root, product_name, p_price, p2):
             
             last_pos = f.tell()
         window_select.destroy()
-        
-
     tk.Button(window_select, text="Confirm", command=confirm_value, width=10).pack(pady=10)
     
+
+def hold_bill():
+    global current_total_sum, row_bill, last_pos, is_holding
+    source_file = "Bill.txt"
+    hold_file = "Hold_Bill.txt"
+
+    if os.path.exists(source_file):
+        # ถ้ามีไฟล์พักอยู่แล้ว ให้แจ้งเตือน (หรือจะทำหลายบิลก็ได้แต่เริ่มจาก 1 ก่อนจะง่ายกว่า)
+        if os.path.exists(hold_file):
+            messagebox.showwarning("Hold Bill", "มีบิลที่พักไว้ก่อนหน้าแล้ว กรุณาจัดการบิลเดิมก่อน")
+            return
+
+        os.rename(source_file, hold_file) # เปลี่ยนชื่อไฟล์
+        is_holding = True
+        
+        # ล้างหน้าจอ (ใช้ Logic เดียวกับ Payment แต่ไม่ลบไฟล์)
+        current_total_sum = 0.0
+        row_bill = 1
+        last_pos = 0
+        total_label_ref.config(text="0.00 ฿")
+        for widget in cart_frame_ref.winfo_children():
+            if int(widget.grid_info().get("row", 0)) > 0:
+                widget.destroy()
+        
+        messagebox.showinfo("Hold Bill", "พักบิลเรียบร้อยแล้ว")
+    else:
+        messagebox.showwarning("Hold Bill", "ไม่มีรายการให้พัก")
+
+def recall_bill():
+    global current_total_sum, row_bill, last_pos
+    source_file = "Bill.txt"
+    hold_file = "Hold_Bill.txt"
+
+    if os.path.exists(hold_file):
+        # ถ้าปัจจุบันมีบิลค้างอยู่หน้าจอ ให้ถามก่อนว่าจะเอามารวมกันไหม หรือให้เคลียร์บิลปัจจุบันก่อน
+        if os.path.exists(source_file):
+            messagebox.showwarning("Recall Bill", "กรุณาชำระเงินหรือเคลียร์บิลปัจจุบันก่อนเรียกคืน")
+            return
+
+        os.rename(hold_file, source_file) # เปลี่ยนชื่อกลับมา
+        
+        # สั่งให้โปรแกรมอ่านไฟล์ Bill.txt ใหม่ทั้งหมดเพื่อวาดขึ้นหน้าจอ
+        refresh_cart_display() 
+        messagebox.showinfo("Recall Bill", "เรียกคืนบิลเรียบร้อยแล้ว")
+    else:
+        messagebox.showwarning("Recall Bill", "ไม่พบรายการที่พักไว้")
+
+# ฟังก์ชันช่วยวาดหน้าจอใหม่หลังจากเรียกคืนบิล
+def refresh_cart_display():
+    global current_total_sum, row_bill, last_pos
+    file_name = "Bill.txt"
+    
+    if os.path.exists(file_name):
+        with open(file_name, 'r', encoding='utf-8') as f:
+            lines = [line.strip() for line in f.readlines() if line.strip()]
+            
+            for i in range(0, len(lines), 3):
+                name = lines[i]
+                amount = lines[i+1]
+                price = lines[i+2]
+                
+                total_item_price = float(price) * int(amount)
+                current_total_sum += total_item_price
+                
+                # วาดลง Grid (Copy logic จาก confirm_value มา)
+                tk.Label(cart_frame_ref, text=name, font=("Arial", 16), bg="red", width=20, height=2, anchor="w").grid(row=row_bill, column=0, sticky="w", padx=10, pady=5)
+                tk.Label(cart_frame_ref, text=amount, font=("Arial", 16), bg="red", width=8, height=2).grid(row=row_bill, column=1, padx=10, pady=5)
+                tk.Label(cart_frame_ref, text=f"{total_item_price:.2f}", font=("Arial", 16), bg="red", fg="green", width=13, height=2, anchor="e").grid(row=row_bill, column=2, sticky="e", padx=10, pady=5)
+                
+                row_bill += 1
+            
+            total_label_ref.config(text=f"{current_total_sum:,.2f} ฿")
+            last_pos = f.tell()
+
+def clear_cart():
+    global current_total_sum, row_bill, last_pos, cart_frame_ref, total_label_ref
+    file_name = "Bill.txt"
+    
+    # ถามเพื่อความแน่ใจก่อนลบ
+    if not os.path.exists(file_name) and current_total_sum == 0:
+        messagebox.showwarning("Clear Cart", "ไม่มีรายการสินค้าในรถเข็น")
+        return
+
+    confirm = messagebox.askyesno("Confirm Clear", "คุณต้องการล้างรายการทั้งหมดในรถเข็นใช่หรือไม่?")
+    
+    if confirm:
+        try:
+            # 1. ลบไฟล์ทิ้ง
+            if os.path.exists(file_name):
+                os.remove(file_name)
+            
+            # 2. รีเซ็ตตัวแปร
+            current_total_sum = 0.0
+            row_bill = 1
+            last_pos = 0
+            
+            # 3. ล้างหน้าจอ UI
+            if total_label_ref:
+                total_label_ref.config(text="0.00 ฿")
+            
+            if cart_frame_ref:
+                for widget in cart_frame_ref.winfo_children():
+                    info = widget.grid_info()
+                    if int(info.get("row", 0)) > 0:
+                        widget.destroy()
+            
+            messagebox.showinfo("Clear Cart", "ล้างรถเข็นเรียบร้อยแล้ว")
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"ไม่สามารถล้างรถเข็นได้: {e}")
+
+def on_closing(root):
+    file_name = "Bill.txt"
+    # ถ้ามีไฟล์ Bill.txt ค้างอยู่ ให้ลบทิ้งก่อนปิด
+    if os.path.exists(file_name):
+        try:
+            os.remove(file_name)
+        except Exception as e:
+            print(f"Error deleting file on close: {e}")
+    
+    # ปิดหน้าต่างโปรแกรม
+    root.destroy()
