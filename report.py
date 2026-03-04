@@ -1,17 +1,19 @@
 import storage_product as stock
-import product_manager as manage
 import os
 
-#ฟังก์ชั่นดึงข้อมูลการขาย #คำนวนยแด
+#ฟังก์ชั่นดึงข้อมูลการขาย
 def product_sale_data():
     sale_data = "product.txt"  # อ้างอิงไฟล์จาก storage_product
     if os.path.exists(sale_data):  # เช็คว่าไฟล์มีอยู่จริงไหม
-        with open(sale_data, 'r', encoding='utf-8') as cat_data:  # เปิดไฟล์เพื่ออ่าน
-            content = cat_data.read().strip()  #content มีไว้เก็บ ข้อมูลที่อ่านออกมาจากไฟล์  #.strip()ตัดช่องว่างหน้า-หลัง
-            if content: #ถ้าcontentไม่ว่าง ให้คืนค่าเป็น float(content)
-                return float(content) 
-            else: #ถ้า contentว่าง ให้คืนค่าเป็น 0.0
-                return 0.0
+        with open(sale_data, 'r', encoding='utf-8') as flie:  # เปิดไฟล์เพื่ออ่าน
+            content = flie.read().strip()  #content มีไว้เก็บ ข้อมูลที่อ่านออกมาจากไฟล์  #.strip()ตัดช่องว่างหน้า-หลัง
+             if content: 
+            #ถ้าcontentไม่ว่างให้คืนค่าเป็น float(content)
+                try:
+                    # ป้องกันกรณีในไฟล์เป็นตัวอักษรที่ไม่ใช่ตัวเลข
+                    return float(content) 
+                except ValueError:
+                    return 0.0
     return 0.0
 
 #ฟังก์ชันสำหรับคำนวณรายจ่ายรวมทั้งหมด
@@ -45,7 +47,7 @@ def product_report():
         #สร้างเงื่อนไขว่าอันไหนเป็น สินค้าที่ดี และ เป็นสินค้าที่ไม่ดี
         # ขายออกได้มากเอาจากยอดขาย
         if  int(data['stock']) <50 :
-            good_product.append(data) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร good_product
+            good_product.append(item) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร good_product
         else :
-            not_good_product.append(data) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร not_good_product
+            not_good_product.append(item) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร not_good_product
     return (good_product,not_good_product)
