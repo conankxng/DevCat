@@ -2,8 +2,8 @@
 
 # 💻 ระบบ Inventory
 
-👤 **ชื่อ:** `อนุพงค์ พลจันทึก`  
-🆔 **รหัสนักศึกษา:** `681310024`
+**ชื่อ:** **อนุพงค์ พลจันทึก**  
+**รหัสนักศึกษา:** **681310024**
 
 ---
 
@@ -11,8 +11,19 @@
 
 | 📂 File | 📝 รายละเอียด |
 |---------|----------------|
-| `product_manager.py` | 🛒 จัดการข้อมูลสินค้า **(Product Management)** |
-| `storage_product.py` | 💾 บันทึกและโหลดข้อมูลจากไฟล์ **(Persistence Layer)** |
-| `ui_inventory.py` | 🖥️ แสดงผล GUI คลังสินค้า **(Frontend Interface)** |
+| [`product_manager.py`](product_manager.py) | 🛒 จัดการข้อมูลสินค้า **(Product Management)** |
+| [`storage_product.py`](storage_product.py) | 💾 บันทึกและโหลดข้อมูลจากไฟล์ **(Persistence Layer)** |
+| [`ui_inventory.py`](ui_inventory.py) | 🖥️ แสดงผล GUI คลังสินค้า **(Frontend Interface)** |
+
+---
+
+---
+
+## 🚀 ฟีเจอร์ & จุดเด่น
+
+- ⚡ **sleep** - นอน
+- 📝 **sleep** - นอน
+- 🖨️ **sleep** - นอน
+- 📊 **sleep** - นอน
 
 ---
