@@ -1,13 +1,13 @@
 import storage_product as stock
 import os
-
+best_seller_limit = 50 #สินค้าขายดีต้องมีเกณฑ์ขายเหลือในสต้อกแค่ 50ชิ้นลงไป
 #ฟังก์ชั่นดึงข้อมูลการขาย
 def product_sale_data():
     sale_data = "product.txt"  # อ้างอิงไฟล์จาก storage_product
     if os.path.exists(sale_data):  # เช็คว่าไฟล์มีอยู่จริงไหม
         with open(sale_data, 'r', encoding='utf-8') as flie:  # เปิดไฟล์เพื่ออ่าน
             content = flie.read().strip()  #content มีไว้เก็บ ข้อมูลที่อ่านออกมาจากไฟล์  #.strip()ตัดช่องว่างหน้า-หลัง
-             if content: 
+            if content:
             #ถ้าcontentไม่ว่างให้คืนค่าเป็น float(content)
                 try:
                     # ป้องกันกรณีในไฟล์เป็นตัวอักษรที่ไม่ใช่ตัวเลข
@@ -45,8 +45,8 @@ def product_report():
         item = {'name': data['name'],'stock': data['stock']} #Dictionary
 
         #สร้างเงื่อนไขว่าอันไหนเป็น สินค้าที่ดี และ เป็นสินค้าที่ไม่ดี
-        # ขายออกได้มากเอาจากยอดขาย
-        if  int(data['stock']) <50 :
+        # 
+        if  int(data['stock']) < best_seller_limit :
             good_product.append(item) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร good_product
         else :
             not_good_product.append(item) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร not_good_product
