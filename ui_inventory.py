@@ -21,7 +21,7 @@ def setup_inventory_interface(parent):
         """
         frame = tk.Frame(form_frame,bg='#f0f0f0') #สร้างแถวมาอยู่ใน form_frame 
         frame.pack(fill='x',pady=8) #วางแถวนี้ลงบนหน้าจอ และให้ขยายเต็มความกว้าง และเว้นคนสูง 8
-        tk.Label(frame, text=label_text, font=default_font, bg='#f0f0f0', width=15,anchor='w').pack(side='left') #สร้างป้ายชื่อ textดึงข้อมูลมาแสดง และชิดซ้าย เพื่อให้ช่องกรอกอยู่บรรทัดเดียว
+        tk.Label(frame, text=label_text, font=default_font, bg='#f0f0f0', width=15,anchor='w').pack(side='left') #สร้างป้ายชื่อ textดึงข้อมูลมาแสดง และชิดซ้าย เพื่อให้ช่องกรอกอยู่บรรทัดเดียว w ด้านซ้าย
         entry = tk.Entry(frame, font=default_font) #สร้างช่องไว้สำหรับป้อนข้อมูล
         entry.pack(side='left',fill='x',expand=True) #างช่องกรอกไว้ต่อจากป้ายชื่อ และสั่งให้มันยืดขยายตัว (expand=True) ให้เต็มพื้นที่ที่เหลือในแถวนั้น
         return entry #ส่งค่ากลับไปในฟังก์ชัน
@@ -39,3 +39,5 @@ def setup_inventory_interface(parent):
         entry_price.delete(0, tk.END)
         entry_stock.delete(0, tk.END)
         entry_cost.delete(0, tk.END)
+        
+    
