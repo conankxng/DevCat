@@ -84,7 +84,7 @@ def search_sale_history(year,month,day):
     return results
 
 
-print(product_sale_data())
+#print(product_sale_data())
 # print(total_revenue())
 # print(product_cost_data())
 # print(total_expense())
