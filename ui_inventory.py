@@ -45,15 +45,15 @@ def setup_inventory_interface(parent):
         """
         for row in tree.get_children(): # tree.get_children() มีอะไรอยู๋ในตารางบ้าง ลูปมาที่ละแถว มาเก็บในตัวแปร
             tree.delete(row) #แล้วก็สั่งลบข้อมูลที่ละแถว #เพื่ออัปเดทข้อมูล ก็คือพอลบเสร็จก็จะเข้าในส่วนอัปเดทข้อมูล for pid, data in products.items(): อันนี้
-    
-    products = pm.get_all_products() #อ่านข้อมูลแล้วมาเก็บในตัวแปร
-    
-    for pid, data in products.items(): #ทำการลูปเอาข้อมูล
-        tree.insert('', 'end', values=(pid, data['name'], data['price'], data['stock'], data['cost'])) #tree.insert: เป็นคำสั่ง "เขียนข้อมูล" ลงไปในตาราง แล้ว values= คือระบุว่าข้อมูลควรมีอะไรบ้างและเรียงตามลำดับ
-        #เป็นคำสั่ง "เขียนข้อมูล" ลงไปในตาราง แล้ว values= คือระบุว่าข้อมูลควรมีอะไรบ้างและเรียงตามลำดับ  end คือให้ต่อเป็นแถวๆไป  "" สร้างแถวใหม่ขึ้นมาเลย
         
-    update_summary() # พอ รีเฟรช ก็แสดงจำนวนยอดเงินใหม่
-    check_low_stock() # พอ รีเฟรช ก็จะดูว่ามีสินค้าไหนใกล้หมดไหม
+        products = pm.get_all_products() #อ่านข้อมูลล่าสุดแล้วมาเก็บในตัวแปร
+        for pid, data in products.items(): #ทำการลูปเอาข้อมูลใส่ตาราง
+            tree.insert('', 'end', values=(pid, data['name'], data['price'], data['stock'], data['cost']))
+        
+        update_summary() # พอ รีเฟรช ก็แสดงจำนวนยอดเงินใหม่
+        check_low_stock() # พอ รีเฟรช ก็จะดูว่ามีสินค้าไหนใกล้หมดไหม
+    
+
     
     def update_summary():
         """
@@ -62,7 +62,7 @@ def setup_inventory_interface(parent):
         summary = pm.get_store_financial_summary() #ดึงตัวเลขสรุปผลมาเก็บไว้ในตัวแปร
         summary_text = (f'ต้นทุนรวม: ฿{summary['total_cost']:,.2f}  |  ' # "จัดรูปแบบข้อความ" ให้สวยงามก่อนจะเอาไปโชว์ครับ
                         f'รายได้ที่คาดหวัง: ฿{summary['total_revenue']:,.2f}  |  '
-                        f'กำไรคาดหวัง: ฿{summary['total_profit']:,.2f}')
+                        f'กำไรคาดหวัง: ฿{summary['potential_profit']:,.2f}')
         lbl_summary.config(text=summary_text)   #จะทำหน้าที่เปลี่ยนข้อความเก่าให้เป็นข้อความใหม่
         
     def check_low_stock():
@@ -227,11 +227,11 @@ def setup_inventory_interface(parent):
     # ==========================
     # เฟรมขวา สำหรับแสดงรายการ และ ยอดสรุป
     # ==========================
-    data_frame = tk.Frame(parent, bg='ffffff', padx=20,pady=20)
+    data_frame = tk.Frame(parent, bg='#ffffff', padx=20,pady=20)
     data_frame.place(relx=0.3, relwidth=0.7, relheight=1) #.place ทำให้เป็นเปอร์เซ็น
     
     # กรอบสำหรับสรุปการเงิน และ แจ้งเตือนของใกล้หมด (ส่วนบนขวา)
-    dash_frame = tk.Frame(dash_frame, bg='#e0f7fa', pady=10,padx=15,relief='ridge',bd=2) #relief='ridge',bd=2 สร้างขอบนูนแล้วปรับเส้นหนา 2
+    dash_frame = tk.Frame(data_frame, bg='#e0f7fa', pady=10,padx=15,relief='ridge',bd=2) #relief='ridge',bd=2 สร้างขอบนูนแล้วปรับเส้นหนา 2
     dash_frame.pack(fill='x', pady=(0, 15)) #ด้านบน 0 ด้านล่าง 15
     
     lbl_summary = tk.Label(dash_frame, text='สรุปการเงิน: --',font=default_font,bg="#e0f7fa")
