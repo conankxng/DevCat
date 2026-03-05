@@ -373,6 +373,7 @@ def create_three_frames(parent):
                     all_success = False
                     error_msgs.append(f"{name}: {msg}")
                 else:
+                    product_manager.record_sale(pid, int(qty), float(total))
                     receipt_items.append({
                         "name": name,
                         "qty": int(qty),
