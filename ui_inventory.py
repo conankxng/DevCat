@@ -262,5 +262,37 @@ def setup_inventory_interface(parent):
     # ตารางสินค้า (Treeview)
     # ==========================
     
-    columns = ('PID', 'Name', 'Price', 'Stock', 'Cost')
-    tree = ttk.Treeview(data_frame, columns=columns, show='headings', height=20)
+    columns = ('PID', 'Name', 'Price', 'Stock', 'Cost') #สร้างชื่อตอลัมขึ้นมาแล้วก็เก็บในตัวแปร
+    tree = ttk.Treeview(data_frame, columns=columns, show='headings', height=20) #สร้างตาราง เอาคอลัมที่กำหนดมาแสดง สั่งให้แสดงเฉพาะหัวตาราง
+    
+    # จัดการแสดงผลฟอนต์ไทยใน Treeview
+    style = ttk.Style() #เรียก .Style() มาตกแต่งให้ทั้งหมดเหมือนกัน
+    style.configure("Treeview.Heading", font=header_font) #กำหนดให้หัวตาราง ตัวใหญ่และเด่นทำให้รอมันคือคอลัมอะไร
+    style.configure("Treeview", font=default_font, rowheight=30)
+    
+    # กำหนดหัวตาราง
+    tree.heading("PID", text="รหัสสินค้า") #กำหนดให้ตรงตามที่ลำเคยสร้างตัวแปรคอลัมว่ามันจะไปอยู่ส่วนไหน
+    tree.heading("Name", text="ชื่อสินค้า")
+    tree.heading("Price", text="ราคาขาย (บาท)")
+    tree.heading("Stock", text="สต็อกคงเหลือ")
+    tree.heading("Cost", text="ต้นทุน (บาท)")
+    
+    # กำหนดความกว้างคอลัมน์                          # Center (กลาง)  W (ซ้าย) E (ขวา)
+    tree.column("PID", width=100, anchor="center") #กำหนดข้อความคอลัม width คือ ขนาดความกว้างที่กำหนดว่าส่วนนี้ของผมไม่ต้องมายุ่ง 
+    tree.column("Name", width=350, anchor="w")
+    tree.column("Price", width=120, anchor="e")
+    tree.column("Stock", width=120, anchor="center")
+    tree.column("Cost", width=120, anchor="e")
+    
+    # ผูก Event เวลากดเลือกแถว
+    tree.bind("<<TreeviewSelect>>", on_tree_select) # เหตุการณ์กระทำ เมื่อมีการกระทำ การคลิกแถว จะทำการ เรียกฟังก์ชัน
+    
+    # เพิ่ม Scrollbar ให้ตาราง                                                       #คือการผูกการทำงานของแถบเลื่อนเข้ากับมุมมองแนวตั้งของตาราง
+    scrollbar = ttk.Scrollbar(data_frame, orient="vertical", command=tree.yview) #เมื่อมีคนมาเลื่อนในส่วน data_frame ทำให้เลื่อนจากบนลงล่าง 
+    tree.configure(yscrollcommand=scrollbar.set) #เมื่อข้อมูลของ tree มันเยอะเกินหน้าจอ จะทำการสั่งให้เลื่อนสกอบาร์ได้
+    
+    tree.pack(side="left", fill="both", expand=True) #ให้ตารางอยู่ฝั่งซ้าย ให้ตารางเต็มพื้นที่ สั่งให้เต็มพื้นที่ขนาด
+    scrollbar.pack(side="right", fill="y") #สั่งให้อยู่ฝั่งขวา พร้อมให้มันยาวลงมาเป็นแกนYเท่านั้น
+    
+    # ดึงข้อมูลมาแสดงครั้งแรก
+    refresh_data()

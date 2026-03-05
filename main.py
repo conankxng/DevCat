@@ -19,7 +19,7 @@ tk.Button(root, text="Inventory", command=lambda: switch(p1), font=50, padx=300,
 tk.Button(root, text="POS", command=lambda: switch(p2), font=50, padx=300, pady=30).grid(row=0, column=1)
 tk.Button(root, text="Dashboard", command=lambda: switch(p3), font=50, padx=300, pady=30).grid(row=0, column=2)
 #สร้างหน้า
-Inventory = p1
+# Inventory = p1
 p1 = tk.Frame(root, bg='red') #สร้างหน้าเข้าไปใน root และเปลี่ยนสี Bg
 p1.place(x=0, y=90, width=1920, height=1000) #วางแบบกำหนดค่าเองคือ แกน x และ y พร้อมกำหนดขนาด
 
