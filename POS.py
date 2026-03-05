@@ -89,7 +89,8 @@ def create_three_frames(parent):
 #------------------------------Frame1-------------------------------
 #==================================================================#
 # ตัวแปร Global สำหรับเก็บค่า ID และชื่อสินค้าที่ถูกเลือกคลิกล่าสุด
-current_selected_product = {"id": None, "name": None}
+current_selected_product_id = {"id": None}
+current_selected_product_name = {"name": None}
 
 def load_products_to_frame(frame):
     """ฟังก์ชันสำหรับอ่านไฟล์ products.txt และสร้างปุ่มสินค้า"""
@@ -118,11 +119,10 @@ def load_products_to_frame(frame):
                 
                 # กำหนดฟังก์ชันย่อยสำหรับการกดปุ่ม
                 def on_product_click(p_id=product_id, p_name=product_name):
-                    global current_selected_product
+                    global current_selected_product_id, current_selected_product_name
                     # เก็บค่า id และชื่อสินค้าไว้ในตัวแปร global
-                    current_selected_product["id"] = p_id
-                    current_selected_product["name"] = p_name
-                    print(f"Stored -> ID: {p_id}, Name: {p_name}")
+                    current_selected_product_id["id"] = p_id
+                    current_selected_product_name["name"] = p_name
                     
                     # เรียกเปิดหน้าพ็อปอัพ Numpad
                     open_numpad_popup(frame)
@@ -215,6 +215,10 @@ def open_numpad_popup(parent):
         
         
     # ปุ่มยืนยันด้านล่าง
-    submit_btn = tk.Button(popup, text="Confirm", command=lambda: popup.destroy(), font=("Arial", 16, "bold"), bg="green", fg="white")
+    submit_btn = tk.Button(popup, text="Confirm", command=lambda: confirm_amount_product(), font=("Arial", 16, "bold"), bg="green", fg="white")
     submit_btn.pack(fill=tk.X, padx=10, pady=10)
+    
+    def confirm_amount_product():
+        print(current_selected_product_id, current_selected_product_name, qty_var.get())  # แสดงข้อมูลที่เลือกในคอนโซล (สามารถเปลี่ยนเป็นการส่งข้อมูลไปยังฟังก์ชันอื่นได้)
+        popup.destroy()
     
