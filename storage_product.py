@@ -36,11 +36,3 @@ def save_products(inventory):
         for pid, data in inventory.items(): #วนลูปข้อมูล pid คือ Idสินค้าก็คือ key | ส่วนData ก็คือข้อมูลที่กำหนดไว้
             f.write(f"{pid},{data['name']},{data['stock']},{data['price']},{data['cost']}\n") #เขียนทับไฟล์ด้วยข้อมูลดั้งนี้
 
-
-def save_sales(total):
-    """
-    ฟังก์ชันสำหรับบันทึกยอดขายรวมลงไฟล์ 
-    """
-    with open(SALES_FILE, "w",encoding='utf-8') as f: #เปิดไฟล์ยอดขายแล้วเขียนทับลงไป
-        f.write(str(total)) #รับค่ามาเป็นตัวเลขแล้วเป็นเป็น str แล้วก็ส่งให้  f.write ทำงาน
-        
