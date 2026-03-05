@@ -31,15 +31,15 @@ def product_sale_data():
 #ฟังก์ชั่นแสดงรายรับรวมทั้งหมด
 def total_revenue():
     revenue = product_sale_data()
-    return sum(revenue) #sumเพื่อรวม
+    return sum(revenue) #sumเพื่อรวมยอดขาย
 
-#ฟังก์ชันแสดงจ่ายรวมทั้งหมด
+#ฟังก์ชันแสดงรายจ่าย หรือ ต้นทุน
 def product_cost_data():
     cost_data = stock.FILE_NAME 
     if os.path.exists(cost_data): #เช็คว่าไฟล์มีอยู่จริงไหม
-        costs = [] #สร้างลิสต์ว่าง ไว้เก็บข้อมูลยอดขายที่ดึงออกมาจากไฟล์ FILE_NAME  ทีละบรรทัด
-        with open(cost_data,'r',encoding='utf-8') as f: #เปิดไฟล์เพื่ออ่านเป็นภาษาไทย
-            lines= f.readlines() #อ่าน f ทีละบรรทัด
+        costs = [] #สร้างลิสต์ว่าง ไว้เก็บข้อมูลรายจ่ายที่ดึงออกมาจากไฟล์ FILE_NAME  ทีละบรรทัด
+        with open(cost_data,'r',encoding='utf-8') as f: #เปิดไฟล์เพื่ออ่าน เป็นภาษาไทย
+            lines= f.readlines() 
             for line in lines: #วนลูปเพื่ออ่านข้อมูลทีละบรรทัด
                 line = line.strip() #.strip เพื่อตัดช่องว่างหัว-ท้าย
                 if line: 
@@ -47,7 +47,7 @@ def product_cost_data():
                         parts = line.split(',') #แยกส่วนข้อมูลแต่ละพาร์ท ตามลูกน้ำ
                         # cost_value คือข้อมูลต้นทุนที่อยู่ใน FILE_NAME โดยคอลั่มท้ายสุดคือต้นทุน
                         cost_value = float(parts[-1].strip()) #ตัดช่องว่างหัวท้าย
-                        costs.append(cost_value)
+                        costs.append(cost_value) #เก็บcost_valueไปไว้ในcost
                     except :
                         costs.append(0.0) #ถ้าเกิดerror ระหว่างการแปลงค่า ให้ใส่ 0.0 ลงไปแทน
         return costs
@@ -82,10 +82,11 @@ def search_sale_history(year,month,day):
                     if line.startswith(search_date): #ถ้าบรรทัดนั้นขึ้นต้นด้วยsearch_date 
                         results.append(line)  #ให้เก็บผลลัพนั้นลงใน results เปน line
     return results
-
+'''
 print(product_sale_data())
 print(total_revenue())
 print(product_cost_data())
 print(total_expense())
 print(product_report())
 print(search_sale_history(2026,3,5))
+'''
