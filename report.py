@@ -1,8 +1,6 @@
 import storage_product as stock
 import os 
 
-best_seller_limit = 50 #สินค้าขายดีต้องมีเกณฑ์ขายเหลือในสต้อกแค่ 50ชิ้นลงไป
-
 #ฟังก์ชั่นแสดงข้อมูลการขาย
 def product_sale_data():
     sale_data = stock.SALES_FILE 
@@ -59,21 +57,10 @@ def total_expense():
     expense = product_cost_data()
     return sum(expense) #sumเพื่อรวม
 
-#ฟังก์ชั่นที่แสดงว่าสินค้าขายดี และ สินค้าใดที่ขายไม่ดี
-def product_report():
-    inventory = stock.load_products() #ฟังก์ชั่นดึงข้อมูลจาก storage_product
-    good_product = []
-    not_good_product = []
-    for pid,data in inventory.items(): #วนลูปผ่านสินค้าทั้งหมดใน inventory
-        item = {'name': data['name'],'stock': data['stock']} #Dictionary
-
-        #สร้างเงื่อนไขว่าอันไหนเป็น สินค้าที่ดี และ เป็นสินค้าที่ไม่ดี
-        # 
-        if  int(data['stock']) < best_seller_limit :
-            good_product.append(item) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร good_product
-        else :
-            not_good_product.append(item) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร not_good_product
-    return (good_product,not_good_product)
+#ฟังก์ชั่นที่แสดงว่าสินค้าขายดี
+def product_report(): 
+    inventory = Manage.best_seller() # เรียกใช้ฟังก์ชันจาก product_manager 
+    return inventory
 
 
 #ฟังก์ชันค้นหาประวัติจากขาย ผ่าน วัน/เดือน/ปี 
@@ -94,4 +81,3 @@ def search_sale_history(year,month,day):
                     if line.startswith(search_date): #ถ้าบรรทัดนั้นขึ้นต้นด้วยsearch_date 
                         results.append(line)  #ให้เก็บผลลัพนั้นลงใน results เปน line
     return results
-
