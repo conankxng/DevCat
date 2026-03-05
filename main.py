@@ -18,10 +18,9 @@ root.geometry("1920x1080")
 tk.Button(root, text="Inventory", command=lambda: switch(p1), font=50, padx=300, pady=30).grid(row=0, column=0)
 tk.Button(root, text="POS", command=lambda: switch(p2), font=50, padx=300, pady=30).grid(row=0, column=1)
 tk.Button(root, text="Dashboard", command=lambda: switch(p3), font=50, padx=300, pady=30).grid(row=0, column=2)
+
+
 #สร้างหน้า
-
-
-
 """
 ส่วนของ เนส Inventory
 """
