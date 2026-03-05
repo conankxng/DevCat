@@ -136,6 +136,59 @@ def create_three_frames(parent):
     lbl_member_status_var = tk.StringVar(value="General Customer")
     tk.Label(member_frame, textvariable=lbl_member_status_var, font=("Kanit", 11, "bold"), fg="blue").pack(pady=5)
     
+    
+    def open_phone_numpad(parent_win, entry_widget):
+        popup = tk.Toplevel(parent_win)
+        popup.title("Numpad")
+        popup.geometry("300x500")
+        popup.grab_set()
+        popup.transient(parent_win)
+        popup.focus_force()
+        
+        current_val = entry_widget.get()
+        qty_var = tk.StringVar(value=current_val)
+        
+        display = tk.Label(popup, textvariable=qty_var, font=("Kanit", 28, "bold"), bg="white", relief="sunken", anchor="e")
+        display.pack(fill=tk.X, padx=10, pady=10, ipady=10)
+        
+        keypad_frame = tk.Frame(popup)
+        keypad_frame.pack(expand=True, fill=tk.BOTH, padx=10, pady=5)
+        
+        for i in range(3): keypad_frame.columnconfigure(i, weight=1)
+        for i in range(4): keypad_frame.rowconfigure(i, weight=1)
+            
+        def btn_press(key):
+            current = qty_var.get()
+            if key == "C":
+                qty_var.set("")
+            elif key == "<-":
+                qty_var.set(current[:-1])
+            else:
+                qty_var.set(current + key)
+
+        def create_btn_command(k):
+            return lambda: btn_press(k)
+            
+        buttons = [
+            ('7', 0, 0), ('8', 0, 1), ('9', 0, 2),
+            ('4', 1, 0), ('5', 1, 1), ('6', 1, 2),
+            ('1', 2, 0), ('2', 2, 1), ('3', 2, 2),
+            ('C', 3, 0), ('0', 3, 1), ('<-', 3, 2),
+        ]
+        
+        for (text, row, col) in buttons:
+            btn = tk.Button(keypad_frame, text=text, font=("Kanit", 18, "bold"), command=create_btn_command(text))
+            btn.grid(row=row, column=col, sticky="nsew", padx=2, pady=2)
+            
+        def submit():
+            entry_widget.delete(0, tk.END)
+            entry_widget.insert(0, qty_var.get())
+            popup.destroy()
+            
+        tk.Button(popup, text="Confirm", command=submit, font=("Kanit", 16, "bold"), bg="green", fg="white").pack(fill=tk.X, padx=10, pady=10)
+    
+    
+    
     def popup_register():
         reg_pop = tk.Toplevel(parent)
         reg_pop.title("New Member Registration")
@@ -145,6 +198,7 @@ def create_three_frames(parent):
         tk.Label(reg_pop, text="Phone Number:").pack(pady=5)
         ent_phone = tk.Entry(reg_pop)
         ent_phone.pack()
+        ent_phone.bind("<Button-1>", lambda e: open_phone_numpad(reg_pop, ent_phone))
         
         tk.Label(reg_pop, text="First Name:").pack(pady=5)
         ent_fname = tk.Entry(reg_pop)
@@ -173,6 +227,7 @@ def create_three_frames(parent):
         tk.Label(log_pop, text="Enter Phone Number:").pack(pady=10)
         ent_phone = tk.Entry(log_pop)
         ent_phone.pack()
+        ent_phone.bind("<Button-1>", lambda e: open_phone_numpad(log_pop, ent_phone))
         
         def do_login():
             global current_member_info
@@ -217,14 +272,14 @@ def create_three_frames(parent):
     tk.Label(summary_frame, text="Total:", font=("Kanit", 10)).grid(row=0, column=0, sticky="w", pady=2)
     tk.Label(summary_frame, textvariable=lbl_subtotal_var, font=("Kanit", 10)).grid(row=0, column=1, sticky="e", pady=2)
     
-    tk.Label(summary_frame, text="Membership Discount:", font=("Arial", 10), fg="red").grid(row=1, column=0, sticky="w", pady=2)
-    tk.Label(summary_frame, textvariable=lbl_discount_var, font=("Arial", 10), fg="red").grid(row=1, column=1, sticky="e", pady=2)
+    tk.Label(summary_frame, text="Membership Discount:", font=("Kanit", 10), fg="red").grid(row=1, column=0, sticky="w", pady=2)
+    tk.Label(summary_frame, textvariable=lbl_discount_var, font=("Kanit", 10), fg="red").grid(row=1, column=1, sticky="e", pady=2)
     
-    tk.Label(summary_frame, text="VAT 7%:", font=("Arial", 10)).grid(row=2, column=0, sticky="w", pady=2)
-    tk.Label(summary_frame, textvariable=lbl_vat_var, font=("Arial", 10)).grid(row=2, column=1, sticky="e", pady=2)
+    tk.Label(summary_frame, text="VAT 7%:", font=("Kanit", 10)).grid(row=2, column=0, sticky="w", pady=2)
+    tk.Label(summary_frame, textvariable=lbl_vat_var, font=("Kanit", 10)).grid(row=2, column=1, sticky="e", pady=2)
     
-    tk.Label(summary_frame, text="ยอดสุทธิ (Grand Total):", font=("Arial", 14, "bold"), fg="green").grid(row=3, column=0, sticky="w", pady=10)
-    tk.Label(summary_frame, textvariable=lbl_grand_total_var, font=("Arial", 14, "bold"), fg="green").grid(row=3, column=1, sticky="e", pady=10)
+    tk.Label(summary_frame, text="Net Total:", font=("Kanit", 14, "bold"), fg="green").grid(row=3, column=0, sticky="w", pady=10)
+    tk.Label(summary_frame, textvariable=lbl_grand_total_var, font=("Kanit", 14, "bold"), fg="green").grid(row=3, column=1, sticky="e", pady=10)
     summary_frame.columnconfigure(1, weight=1)
     
     
@@ -292,15 +347,15 @@ def create_three_frames(parent):
             messagebox.showinfo("แจ้งเตือน", "ไม่มีสินค้าในตะกร้า!")
             return
             
-        held_dir = os.path.join(os.path.dirname(__file__), "data", "held_bills")
-        os.makedirs(held_dir, exist_ok=True)
+        hold_dir = os.path.join(os.path.dirname(__file__), "data", "hold_bills")
+        os.makedirs(hold_dir, exist_ok=True)
         
         # ตั้งชื่อไฟล์เป็น วัน-เดือน-ปี_ชั่วโมง-นาที-วินาที
         timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
-        held_file = os.path.join(held_dir, f"bill_{timestamp}.txt")
+        hold_file = os.path.join(hold_dir, f"bill_{timestamp}.txt")
         
         # ย้ายข้อมูลไปไฟล์พักบิลและล้างของเดิม
-        with open(held_file, "w", encoding="utf-8") as f:
+        with open(hold_file, "w", encoding="utf-8") as f:
             f.writelines(lines)
         open(bill_path, "w").close()
         reload_cart()
@@ -320,9 +375,9 @@ def create_three_frames(parent):
         recall_pop.geometry("300x300")
         recall_pop.grab_set()
         
-        tk.Label(recall_pop, text="รายการพักบิลทั้งหมด:", font=("Arial", 10, "bold")).pack(pady=5)
+        tk.Label(recall_pop, text="รายการพักบิลทั้งหมด:", font=("Kanit", 10, "bold")).pack(pady=5)
         
-        listbox = tk.Listbox(recall_pop, font=("Arial", 10))
+        listbox = tk.Listbox(recall_pop, font=("Kanit", 10))
         listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
         
         for f in files:
@@ -355,9 +410,9 @@ def create_three_frames(parent):
             
         tk.Button(recall_pop, text="เรียกคืนบิลนี้", command=do_recall, bg="lightblue").pack(pady=10)
         
-    tk.Button(action_frame, text="พักบิล (Hold Bill)", command=hold_bill, bg="orange").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
-    tk.Button(action_frame, text="เรียกบิล (Recall Bill)", command=recall_bill, bg="lightblue").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
-    tk.Button(action_frame, text="ล้างตะกร้า (Clear Cart)", command=clear_cart, bg="red", fg="white").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    tk.Button(action_frame, text="Hold Bill", command=hold_bill, bg="orange").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    tk.Button(action_frame, text="Recall Bill", command=recall_bill, bg="lightblue").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    tk.Button(action_frame, text="Clear Cart", command=clear_cart, bg="red", fg="white").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
 
     def confirm_checkout():
         """ยืนยันการทำรายการแบบเต็มรูปแบบ"""
@@ -416,9 +471,9 @@ def create_three_frames(parent):
                     grand_total=grand_total, 
                     member_info=current_member_info
                 )
-                success_msg = f"ทำรายการสำเร็จ!\nระบบได้บันทึกยอดขายและออกใบเสร็จที่:\n{pdf_file}"
+                success_msg = "ทำรายการสำเร็จ!"
             except Exception as e:
-                success_msg = f"ทำรายการสำเร็จ! แต่เกิดข้อผิดพลาดในการสร้างใบเสร็จ: {e}"
+                success_msg = f"ทำรายการสำเร็จ! แต่เกิดข้อผิดพลาดในการสร้างใบเสร็จ"
                 
             messagebox.showinfo("สำเร็จ", success_msg)
             open(bill_path, 'w').close() 
@@ -432,8 +487,8 @@ def create_three_frames(parent):
     # ปุ่มยืนยันรายการจ่ายเงิน (แพ็คให้ติดขอบล่างเสมอ ป้องกันการโดนดันตกจอ)
     tk.Button(
         frame3, 
-        text="ยืนยันการทำรายการ\n(Confirm & ออกใบเสร็จ)", 
-        font=("Arial", 14, "bold"), 
+        text="Payment", 
+        font=("Kanit", 14, "bold"), 
         bg="green", 
         fg="white", 
         command=confirm_checkout
@@ -486,7 +541,7 @@ def load_products_to_frame(frame, reload_cart_cb=None):
                 btn = tk.Button(
                     frame, 
                     text=product_name, 
-                    font=("Arial", 10),
+                    font=("Kanit", 10),
                     height=8,
                     command=on_product_click
                 )
@@ -523,7 +578,7 @@ def open_numpad_popup(parent, on_add_to_cart_cb=None):
     qty_var = tk.StringVar(value="0") # ค่าตั้งต้นบนจอ
     
     # หน้าจอแสดงตัวเลข
-    display = tk.Label(popup, textvariable=qty_var, font=("Arial", 28, "bold"), bg="white", relief="sunken", anchor="e")
+    display = tk.Label(popup, textvariable=qty_var, font=("Kanit", 28, "bold"), bg="white", relief="sunken", anchor="e")
     display.pack(fill=tk.X, padx=10, pady=10, ipady=10)
     
     # กรอบสำหรับเรียงปุ่ม
@@ -565,7 +620,7 @@ def open_numpad_popup(parent, on_add_to_cart_cb=None):
     
     # เจนเนอเรทและวางปุ่มเข้า Numpad
     for (text, row, col) in buttons:
-        btn = tk.Button(keypad_frame, text=text, font=("Arial", 18, "bold"), command=create_btn_command(text))
+        btn = tk.Button(keypad_frame, text=text, font=("Kanit", 18, "bold"), command=create_btn_command(text))
         btn.grid(row=row, column=col, sticky="nsew", padx=2, pady=2)
         
     def submit():
@@ -607,4 +662,4 @@ def open_numpad_popup(parent, on_add_to_cart_cb=None):
             messagebox.showerror("ข้อผิดพลาด", "ไม่พบข้อมูลรหัสสินค้าที่เลือก", parent=popup)
             
     # ปุ่มยืนยัน
-    tk.Button(popup, text="Confirm", command=submit, font=("Arial", 16, "bold"), bg="green", fg="white").pack(fill=tk.X, padx=10, pady=10)
+    tk.Button(popup, text="Confirm", command=submit, font=("Kanit", 16, "bold"), bg="green", fg="white").pack(fill=tk.X, padx=10, pady=10)
