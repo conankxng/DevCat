@@ -1,22 +1,40 @@
 import storage_product as stock
-import os
-best_seller_limit = 50 #สินค้าขายดีต้องมีเกณฑ์ขายเหลือในสต้อกแค่ 50ชิ้นลงไป
-#ฟังก์ชั่นดึงข้อมูลการขาย
-def product_sale_data():
-    sale_data = "product.txt"  # อ้างอิงไฟล์จาก storage_product
-    if os.path.exists(sale_data):  # เช็คว่าไฟล์มีอยู่จริงไหม
-        with open(sale_data, 'r', encoding='utf-8') as flie:  # เปิดไฟล์เพื่ออ่าน
-            content = flie.read().strip()  #content มีไว้เก็บ ข้อมูลที่อ่านออกมาจากไฟล์  #.strip()ตัดช่องว่างหน้า-หลัง
-            if content:
-            #ถ้าcontentไม่ว่างให้คืนค่าเป็น float(content)
-                try:
-                    # ป้องกันกรณีในไฟล์เป็นตัวอักษรที่ไม่ใช่ตัวเลข
-                    return float(content) 
-                except ValueError:
-                    return 0.0
-    return 0.0
+import os 
 
-#ฟังก์ชันสำหรับคำนวณรายจ่ายรวมทั้งหมด
+best_seller_limit = 50 #สินค้าขายดีต้องมีเกณฑ์ขายเหลือในสต้อกแค่ 50ชิ้นลงไป
+
+#ฟังก์ชั่นแสดงข้อมูลการขาย
+def product_sale_data():
+    sale_data = "sales.txt" #ดึงข้อมูลจากไฟล์ sale.txtมาใส่ในตัวแปร
+    if os.path.exists(sale_data): #เช็คว่าไฟล์มีอยู่จริงไหม
+        sales = [] #สร้างลิสต์ว่าง ไว้เก็บข้อมูลยอดขายที่ดึงออกมาจากไฟล์ sales.txt ทีละบรรทัด
+        with open(sale_data,'r',encoding='utf-8') as f: #เปิดไฟล์เพื่ออ่านเป็นภาษาไทย
+            lines= f.readlines() #อ่าน f ทีละบรรทัด
+            for line in lines: #วนลูปเพื่ออ่านข้อมูลทีละบรรทัด
+                line = line.strip() #.strip เพื่อตัดช่องว่างหัว-ท้าย
+                if line: 
+                    try:
+                        parts = line.split(',') #แยกส่วนข้อมูลแต่ละพาร์ท ตามลูกน้ำ
+                        # total_str คือข้อมูลยอดขายที่อยู่ใน sales.txt
+                        total_str = [item for item in parts if "total:" in item] # หาค่าที่ขึ้นต้นด้วย "Total:"
+                        if total_str:
+                            #แปลงข้อมูลเป็น float #เข้าถึงค่าภายในด้วย index เพื่อเอายอดขาย #ใช้split()เพื่อเอาโคล่อนออก
+                            total_value = float(total_str[0].split(':')[1].strip()) 
+                            sales.append(total_value) #.append เพื่อเพิ่มtotal_valueเข้าไปเก็บเพิ่มในlist
+                        else : 
+                            # ถ้า total_str ไม่มีค่า "Total:" .ให้ใส่ 0.0 ลงไปแทน
+                            sales.append(0.0)
+                    except :
+                        sales.append(0.0) #ถ้าเกิดerror ระหว่างการแปลงค่า ให้ใส่ 0.0 ลงไปแทน
+        return sales
+    return []
+
+#ฟังก์ชั่นแสดงรายรับรวมทั้งหมด
+def total_revenue():
+    revenue = product_sale_data()
+    return sum(revenue)
+
+#ฟังก์ชันแสดงจ่ายรวมทั้งหมด
 def calculate_expenses():
     inventory = stock.load_products() #ฟังก์ชั่นดึงข้อมูลจากไฟล์
     total_cost = 0.0 # ตัวแปรสำหรับเก็บต้นทุนทั้งหมด
@@ -36,7 +54,7 @@ def calculate_expenses():
     return total_cost
 
 
-#ฟังก์ชั่นการแสดงประวัติสินค้า
+#ฟังก์ชั่นที่แสดงว่าสินค้าขายดี และ สินค้าใดที่ขายไม่ดี
 def product_report():
     inventory = stock.load_products() #ฟังก์ชั่นดึงข้อมูลจากไฟล์ 
     good_product = []
@@ -51,3 +69,8 @@ def product_report():
         else :
             not_good_product.append(item) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร not_good_product
     return (good_product,not_good_product)
+
+
+#ฟังก์ชันค้นหาประวัติจากขาย ผ่าน วัน/เดือน/ปี 
+def search_sale_history():
+    pass
