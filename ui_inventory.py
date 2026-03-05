@@ -40,34 +40,34 @@ def setup_inventory_interface(parent):
         entry_stock.delete(0, tk.END)
         entry_cost.delete(0, tk.END)
         
-    def refresh_data():
-        """
-        ฟังก์ชัน รีเฟรช เพื่อดึงข้อมูลล่าสุดจากไฟล์มาแสดงให้เป็นปัจจุบัน
-        """
-        for row in tree.get_children(): # tree.get_children() มีอะไรอยู๋ในตารางบ้าง ลูปมาที่ละแถว มาเก็บในตัวแปร
-            tree.delete(row) #แล้วก็สั่งลบข้อมูลที่ละแถว #เพื่ออัปเดทข้อมูล ก็คือพอลบเสร็จก็จะเข้าในส่วนอัปเดทข้อมูล for pid, data in products.items(): อันนี้
+    # def refresh_data():
+    #     """
+    #     ฟังก์ชัน รีเฟรช เพื่อดึงข้อมูลล่าสุดจากไฟล์มาแสดงให้เป็นปัจจุบัน
+    #     """
+    #     for row in tree.get_children(): # tree.get_children() มีอะไรอยู๋ในตารางบ้าง ลูปมาที่ละแถว มาเก็บในตัวแปร
+    #         tree.delete(row) #แล้วก็สั่งลบข้อมูลที่ละแถว #เพื่ออัปเดทข้อมูล ก็คือพอลบเสร็จก็จะเข้าในส่วนอัปเดทข้อมูล for pid, data in products.items(): อันนี้
     
-    products = pm.get_all_products() #อ่านข้อมูลแล้วมาเก็บในตัวแปร
+    # products = pm.get_all_products() #อ่านข้อมูลแล้วมาเก็บในตัวแปร
     
-    for pid, data in products.items(): #ทำการลูปเอาข้อมูล
-        tree.insert('', 'end', values=(pid, data['name'], data['price'], data['stock'], data['cost'])) #tree.insert: เป็นคำสั่ง "เขียนข้อมูล" ลงไปในตาราง แล้ว values= คือระบุว่าข้อมูลควรมีอะไรบ้างและเรียงตามลำดับ
-        #tree.insert: เป็นคำสั่ง "เขียนข้อมูล" ลงไปในตาราง แล้ว values= คือระบุว่าข้อมูลควรมีอะไรบ้างและเรียงตามลำดับ  end คือให้ต่อเป็นแถวๆไป  "" สร้างแถวใหม่ขึ้นมาเลย
+    # for pid, data in products.items(): #ทำการลูปเอาข้อมูล
+    #     tree.insert('', 'end', values=(pid, data['name'], data['price'], data['stock'], data['cost'])) #tree.insert: เป็นคำสั่ง "เขียนข้อมูล" ลงไปในตาราง แล้ว values= คือระบุว่าข้อมูลควรมีอะไรบ้างและเรียงตามลำดับ
+    #     #tree.insert: เป็นคำสั่ง "เขียนข้อมูล" ลงไปในตาราง แล้ว values= คือระบุว่าข้อมูลควรมีอะไรบ้างและเรียงตามลำดับ  end คือให้ต่อเป็นแถวๆไป  "" สร้างแถวใหม่ขึ้นมาเลย
         
-    update_summary() # พอ รีเฟรช ก็แสดงจำนวนยอดเงินใหม่
-    check_low_stock() # พอ รีเฟรช ก็จะดูว่ามีสินค้าไหนใกล้หมดไหม
+    # update_summary() # พอ รีเฟรช ก็แสดงจำนวนยอดเงินใหม่
+    # check_low_stock() # พอ รีเฟรช ก็จะดูว่ามีสินค้าไหนใกล้หมดไหม
     
-    def update_summary():
-        """
-        ฟังก์ชันสำหรับแสดง ยอดเงิน บนหน้า inventory
-        """
-        summary = pm.get_store_financial_summary() #ดึงตัวเลขสรุปผลมาเก็บไว้ในตัวแปร
-        summary_text = (f'ต้นทุนรวม: ฿{summary['total_cost']:,.2f}  |  ' # "จัดรูปแบบข้อความ" ให้สวยงามก่อนจะเอาไปโชว์ครับ
-                        f'รายได้ที่คาดหวัง: ฿{summary['total_revenue']:,.2f}  |  '
-                        f'กำไรคาดหวัง: ฿{summary['total_profit']:,.2f}')
-        ibl_summary.config(text=summary_text)   #จะทำหน้าที่เปลี่ยนข้อความเก่าให้เป็นข้อความใหม่
+    # def update_summary():
+    #     """
+    #     ฟังก์ชันสำหรับแสดง ยอดเงิน บนหน้า inventory
+    #     """
+    #     summary = pm.get_store_financial_summary() #ดึงตัวเลขสรุปผลมาเก็บไว้ในตัวแปร
+    #     summary_text = (f'ต้นทุนรวม: ฿{summary['total_cost']:,.2f}  |  ' # "จัดรูปแบบข้อความ" ให้สวยงามก่อนจะเอาไปโชว์ครับ
+    #                     f'รายได้ที่คาดหวัง: ฿{summary['total_revenue']:,.2f}  |  '
+    #                     f'กำไรคาดหวัง: ฿{summary['total_profit']:,.2f}')
+    #     ibl_summary.config(text=summary_text)   #จะทำหน้าที่เปลี่ยนข้อความเก่าให้เป็นข้อความใหม่
         
-    def check_low_stock():
-        """
-        ฟังก์ชันสำหรับเช็ค สินค้าใกล้หมด
-        """
-        low_stock_list = pm.get_low_stock_list(threshold=5) #ไปฟังก์ชันเช็คสต๊อก
+    # def check_low_stock():
+    #     """
+    #     ฟังก์ชันสำหรับเช็ค สินค้าใกล้หมด
+    #     """
+    #     low_stock_list = pm.get_low_stock_list(threshold=5) #ไปฟังก์ชันเช็คสต๊อก
