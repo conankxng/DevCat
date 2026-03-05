@@ -1,6 +1,6 @@
 from turtle import width
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 import os
 import product_manager#==================================================================#
 #------------------------------Create Frame-------------------------------
@@ -67,20 +67,50 @@ def create_three_frames(parent):
     โดยเฟรมที่ 1 และ 2 เลื่อนได้ ส่วนเฟรมที่ 3 แบบปกติ
     """
     # สร้าง เฟรมที่ 1 (เลื่อนได้)
-    # คืนค่า container สำหรับจัดวาง และ frame1 (inner_frame) สำหรับนำไปใส่เนื้อหาต่อ
     container1, frame1 = create_scrollable_frame(parent)
     container1.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
-    load_products_to_frame(frame1) #เรียกใช้ฟังก์ชันโหลดสินค้าไปแสดงใน frame1
     
-    # สร้าง เฟรมที่ 2 (เลื่อนได้)
+    # สร้าง เฟรมที่ 2 (เลื่อนได้ สำหรับแสดงตะกร้าสินค้า)
     container2, frame2 = create_scrollable_frame(parent)
     container2.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+    
+    tk.Label(frame2, text="Cart", bg="lightgreen", font=("Arial", 12, "bold")).pack(pady=10)
+    
+    # สร้างตาราง Treeview ใน Frame 2 สำหรับรายการตระกร้า
+    columns = ("id", "name", "price", "total")
+    cart_tree = ttk.Treeview(frame2, columns=columns, show="headings", height=15)
+    
+    # กำหนดหัวตาราง
+    cart_tree.heading("id", text="ID")
+    cart_tree.heading("name", text="Name")
+    cart_tree.heading("price", text="Price/Unit")
+    cart_tree.heading("total", text="Total")
+    
+    # กำหนดขนาดคอลัมน์
+    cart_tree.column("id", width=80, anchor="center")
+    cart_tree.column("name", width=150, anchor="center")
+    cart_tree.column("price", width=80, anchor="center")
+    cart_tree.column("total", width=80, anchor="center")
+    
+    cart_tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+    
+    def on_add_to_cart(pid, name, qty):
+        # ดึงราคาจากสต๊อก
+        inventory = product_manager.get_all_products()
+        price = 0.0
+        if pid in inventory:
+            price = float(inventory[pid].get("price", 0.0))
+            
+        total_price = price * qty
+        # เพิ่มข้อมูลเข้าไปในตาราง Treeview (ไม่ได้ทำเช็คว่าเคยมีแล้วให้บวกเพิ่ม แค่เพิ่มบรรทัดใหม่)
+        cart_tree.insert("", tk.END, values=(pid, f"{name} (x{qty})", f"{price:,.2f}", f"{total_price:,.2f}"))
 
+    # นำโหลดสินค้ามาใช้และส่ง on_add_to_cart ไปให้
+    load_products_to_frame(frame1, on_add_to_cart)
     
     # สร้าง เฟรมที่ 3 (แบบปกติ เลื่อนไม่ได้)
     frame3 = tk.Frame(parent)
     frame3.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
-    
     
     # คืนค่า frame1, frame2, frame3 ให้เสมือนว่าเป็น Frame ปกติสำหรับใส่เนื้อหาอื่นๆ
     return frame1, frame2, frame3
@@ -91,7 +121,7 @@ def create_three_frames(parent):
 # ตัวแปร Global สำหรับเก็บค่า ID และชื่อสินค้าที่ถูกเลือกคลิกล่าสุด
 current_selected_product = {"id": None, "name": None}
 
-def load_products_to_frame(frame):
+def load_products_to_frame(frame, on_add_to_cart=None):
     """ฟังก์ชันสำหรับอ่านไฟล์ products.txt และสร้างปุ่มสินค้า"""
     # กำหนด path ของไฟล์ products.txt
     file_path = os.path.join(os.path.dirname(__file__), "data", "products.txt")
@@ -124,8 +154,8 @@ def load_products_to_frame(frame):
                     current_selected_product["name"] = p_name
                     print(f"Stored -> ID: {p_id}, Name: {p_name}")
                     
-                    # เรียกเปิดหน้าพ็อปอัพ Numpad
-                    open_numpad_popup(frame)
+                    # เรียกเปิดหน้าพ็อปอัพ Numpad พร้อมส่ง callback ไปด้วย
+                    open_numpad_popup(frame, on_add_to_cart)
                 
                 # สร้างปุ่มโดยแสดงชื่อสินค้า (product_name)
                 btn = tk.Button(
@@ -149,7 +179,7 @@ def load_products_to_frame(frame):
     except FileNotFoundError:
         tk.Label(frame, text="⚠️ ไม่พบไฟล์ data/products.txt", fg="red").grid(row=0, column=0, columnspan=4, pady=20)
         
-def open_numpad_popup(parent):
+def open_numpad_popup(parent, on_add_to_cart=None):
     """ฟังก์ชันเปิดหน้าต่าง Numpad (ป๊อปอัป) เพื่อกรอกจำนวนสินค้า"""
     popup = tk.Toplevel(parent)
     popup.title("Amount Products")
@@ -212,8 +242,7 @@ def open_numpad_popup(parent):
     for (text, row, col) in buttons:
         btn = tk.Button(keypad_frame, text=text, font=("Arial", 18, "bold"), command=create_btn_command(text))
         btn.grid(row=row, column=col, sticky="nsew", padx=2, pady=2)
-    
-    # ฟังก์ชันสำหรับปุ่มยืนยัน (Confirm) ตัดสต็อก
+        
     def submit():
         qty_str = qty_var.get()
         try:
@@ -230,8 +259,10 @@ def open_numpad_popup(parent):
             success, msg = product_manager.process_sale(pid, qty_int)
             if success:
                 messagebox.showinfo("สำเร็จ", msg, parent=popup)
+                # เพิ่มสินค้าเข้ารถเข็นผ่าน callback ที่ส่งเข้ามา
+                if on_add_to_cart:
+                    on_add_to_cart(pid, current_selected_product["name"], qty_int)
                 popup.destroy()
-                # ตรงนี้สามารถใส่โค้ดให้อัปเดตตาราง (Treeview) เพิ่มเข้าไปยังตะกร้าในอนาคตได้
             else:
                 messagebox.showwarning("ข้อผิดพลาด", msg, parent=popup)
         else:
