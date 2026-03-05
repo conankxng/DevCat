@@ -116,7 +116,7 @@ def record_sale(pid,quantity,total_price):
     
     with open(storage.SALES_FILE,'a', encoding='utf-8') as f: #เปิดไฟล์ แล้วก็ทำการเขียนข้อมูลลงไปโดยใช้ a คือการเขียนต่่อท้าย ข้อมูลเดิมที่มีอยู๋ ทำให้ประวัติไม่หาย
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") #แสดงเวลาประวัติการขายเพื่อให้รู้ประวัติเวลา
-        f.write(f'{timestamp}, ID:{pid}, Qty: {quantity}, Total: {total_price}, Profit: {profit}\n') #เก็บข้อมูลประวัติ เวลา จำนวนที่ขาย ราคาทั้งหมด กำไรที่ได้
+        f.write(f'{timestamp}, ID:{pid},Name:{inventory[pid]["name"]} Qty: {quantity}, Total: {total_price}, Profit: {profit}\n') #เก็บข้อมูลประวัติ เวลา จำนวนที่ขาย ราคาทั้งหมด กำไรที่ได้
     return True
 
 def get_store_financial_summary():
