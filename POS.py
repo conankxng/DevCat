@@ -5,6 +5,9 @@ import product_manager
 import member_manager
 import sales_logger
 from datetime import datetime
+from PIL import Image, ImageTk
+from playsound import playsound 
+
 
 # ========================================================================= #
 # ส่วนที่ 1: ฟังก์ชันสำหรับสร้างกล่องแบบเลื่อนได้ (Scrollable Frame)
@@ -476,11 +479,12 @@ def create_three_frames(parent):
                     grand_total=grand_total, 
                     member_info=current_member_info
                 )
-                success_msg = "ทำรายการสำเร็จ!"
+
             except Exception as e:
-                success_msg = f"ทำรายการสำเร็จ! แต่เกิดข้อผิดพลาดในการสร้างใบเสร็จ"
+                pass
+
                 
-            messagebox.showinfo("สำเร็จ", success_msg)
+
             open(bill_path, 'w').close() 
             logout_member() # รับเงินเสร็จ เตะสมาชิกออกรอคิวต่อไป
         else:
@@ -488,16 +492,36 @@ def create_three_frames(parent):
             messagebox.showwarning("ข้อผิดพลาด", f"สต๊อกไม่พอ:\n{errors}\n*ระบบเคลียร์ตะกร้าแล้ว")
             open(bill_path, 'w').close()
             reload_cart()
+        try:
+            # เล่นเสียง (ใส่ Path ไฟล์เสียงของคุณ)
+            # block=False เพื่อให้เสียงเล่นไปโดยไม่ทำให้หน้าจอโปรแกรมค้าง
+            playsound("sound/cat.mp3", block=False)
+        except Exception as e:
+            print(f"เล่นเสียงไม่ได้")
                 
+    try:
+        img = Image.open("img/cat_btn.png")
+        # ปรับขนาดตามต้องการ (กว้าง, สูง)
+        resized = img.resize((170, 130), Image.Resampling.LANCZOS)
+        cat_button_img = ImageTk.PhotoImage(resized)
+    except:
+        cat_button_img = None
+        print("ไม่พบรูปภาพ")         
+
     # ปุ่มยืนยันรายการจ่ายเงิน (แพ็คให้ติดขอบล่างเสมอ ป้องกันการโดนดันตกจอ)
-    tk.Button(
+    btn_cat = tk.Button(
         frame3, 
-        text="Payment", 
-        font=("Kanit", 14, "bold"), 
-        bg="green", 
-        fg="white", 
+        image=cat_button_img if "cat_button_img" in locals() else None,
+        borderwidth=0,
+        highlightthickness=0,
+        activebackground="#f0f2f5",
         command=confirm_checkout
-    ).pack(fill=tk.X, padx=10, pady=10)
+    )
+    # ผูกรูปไว้กับ Widget กันโดน Garbage Collector ลบ
+    if "cat_button_img" in locals() and cat_button_img:
+        btn_cat.image = cat_button_img
+        
+    btn_cat.pack()
     
     # ส่งเฟรมทั้ง 3 กลับเป็นก้อน
     return frame1, frame2, frame3
