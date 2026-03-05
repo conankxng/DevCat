@@ -266,6 +266,20 @@ def create_three_frames(parent):
     # ลบ expand=True ทิ้งเพื่อป้องกันไม่ให้ปุ่มข้างล่างโดนดันตกขอบจอ
     action_frame.pack(fill=tk.X, pady=10)
     
+    def clear_cart():
+        if os.path.exists(bill_path):
+            with open(bill_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+            if not lines:
+                messagebox.showinfo("แจ้งเตือน", "ไม่มีสินค้าในตะกร้า!")
+                return
+                
+            confirm = messagebox.askyesno("ยืนยัน", "คุณแน่ใจหรือไม่ที่จะล้างตะกร้าทั้งหมด?")
+            if confirm:
+                open(bill_path, "w").close()
+                reload_cart()
+                messagebox.showinfo("สำเร็จ", "เคลียร์ตะกร้าเรียบร้อยแล้ว")
+    
     def hold_bill():
         if not os.path.exists(bill_path):
             messagebox.showinfo("แจ้งเตือน", "ไม่มีสินค้าในตะกร้า!")
@@ -343,6 +357,7 @@ def create_three_frames(parent):
         
     tk.Button(action_frame, text="พักบิล (Hold Bill)", command=hold_bill, bg="orange").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
     tk.Button(action_frame, text="เรียกบิล (Recall Bill)", command=recall_bill, bg="lightblue").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    tk.Button(action_frame, text="ล้างตะกร้า (Clear Cart)", command=clear_cart, bg="red", fg="white").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
 
     def confirm_checkout():
         """ยืนยันการทำรายการแบบเต็มรูปแบบ"""
@@ -422,7 +437,7 @@ def create_three_frames(parent):
         bg="green", 
         fg="white", 
         command=confirm_checkout
-    ).pack(side=tk.BOTTOM, fill=tk.X, padx=10, pady=10)
+    ).pack(fill=tk.X, padx=10, pady=10)
     
     # ส่งเฟรมทั้ง 3 กลับเป็นก้อน
     return frame1, frame2, frame3
