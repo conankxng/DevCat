@@ -107,10 +107,10 @@ def create_three_frames(parent):
     cart_tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=15, yscrollcommand=tree_scroll.set)
     tree_scroll.config(command=cart_tree.yview)
     
-    #
+    #ปรับแต่งตารางให้สวยงาม
     style = ttk.Style()
-    style.configure("Treeview.Heading", font=header_font)
-    style.configure("Treeview", font=default_font, rowheight=30)
+    style.configure("Treeview.Heading", font=("Kanit", 11, "bold"))
+    style.configure("Treeview", font=("Kanit", 11), rowheight=30)
     
     # กำหนดหัวข้อคอลัมน์ของตาราง
     cart_tree.heading("id", text="รหัสสินค้า")
@@ -252,15 +252,15 @@ def create_three_frames(parent):
 
     btn_frame = tk.Frame(frame3)
     btn_frame.pack(fill=tk.X, pady=5)
-    tk.Button(btn_frame, text="สมัครสมาชิก", command=popup_register).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
-    tk.Button(btn_frame, text="เข้าสู่ระบบ", command=popup_login).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
+    tk.Button(btn_frame, text="สมัครสมาชิก", font=("Kanit", 12), command=popup_register).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
+    tk.Button(btn_frame, text="เข้าสู่ระบบ", font=("Kanit", 12), command=popup_login).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
     
     def logout_member():
         global current_member_info
         current_member_info = {"phone": None, "first_name": None, "last_name": None}
         lbl_member_status_var.set("ลูกค้าทั่วไป")
         reload_cart()
-    tk.Button(frame3, text="ออกจากระบบสมาชิก", command=logout_member, fg="red").pack(fill=tk.X, pady=2)
+    tk.Button(frame3, text="ออกจากระบบสมาชิก", font=("Kanit", 12), command=logout_member, fg="red").pack(fill=tk.X, pady=2)
 
 
     # ========================== ส่วนที่ 3 กลาง: สรุปยอด ==========================
@@ -306,7 +306,7 @@ def create_three_frames(parent):
 
         discount = 0.0
         if current_member_info["phone"] is not None:
-            discount = total_sum * 0.25 # ลด 25% สำหรับกระเป๋า
+            discount = total_sum * 0.25 # ลด 25%
             
         after_discount = total_sum - discount
         vat = after_discount * 0.07 # ภาษี 7%
@@ -356,7 +356,7 @@ def create_three_frames(parent):
         os.makedirs(hold_dir, exist_ok=True)
         
         # ตั้งชื่อไฟล์เป็น วัน-เดือน-ปี_ชั่วโมง-นาที-วินาที
-        timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
+        timestamp = datetime.now().strftime("%d-%m-%Y  %H-%M")
         hold_file = os.path.join(hold_dir, f"bill_{timestamp}.txt")
         
         # ย้ายข้อมูลไปไฟล์พักบิลและล้างของเดิม
@@ -364,7 +364,7 @@ def create_three_frames(parent):
             f.writelines(lines)
         open(bill_path, "w").close()
         reload_cart()
-        messagebox.showinfo("สำเร็จ", f"พักบิลไว้เรียบร้อยแล้วในชื่อ:\n{timestamp}")
+        messagebox.showinfo("สำเร็จ", f"พักบิลไว้เรียบร้อย\n{timestamp}")
 
     def recall_bill():
         held_dir = os.path.join(os.path.dirname(__file__), "data", "held_bills")
@@ -415,9 +415,9 @@ def create_three_frames(parent):
             
         tk.Button(recall_pop, text="เรียกคืนบิลนี้", command=do_recall, bg="lightblue").pack(pady=10)
         
-    tk.Button(action_frame, text="เก็บบิล", command=hold_bill, bg="orange").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
-    tk.Button(action_frame, text="เรียกคืนบิล", command=recall_bill, bg="lightblue").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
-    tk.Button(action_frame, text="ล้างตะกร้า", command=clear_cart, bg="red", fg="white").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    tk.Button(action_frame, text="พักบิล", font=("Kanit", 12, "bold"), command=hold_bill, bg="orange").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    tk.Button(action_frame, text="เรียกคืนบิล", font=("Kanit", 12, "bold"), command=recall_bill, bg="lightblue").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    tk.Button(action_frame, text="ล้างตะกร้า", font=("Kanit", 12, "bold"), command=clear_cart, bg="red", fg="white").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
 
     def confirm_checkout():
         """ยืนยันการทำรายการแบบเต็มรูปแบบ"""
@@ -573,7 +573,7 @@ def open_numpad_popup(parent, on_add_to_cart_cb=None):
     """
     popup = tk.Toplevel(parent)
     popup.title("ระบุจำนวนสินค้า")
-    popup.geometry("300x420")
+    popup.geometry("300x500")
     
     # ล็อคความสนใจไว้ที่หน้าต่างนี้จนกว่าจะปิด
     popup.grab_set()
