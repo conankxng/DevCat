@@ -4,3 +4,10 @@
 [2026-03-05 22:59:09] Total: 19260.00 THB | Member: Apr TMK (098-1234567) | Items: 1
 [2026-03-05 23:21:32] Total: 3210.00 THB | General Customer | Items: 1
 [2026-03-05 23:22:24] Total: 2407.50 THB | Member: Apr TMK (098-1234567) | Items: 1
+[2026-03-06 03:41:31] Total: 133750.00 THB | General Customer | Items: 1
+[2026-03-06 03:41:51] Total: 25680.00 THB | General Customer | Items: 1
+[2026-03-06 03:50:37] Total: 321.00 THB | General Customer | Items: 1
+[2026-03-06 03:51:06] Total: 6848.00 THB | General Customer | Items: 1
+[2026-03-06 03:51:38] Total: 22470.00 THB | General Customer | Items: 1
+[2026-03-06 03:52:51] Total: 802.50 THB | General Customer | Items: 1
+[2026-03-06 03:53:10] Total: 10272.00 THB | General Customer | Items: 1
