@@ -70,29 +70,38 @@ def create_three_frames(parent):
     container1, frame1 = create_scrollable_frame(parent)
     container1.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
     
-    # สร้าง เฟรมที่ 2 (เลื่อนได้ สำหรับแสดงตะกร้าสินค้า)
-    container2, frame2 = create_scrollable_frame(parent)
-    container2.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+    # สร้าง เฟรมที่ 2 (แบบปกติ แล้วใส่ Scrollbar ให้ Treeview โดยเฉพาะ)
+    frame2 = tk.Frame(parent)
+    frame2.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
     
-    tk.Label(frame2, text="Cart", bg="lightgreen", font=("Arial", 12, "bold")).pack(pady=10)
+    tk.Label(frame2, text="{ ตะกร้าสินค้า }", bg="lightgreen", font=("Arial", 12, "bold")).pack(pady=10)
+    
+    # สร้าง Frame ย่อยสำหรับตาราง Treeview เพื่อให้ใส่ Scrollbar ได้
+    tree_frame = tk.Frame(frame2)
+    tree_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+    
+    # สร้าง Scrollbar สำหรับ Treeview
+    tree_scroll = ttk.Scrollbar(tree_frame)
+    tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
     
     # สร้างตาราง Treeview ใน Frame 2 สำหรับรายการตระกร้า
     columns = ("id", "name", "price", "total")
-    cart_tree = ttk.Treeview(frame2, columns=columns, show="headings", height=15)
+    cart_tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=15, yscrollcommand=tree_scroll.set)
+    tree_scroll.config(command=cart_tree.yview)
     
     # กำหนดหัวตาราง
-    cart_tree.heading("id", text="ID")
-    cart_tree.heading("name", text="Name")
-    cart_tree.heading("price", text="Price/Unit")
-    cart_tree.heading("total", text="Total")
+    cart_tree.heading("id", text="รหัสสินค้า")
+    cart_tree.heading("name", text="ชื่อสินค้า")
+    cart_tree.heading("price", text="ราคา/หน่วย")
+    cart_tree.heading("total", text="ราคารวม")
     
     # กำหนดขนาดคอลัมน์
     cart_tree.column("id", width=80, anchor="center")
-    cart_tree.column("name", width=150, anchor="center")
-    cart_tree.column("price", width=80, anchor="center")
-    cart_tree.column("total", width=80, anchor="center")
+    cart_tree.column("name", width=150, anchor="w")
+    cart_tree.column("price", width=80, anchor="e")
+    cart_tree.column("total", width=80, anchor="e")
     
-    cart_tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+    cart_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     
     def on_add_to_cart(pid, name, qty):
         # ดึงราคาจากสต๊อก
@@ -259,10 +268,10 @@ def open_numpad_popup(parent, on_add_to_cart=None):
             success, msg = product_manager.process_sale(pid, qty_int)
             if success:
                 messagebox.showinfo("สำเร็จ", msg, parent=popup)
-                # เพิ่มสินค้าเข้ารถเข็นผ่าน callback ที่ส่งเข้ามา
                 if on_add_to_cart:
                     on_add_to_cart(pid, current_selected_product["name"], qty_int)
                 popup.destroy()
+                # ตรงนี้สามารถใส่โค้ดให้อัปเดตตาราง (Treeview) เพิ่มเข้าไปยังตะกร้าในอนาคตได้
             else:
                 messagebox.showwarning("ข้อผิดพลาด", msg, parent=popup)
         else:

@@ -64,6 +64,22 @@ def delete_product(pid):
     storage.save_products(inventory) #แล้วก็ทำการเซฟข้อมูลใหม่ลงไป
     return True,"สำเร็จ: ลบสินค้าเรียบร้อยแล้ว!" #return ค่ากลับพร้อมแจ้งเตือน
 
+def best_seller(threshold=20):
+    """
+    ฟังก์ชันสำหรับเช็คสินค้าใกล้หมด
+    คืนค่า: รายชื่อสินค้าที่เป็น List เพื่อให้ GUI นำไปแสดง Popup หรือ Label
+    """
+    inventory = storage.load_products() #ดึงข้อมูลในไฟล์มาเก็บใน ตัวแปร
+    best_stock_items = [] #สร้างตัวแปรสำหรับเก็บข้อมูลสำหรับรายชื่อสินค้าใกล้หมด
+    
+    for pid,data in inventory.items(): #วนรอบตรวจสอบข้อมูล
+        if data['stock']<=threshold: #มาเข้าเงื่อนไข ตรวจสอบ stock น้อยกว่าหรือ = ตัวแปรที่กำหนดไว้
+            best_stock_items.append({ #เก็บข้อมูลลงในตัวแปร ใช้append ต่อท้ายข้อมูลเก็บ ทั้งid ชื่อ จำนวนสินค้า เป็น list
+                "id":pid,
+                "name":data["name"],
+                "stock": data["stock"]
+            })
+    return best_stock_items #ส่ง ข้อมูลเป็น listกลับไป
 
 def get_low_stock_list(threshold=5):
     """
