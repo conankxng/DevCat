@@ -53,7 +53,7 @@ def record_sale(items, subtotal, discount, vat, grand_total, member_info):
     pdf.cell(200, 10, txt="----------------------------------------------------------------------", align="C", new_x="LMARGIN", new_y="NEXT")
     
     # หัวตาราง
-    pdf.set_font(pdf.font_family, style="B", size=10)
+    pdf.set_font(pdf.font_family, size=10)
     pdf.cell(80, 8, "รายการ (Item)", border=0)
     pdf.cell(30, 8, "จำนวน (Qty)", border=0, align="C")
     pdf.cell(40, 8, "ราคาต่อหน่วย (Unit Price)", border=0, align="R")
@@ -79,7 +79,7 @@ def record_sale(items, subtotal, discount, vat, grand_total, member_info):
     pdf.cell(150, 8, "ภาษีมูลค่าเพิ่ม 7% (VAT):", align="R")
     pdf.cell(40, 8, f"{vat:.2f}", align="R", new_x="LMARGIN", new_y="NEXT")
     
-    pdf.set_font(pdf.font_family, style="B", size=12)
+    pdf.set_font(pdf.font_family, size=12)
     pdf.cell(150, 10, "ยอดชำระสุทธิ (Grand Total):", align="R")
     pdf.cell(40, 10, f"{grand_total:.2f} THB", align="R", new_x="LMARGIN", new_y="NEXT")
     
