@@ -184,4 +184,18 @@
         
 #         for pid, data in results.items():
 #             tree.insert('','end',values=(pid, data["name"], data["price"], data["stock"], data["cost"])) #เป็นคำสั่ง "เขียนข้อมูล" ลงไปในตาราง แล้ว values= คือระบุว่าข้อมูลควรมีอะไรบ้างและเรียงตามลำดับ  end คือให้ต่อเป็นแถวๆไป  "" สร้างแถวใหม่ขึ้นมาเลย
+        
+#     def on_tree_select(event):
+#         try:                               #selection() นี่แหละคือตัวที่ทำหน้าที่บอกโปรแกรมว่า "ตอนนี้ผู้ใช้กำลังสนใจ (คลิก) แถวไหนอยู่"
+#             selected = tree.selection()[0] #ให้ไปดูว่าผู้ใช้เลือกแถวไหน [0]คือกรณีเผลอเลือกหลายแถวก็จะให้เลือกแถวที่คลิกล่าสุด
+#             values = tree.item(selected, "values") #ไปดึงข้อมูลจากแถวนั้นออกมาเก็บไว้ในตัวแปร
             
+#             clear_form() #เครียร์ฟร์อมเพื่อจะเอาข้อมูลใหม่ไปแสดง
+#             entry_pid.insert(0, values[0]) #แสดงช้อมูลลงไปในฟร์อม # values[0] = รหัสสินค้า (PID)
+#             entry_pid.config(state="disabled") # ล็อกการแก้ไขรหัสสินค้า เพื่อป้องกัน Bug 
+#             entry_name.insert(0, values[1])    # values[1] = ชื่อสินค้า (Name)
+#             entry_price.insert(0, values[2])   # values[2] = ราคา (Price)
+#             entry_stock.insert(0, values[3])   # values[3] = สต็อก (Stock)
+#             entry_cost.insert(0, values[4])    # values[4] = ต้นทุน (Cost)
+#         except IndexError: #คือการบอกคอมพิวเตอร์ว่า "ถ้าหาไม่เจอ ก็ไม่ต้องทำอะไรนะ นิ่งไว้ โปรแกรมไม่ต้องค้าง"
+#             pass
