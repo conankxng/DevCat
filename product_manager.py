@@ -10,6 +10,10 @@ def add_product(pid,name,price,stock,cost):
     if pid in inventory:
         return False, f'เกิดข้อผิดพลาด: รหัสสินค้า "{pid}" มีอยู่แล้ว!' #เช็คว่ารหัสสินค้าซ้ำกับที่่อยู่ในระบบไหม หาซ้ำจะหยุดทำงานและส่งค่่า False
     
+    for existing_pid,product in inventory.items(): #เช็คว่ามีชื่อสินค้าซ้ำกันไหมก่อนเพิ่มสินค้า
+        if product.get('name') == name:
+            return False, f'เกิดข้อผิดพลาด: ชื่อสินค้า "{name}" มีอยู่แล้วในระบบ!'
+    
     #เพิ่มช้อมูลลง Dictionary
     inventory[pid] = {'name':name, "price":price, "stock":stock, 'cost':cost} #หากไม่่ซ้ำก็จะทำการสร้างข้อมูลเก็บเข้าไปใน inventory โดยใช้ pid เป็นคีย์หลัก
     storage.save_products(inventory) #เมื่อเพิ่มข้อมูลในตัวแปรเสร็จ ก็สั่งบันทึกทับลงไปในไฟล์ฟังก์ชั่่น save_products
@@ -31,6 +35,10 @@ def update_product(pid,name,price,stock,cost):
     
     if pid not in inventory: #เอามาเช็คเงื่อนไข ว่าไม่่มี รหัสสินค้า ข้อมูลจริงไหม
         return False, 'แจ้งเตือน: ไม่พบรหัสสินค้านี้ในระบบ!' #แล้วก็ส่งข้อมูลกลับไป
+    
+    for existing_pid, product in inventory.items():
+        if existing_pid != pid and product.get('name') == name: #ถ้าเป็นรหัสสินค้าตัวเดิมไม่่ถือว่ามันซ้ำนะ เราจะแจ้งตรงส่วน ชื่อว่าห้ามซ้ำ
+            return False, f'เกิดข้อผิดพลาด: ชื่อสินค้า "{name}" มีอยู่แล้วในระบบ!' 
     
     #ถ้ามีมาเข้าส่วนนี้ ก็คือเก็บข้อมูลใหม่ลงในตัวแปร
     inventory[pid]["name"] = name 
