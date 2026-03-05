@@ -239,10 +239,7 @@ def setup_inventory_interface(parent):
     
     lbl_alert = tk.Label(dash_frame, text="สถานะสต็อก: ปกติ", font=default_font, bg="#e0f7fa", fg="green")
     lbl_alert.pack(side="right")
-    
-    # กรอบสำหรับค้นหา
-    search_frame = tk.Frame(data_frame, bg="#ffffff")
-    search_frame.pack(fill="x", pady=5)
+
     # ==========================
     # เฟรม ค้นหาสินค้า
     # ==========================
@@ -263,7 +260,7 @@ def setup_inventory_interface(parent):
     # ==========================
     
     columns = ('PID', 'Name', 'Price', 'Stock', 'Cost') #สร้างชื่อตอลัมขึ้นมาแล้วก็เก็บในตัวแปร
-    tree = ttk.Treeview(data_frame, columns=columns, show='headings', height=20) #สร้างตาราง เอาคอลัมที่กำหนดมาแสดง สั่งให้แสดงเฉพาะหัวตาราง
+    tree = ttk.Treeview(data_frame, columns=columns, show='headings', height=20) #สร้างตาราง เอาคอลัมน์ที่กำหนดมาแสดง สั่งให้แสดงเฉพาะหัวตาราง
     
     # จัดการแสดงผลฟอนต์ไทยใน Treeview
     style = ttk.Style() #เรียก .Style() มาตกแต่งให้ทั้งหมดเหมือนกัน
