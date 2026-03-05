@@ -2,10 +2,6 @@ import tkinter as tk
 import POS
 import os
 from tkinter import messagebox  # ต้องเพิ่มบรรทัดนี้เพื่อใช้การแจ้งเตือน
-import ctypes
-
-# สมมติว่าไฟล์ฟอนต์ชื่อ 'Kanit.ttf' อยู่ในโฟลเดอร์เดียวกับโค้ด
-ctypes.windll.gdi32.AddFontResourceExW("Kanit.ttf", 0x10, 0)
 
 #ฟังก์ชันสลับหน้า
 def switch(page):
