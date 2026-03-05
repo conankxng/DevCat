@@ -66,11 +66,10 @@ def delete_product(pid):
 
 def best_seller(threshold=20):
     """
-    ฟังก์ชันสำหรับเช็คสินค้าใกล้หมด
-    คืนค่า: รายชื่อสินค้าที่เป็น List เพื่อให้ GUI นำไปแสดง Popup หรือ Label
+    ฟังก์ชันสำหรับเช็คสินค้าขายดี
     """
     inventory = storage.load_products() #ดึงข้อมูลในไฟล์มาเก็บใน ตัวแปร
-    best_stock_items = [] #สร้างตัวแปรสำหรับเก็บข้อมูลสำหรับรายชื่อสินค้าใกล้หมด
+    best_stock_items = [] #สร้างตัวแปรสำหรับเก็บข้อมูลสำหรับรายชื่อสินค้าขายดี
     
     for pid,data in inventory.items(): #วนรอบตรวจสอบข้อมูล
         if data['stock']<=threshold: #มาเข้าเงื่อนไข ตรวจสอบ stock น้อยกว่าหรือ = ตัวแปรที่กำหนดไว้
