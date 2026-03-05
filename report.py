@@ -82,3 +82,10 @@ def search_sale_history(year,month,day):
                     if line.startswith(search_date): #ถ้าบรรทัดนั้นขึ้นต้นด้วยsearch_date 
                         results.append(line)  #ให้เก็บผลลัพนั้นลงใน results เปน line
     return results
+
+print(product_sale_data())
+print(total_revenue())
+print(product_cost_data())
+print(total_expense())
+print(product_report())
+print(search_sale_history(2026,3,5))
