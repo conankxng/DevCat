@@ -1,4 +1,5 @@
 import storage_product as stock
+import product_manager as manage
 import os 
 
 #ฟังก์ชั่นแสดงข้อมูลการขาย
@@ -59,7 +60,7 @@ def total_expense():
 
 #ฟังก์ชั่นที่แสดงว่าสินค้าขายดี
 def product_report(): 
-    inventory = Manage.best_seller() # เรียกใช้ฟังก์ชันจาก product_manager 
+    inventory = manage.best_seller() # เรียกใช้ฟังก์ชันจาก product_manager 
     return inventory
 
 
