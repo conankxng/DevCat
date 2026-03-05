@@ -88,6 +88,9 @@ def create_three_frames(parent):
 #==================================================================#
 #------------------------------Frame1-------------------------------
 #==================================================================#
+# ตัวแปร Global สำหรับเก็บค่า ID และชื่อสินค้าที่ถูกเลือกคลิกล่าสุด
+current_selected_product = {"id": None, "name": None}
+
 def load_products_to_frame(frame):
     """ฟังก์ชันสำหรับอ่านไฟล์ products.txt และสร้างปุ่มสินค้า"""
     # กำหนด path ของไฟล์ products.txt
@@ -97,10 +100,11 @@ def load_products_to_frame(frame):
     for col_index in range(4):
         frame.columnconfigure(col_index, weight=1)
         
+    try:
         with open(file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
             
-        button_count: int = 0  # ตัวนับจำนวนปุ่มที่ถูกสร้าง
+        button_count = 0  # ตัวนับจำนวนปุ่มที่ถูกสร้าง
         for line in lines:
             line = line.strip()
             if not line:
@@ -112,9 +116,16 @@ def load_products_to_frame(frame):
                 product_id = parts[0]
                 product_name = parts[1]
                 
-                # # กำหนดฟังก์ชันย่อย (closure) เพื่อแนบไปกับคำสั่งผูกปุ่ม
-                # def make_cmd(name=product_name):
-                #     return lambda: print(f"เลือกสินค้า: {name}")
+                # กำหนดฟังก์ชันย่อยสำหรับการกดปุ่ม
+                def on_product_click(p_id=product_id, p_name=product_name):
+                    global current_selected_product
+                    # เก็บค่า id และชื่อสินค้าไว้ในตัวแปร global
+                    current_selected_product["id"] = p_id
+                    current_selected_product["name"] = p_name
+                    print(f"Stored -> ID: {p_id}, Name: {p_name}")
+                    
+                    # เรียกเปิดหน้าพ็อปอัพ Numpad
+                    open_numpad_popup(frame)
                 
                 # สร้างปุ่มโดยแสดงชื่อสินค้า (product_name)
                 btn = tk.Button(
@@ -122,23 +133,26 @@ def load_products_to_frame(frame):
                     text=product_name, 
                     font=("Arial", 10),
                     height=8,
-                    command=lambda: open_numpad_popup(frame, product_name) #เมื่อกดปุ่มสินค้าแล้วจะเปิดหน้าต่าง Numpad เพื่อกรอกจำนวนสินค้า
+                    command=on_product_click
                 )
                 btn.place(relwidth=1, relheight=1)  # ให้ปุ่มขยายเต็มความกว้างและสูงของกริดคอลัมน์
                 
                 # คำนวณแถวและคอลัมน์จากตัวนับ (4 ปุ่มต่อแถว)
-                row = button_count // 4
-                col = button_count % 4
+                row = int(button_count / 4)
+                col = button_count % 4  # type: ignore
                 
                 # วางปุ่มแบบ Grid (ตาราง) โดยเว้นระยะห่างด้านนอก (padx, pady) และขยายปุ่มให้เต็มกริดตารางช่องนั้นๆ (sticky="nsew")
                 btn.grid(row=row, column=col, padx=5, pady=5, sticky="nsew")
                 
-                button_count += 1
+                button_count = button_count + 1
+                
+    except FileNotFoundError:
+        tk.Label(frame, text="⚠️ ไม่พบไฟล์ data/products.txt", fg="red").grid(row=0, column=0, columnspan=4, pady=20)
         
 def open_numpad_popup(parent):
     """ฟังก์ชันเปิดหน้าต่าง Numpad (ป๊อปอัป) เพื่อกรอกจำนวนสินค้า"""
-    popup = tk.Toplevel("Amount Products")
-    popup.title(product_name)
+    popup = tk.Toplevel(parent)
+    popup.title("Amount Products")
     popup.geometry("300x420+1000+200")  # กำหนดขนาดและตำแหน่งของหน้าต่าง
     
     # ล็อคหน้าต่างนี้ไว้ด้านหน้าสุด จนกว่าจะกดยกเลิกหรือตกลง
@@ -199,13 +213,8 @@ def open_numpad_popup(parent):
         btn = tk.Button(keypad_frame, text=text, font=("Arial", 18, "bold"), command=create_btn_command(text))
         btn.grid(row=row, column=col, sticky="nsew", padx=2, pady=2)
         
-    def submit():
-        qty = qty_var.get()
-        print(f"บันทึกข้อมูล: {product_name} จำนวน {qty} ชิ้น")
-        # TODO: นำค่า qty นี้ส่งไปใส่ในรายการตะกร้า (เฟรมที่ 2)
-        popup.destroy()
         
     # ปุ่มยืนยันด้านล่าง
-    submit_btn = tk.Button(popup, text="Confirm", font=("Arial", 16, "bold"), bg="green", fg="white", command=submit)
+    submit_btn = tk.Button(popup, text="Confirm", command=lambda: popup.destroy(), font=("Arial", 16, "bold"), bg="green", fg="white")
     submit_btn.pack(fill=tk.X, padx=10, pady=10)
     
