@@ -92,7 +92,7 @@ def create_three_frames(parent):
     frame2.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
     
     # ป้ายหัวข้อตะกร้าสินค้า
-    tk.Label(frame2, text="ตะกร้าสินค้า", bg="lightgreen", font=("Arial", 12, "bold")).pack(pady=10)
+    tk.Label(frame2, text="{ ตะกร้าสินค้า }", bg="lightgreen", font=("Arial", 12, "bold")).pack(pady=10)
     
     # กรอบสำหรับตารางและแถบเลื่อน
     tree_frame = tk.Frame(frame2)
@@ -263,7 +263,8 @@ def create_three_frames(parent):
     
     # ========================== ส่วนที่ 3 ล่าง: ดำเนินการ ==========================
     action_frame = tk.Frame(frame3)
-    action_frame.pack()
+    # ลบ expand=True ทิ้งเพื่อป้องกันไม่ให้ปุ่มข้างล่างโดนดันตกขอบจอ
+    action_frame.pack(fill=tk.X, pady=10)
     
     def hold_bill():
         if not os.path.exists(bill_path):
@@ -340,8 +341,8 @@ def create_three_frames(parent):
             
         tk.Button(recall_pop, text="เรียกคืนบิลนี้", command=do_recall, bg="lightblue").pack(pady=10)
         
-    tk.Button(action_frame, text="Hold Bill", command=hold_bill, bg="orange").pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
-    tk.Button(action_frame, text="Recall Bill", command=recall_bill, bg="lightblue").pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
+    tk.Button(action_frame, text="พักบิล (Hold Bill)", command=hold_bill, bg="orange").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    tk.Button(action_frame, text="เรียกบิล (Recall Bill)", command=recall_bill, bg="lightblue").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
 
     def confirm_checkout():
         """ยืนยันการทำรายการแบบเต็มรูปแบบ"""
@@ -356,63 +357,63 @@ def create_three_frames(parent):
             messagebox.showinfo("แจ้งเตือน", "ไม่มีสินค้าในตะกร้า!")
             return
             
-            all_success = True
-            error_msgs = []
-            
-            # บันทึก items สำหรับใบเสร็จ
-            receipt_items = []
-            total_sum = 0.0
-            
-            for line in lines:
-                parts = line.strip().split(",")
-                if len(parts) == 5:
-                    pid, name, price, qty, total = parts
-                    success, msg = product_manager.process_sale(pid, int(qty))
-                    if not success:
-                        all_success = False
-                        error_msgs.append(f"{name}: {msg}")
-                    else:
-                        receipt_items.append({
-                            "name": name,
-                            "qty": int(qty),
-                            "price": float(price),
-                            "total": float(total)
-                        })
-                        total_sum += float(total)
-                        
-            if all_success:
-                # คำนวณสรุปยอดแบบเดียวกับตอน reload_cart
-                discount = 0.0
-                if current_member_info["phone"] is not None:
-                    discount = total_sum * 0.25
-                after_discount = total_sum - discount
-                vat = after_discount * 0.07
-                grand_total = after_discount + vat
-                
-                # บันทึกลง Master Sales และปริ้น PDF
-                try:
-                    pdf_file = sales_logger.record_sale(
-                        items=receipt_items, 
-                        subtotal=total_sum, 
-                        discount=discount, 
-                        vat=vat, 
-                        grand_total=grand_total, 
-                        member_info=current_member_info
-                    )
-                    success_msg = f"ทำรายการสำเร็จ!\nระบบได้บันทึกยอดขายและออกใบเสร็จที่:\n{pdf_file}"
-                except Exception as e:
-                    success_msg = f"ทำรายการสำเร็จ! แต่เกิดข้อผิดพลาดในการสร้างใบเสร็จ: {e}"
+        all_success = True
+        error_msgs = []
+        
+        # บันทึก items สำหรับใบเสร็จ
+        receipt_items = []
+        total_sum = 0.0
+        
+        for line in lines:
+            parts = line.strip().split(",")
+            if len(parts) == 5:
+                pid, name, price, qty, total = parts
+                success, msg = product_manager.process_sale(pid, int(qty))
+                if not success:
+                    all_success = False
+                    error_msgs.append(f"{name}: {msg}")
+                else:
+                    receipt_items.append({
+                        "name": name,
+                        "qty": int(qty),
+                        "price": float(price),
+                        "total": float(total)
+                    })
+                    total_sum += float(total)
                     
-                messagebox.showinfo("สำเร็จ", success_msg)
-                open(bill_path, 'w').close() 
-                logout_member() # รับเงินเสร็จ เตะสมาชิกออกรอคิวต่อไป
-            else:
-                errors = "\n".join(error_msgs)
-                messagebox.showwarning("ข้อผิดพลาด", f"สต๊อกไม่พอ:\n{errors}\n*ระบบเคลียร์ตะกร้าแล้ว")
-                open(bill_path, 'w').close()
-                reload_cart()
+        if all_success:
+            # คำนวณสรุปยอดแบบเดียวกับตอน reload_cart
+            discount = 0.0
+            if current_member_info["phone"] is not None:
+                discount = total_sum * 0.25
+            after_discount = total_sum - discount
+            vat = after_discount * 0.07
+            grand_total = after_discount + vat
+            
+            # บันทึกลง Master Sales และปริ้น PDF
+            try:
+                pdf_file = sales_logger.record_sale(
+                    items=receipt_items, 
+                    subtotal=total_sum, 
+                    discount=discount, 
+                    vat=vat, 
+                    grand_total=grand_total, 
+                    member_info=current_member_info
+                )
+                success_msg = f"ทำรายการสำเร็จ!\nระบบได้บันทึกยอดขายและออกใบเสร็จที่:\n{pdf_file}"
+            except Exception as e:
+                success_msg = f"ทำรายการสำเร็จ! แต่เกิดข้อผิดพลาดในการสร้างใบเสร็จ: {e}"
                 
-    # ปุ่มยืนยันรายการจ่ายเงิน
+            messagebox.showinfo("สำเร็จ", success_msg)
+            open(bill_path, 'w').close() 
+            logout_member() # รับเงินเสร็จ เตะสมาชิกออกรอคิวต่อไป
+        else:
+            errors = "\n".join(error_msgs)
+            messagebox.showwarning("ข้อผิดพลาด", f"สต๊อกไม่พอ:\n{errors}\n*ระบบเคลียร์ตะกร้าแล้ว")
+            open(bill_path, 'w').close()
+            reload_cart()
+                
+    # ปุ่มยืนยันรายการจ่ายเงิน (แพ็คให้ติดขอบล่างเสมอ ป้องกันการโดนดันตกจอ)
     tk.Button(
         frame3, 
         text="ยืนยันการทำรายการ\n(Confirm & ออกใบเสร็จ)", 
@@ -420,7 +421,7 @@ def create_three_frames(parent):
         bg="green", 
         fg="white", 
         command=confirm_checkout
-    ).pack(fill=tk.X, padx=10, pady=10)
+    ).pack(side=tk.BOTTOM, fill=tk.X, padx=10, pady=10)
     
     # ส่งเฟรมทั้ง 3 กลับเป็นก้อน
     return frame1, frame2, frame3

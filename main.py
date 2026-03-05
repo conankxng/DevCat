@@ -8,14 +8,7 @@ def switch(page):
     page.tkraise()
 
 def on_closing():
-    try:
-        if os.path.exists("Bill.txt"):
-            os.remove("Bill.txt")
-    except Exception as e:
-        print(f"Error: {e}")
-    finally:
-        # ใช้คำสั่งนี้เพื่อปิดหน้าต่างและหยุดโปรแกรม Python ทั้งหมด
-        root.destroy()
+    root.destroy()
 
 root = tk.Tk()
 root.title("DevCat")
