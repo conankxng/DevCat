@@ -1,7 +1,6 @@
 import storage_product as stock
+import product_manager as manage
 import os 
-
-best_seller_limit = 50 #สินค้าขายดีต้องมีเกณฑ์ขายเหลือในสต้อกแค่ 50ชิ้นลงไป
 
 #ฟังก์ชั่นแสดงข้อมูลการขาย
 def product_sale_data():
@@ -32,15 +31,15 @@ def product_sale_data():
 #ฟังก์ชั่นแสดงรายรับรวมทั้งหมด
 def total_revenue():
     revenue = product_sale_data()
-    return sum(revenue) #sumเพื่อรวม
+    return sum(revenue) #sumเพื่อรวมยอดขาย
 
-#ฟังก์ชันแสดงจ่ายรวมทั้งหมด
+#ฟังก์ชันแสดงรายจ่าย หรือ ต้นทุน
 def product_cost_data():
     cost_data = stock.FILE_NAME 
     if os.path.exists(cost_data): #เช็คว่าไฟล์มีอยู่จริงไหม
-        costs = [] #สร้างลิสต์ว่าง ไว้เก็บข้อมูลยอดขายที่ดึงออกมาจากไฟล์ FILE_NAME  ทีละบรรทัด
-        with open(cost_data,'r',encoding='utf-8') as f: #เปิดไฟล์เพื่ออ่านเป็นภาษาไทย
-            lines= f.readlines() #อ่าน f ทีละบรรทัด
+        costs = [] #สร้างลิสต์ว่าง ไว้เก็บข้อมูลรายจ่ายที่ดึงออกมาจากไฟล์ FILE_NAME  ทีละบรรทัด
+        with open(cost_data,'r',encoding='utf-8') as f: #เปิดไฟล์เพื่ออ่าน เป็นภาษาไทย
+            lines= f.readlines() 
             for line in lines: #วนลูปเพื่ออ่านข้อมูลทีละบรรทัด
                 line = line.strip() #.strip เพื่อตัดช่องว่างหัว-ท้าย
                 if line: 
@@ -48,7 +47,7 @@ def product_cost_data():
                         parts = line.split(',') #แยกส่วนข้อมูลแต่ละพาร์ท ตามลูกน้ำ
                         # cost_value คือข้อมูลต้นทุนที่อยู่ใน FILE_NAME โดยคอลั่มท้ายสุดคือต้นทุน
                         cost_value = float(parts[-1].strip()) #ตัดช่องว่างหัวท้าย
-                        costs.append(cost_value)
+                        costs.append(cost_value) #เก็บcost_valueไปไว้ในcost
                     except :
                         costs.append(0.0) #ถ้าเกิดerror ระหว่างการแปลงค่า ให้ใส่ 0.0 ลงไปแทน
         return costs
@@ -59,29 +58,35 @@ def total_expense():
     expense = product_cost_data()
     return sum(expense) #sumเพื่อรวม
 
-#ฟังก์ชั่นที่แสดงว่าสินค้าขายดี และ สินค้าใดที่ขายไม่ดี
-def product_report():
-    inventory = stock.load_products() #ฟังก์ชั่นดึงข้อมูลจาก storage_product
-    good_product = []
-    not_good_product = []
-    for pid,data in inventory.items(): #วนลูปผ่านสินค้าทั้งหมดใน inventory
-        item = {'name': data['name'],'stock': data['stock']} #Dictionary
-
-        #สร้างเงื่อนไขว่าอันไหนเป็น สินค้าที่ดี และ เป็นสินค้าที่ไม่ดี
-        # 
-        if  int(data['stock']) < best_seller_limit :
-            good_product.append(item) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร good_product
-        else :
-            not_good_product.append(item) #เก็บข้อมูลไป list ไปเก็บไว้ในตัวแปร not_good_product
-    return (good_product,not_good_product)
+#ฟังก์ชั่นที่แสดงว่าสินค้าขายดี
+def product_report(): 
+    inventory = manage.best_seller() # เรียกใช้ฟังก์ชันจาก product_manager 
+    return inventory
 
 
 #ฟังก์ชันค้นหาประวัติจากขาย ผ่าน วัน/เดือน/ปี 
-def search_sale_history():
-    pass
+def search_sale_history(year,month,day):
+    # เป็น แปลงint เพื่อให้จัดรูปแบบวันที่ให้เปน YYYY-MM-DD เรียงแบบนี้เพือให้ตรงกับไฟล์ sale.txt
+    search_date = f"{int(year):04d}-{int(month):02d}-{int(day):02d}" #เกบวันที่
+    #d = แสดงเป็นตัวเลขจำนวนเต็ม #ใช้ :04d :02d :02d เพื่อกำหนดจำนวนอักษรให้ตรงตามล็อค ใส่0 เพื่อเติมในเดือนที่เป็นเลขตัวเดียว
 
+    sale_data = stock.SALES_FILE
+    results = [] #ใช้เก็บเนื้อหาที่ค้นเจอ
+    
+    if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์sale_data มีอยู่จริงไหม
+        with open(sale_data,'r',encoding='utf-8') as f:
+            lines = f.readlines() #อ่านไฟล์ในบรรทัด
+            for line in lines: #ลูปให้อ่านแต่ละบรรทัด
+                line = line.strip() #ตัดช่องว่างหน้า-หลัง
+                if line:
+                    if line.startswith(search_date): #ถ้าบรรทัดนั้นขึ้นต้นด้วยsearch_date 
+                        results.append(line)  #ให้เก็บผลลัพนั้นลงใน results เปน line
+    return results
+'''
 print(product_sale_data())
 print(total_revenue())
 print(product_cost_data())
 print(total_expense())
-#abc
+print(product_report())
+print(search_sale_history(2026,3,5))
+'''
