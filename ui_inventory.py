@@ -264,3 +264,5 @@ def setup_inventory_interface(parent):
     
     columns = ('PID', 'Name', 'Price', 'Stock', 'Cost')
     tree = ttk.Treeview(data_frame, columns=columns, show='headings', height=20)
+    
+    
