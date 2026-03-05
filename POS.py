@@ -92,7 +92,7 @@ def create_three_frames(parent):
     frame2.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
     
     # ป้ายหัวข้อตะกร้าสินค้า
-    tk.Label(frame2, text="My Cart", font=("Kanit", 12, "bold")).pack(pady=10)
+    tk.Label(frame2, text="รายการสินค้า", font=("Kanit", 12, "bold")).pack(pady=10)
     
     # กรอบสำหรับตารางและแถบเลื่อน
     tree_frame = tk.Frame(frame2)
@@ -107,11 +107,16 @@ def create_three_frames(parent):
     cart_tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=15, yscrollcommand=tree_scroll.set)
     tree_scroll.config(command=cart_tree.yview)
     
+    #
+    style = ttk.Style()
+    style.configure("Treeview.Heading", font=header_font)
+    style.configure("Treeview", font=default_font, rowheight=30)
+    
     # กำหนดหัวข้อคอลัมน์ของตาราง
-    cart_tree.heading("id", text="ID")
-    cart_tree.heading("name", text="Products")
-    cart_tree.heading("price", text="Price/Unit")
-    cart_tree.heading("total", text="Total Price")
+    cart_tree.heading("id", text="รหัสสินค้า")
+    cart_tree.heading("name", text="สินค้า")
+    cart_tree.heading("price", text="ราคา/หน่วย")
+    cart_tree.heading("total", text="ราคารวม")
     
     # กำหนดขนาดและการจัดตำแหน่งของแต่ละคอลัมน์
     cart_tree.column("id", width=80, anchor="center")
@@ -133,13 +138,13 @@ def create_three_frames(parent):
     member_frame = tk.Frame(frame3, relief="groove", bd=2)
     member_frame.pack(fill=tk.X, pady=5)
     
-    lbl_member_status_var = tk.StringVar(value="General Customer")
+    lbl_member_status_var = tk.StringVar(value="ลูกค้าทั่วไป")
     tk.Label(member_frame, textvariable=lbl_member_status_var, font=("Kanit", 11, "bold"), fg="blue").pack(pady=5)
     
     
     def open_phone_numpad(parent_win, entry_widget):
         popup = tk.Toplevel(parent_win)
-        popup.title("Numpad")
+        popup.title("แป้นตัวเลข")
         popup.geometry("300x500")
         popup.grab_set()
         popup.transient(parent_win)
@@ -185,26 +190,26 @@ def create_three_frames(parent):
             entry_widget.insert(0, qty_var.get())
             popup.destroy()
             
-        tk.Button(popup, text="Confirm", command=submit, font=("Kanit", 16, "bold"), bg="green", fg="white").pack(fill=tk.X, padx=10, pady=10)
+        tk.Button(popup, text="ยืนยัน", command=submit, font=("Kanit", 16, "bold"), bg="green", fg="white").pack(fill=tk.X, padx=10, pady=10)
     
     
     
     def popup_register():
         reg_pop = tk.Toplevel(parent)
-        reg_pop.title("New Member Registration")
+        reg_pop.title("ลงทะเบียนสมาชิกใหม่")
         reg_pop.geometry("300x250")
         reg_pop.grab_set()
         
-        tk.Label(reg_pop, text="Phone Number:").pack(pady=5)
+        tk.Label(reg_pop, text="เบอร์โทรศัพท์:").pack(pady=5)
         ent_phone = tk.Entry(reg_pop)
         ent_phone.pack()
         ent_phone.bind("<Button-1>", lambda e: open_phone_numpad(reg_pop, ent_phone))
         
-        tk.Label(reg_pop, text="First Name:").pack(pady=5)
+        tk.Label(reg_pop, text="ชื่อ:").pack(pady=5)
         ent_fname = tk.Entry(reg_pop)
         ent_fname.pack()
         
-        tk.Label(reg_pop, text="Last Name:").pack(pady=5)
+        tk.Label(reg_pop, text="นามสกุล:").pack(pady=5)
         ent_lname = tk.Entry(reg_pop)
         ent_lname.pack()
         
@@ -216,15 +221,15 @@ def create_three_frames(parent):
             else:
                 messagebox.showwarning("แจ้งเตือน", msg, parent=reg_pop)
                 
-        tk.Button(reg_pop, text="Confirm Membership", command=do_register, bg="green", fg="white").pack(pady=15)
+        tk.Button(reg_pop, text="ยืนยันสมาชิก", command=do_register, bg="green", fg="white").pack(pady=15)
 
     def popup_login():
         log_pop = tk.Toplevel(parent)
-        log_pop.title("Member Login")
+        log_pop.title("เข้าสู่ระบบสมาชิก")
         log_pop.geometry("250x150")
         log_pop.grab_set()
         
-        tk.Label(log_pop, text="Enter Phone Number:").pack(pady=10)
+        tk.Label(log_pop, text="ใส่เบอร์โทรศัพท์").pack(pady=10)
         ent_phone = tk.Entry(log_pop)
         ent_phone.pack()
         ent_phone.bind("<Button-1>", lambda e: open_phone_numpad(log_pop, ent_phone))
@@ -236,30 +241,30 @@ def create_three_frames(parent):
                 current_member_info["phone"] = mem["phone"]
                 current_member_info["first_name"] = mem["first_name"]
                 current_member_info["last_name"] = mem["last_name"]
-                lbl_member_status_var.set(f"MemberShip: {mem['first_name']} {mem['last_name']}")
+                lbl_member_status_var.set(f"สมาชิก | {mem['first_name']} {mem['last_name']}")
                 messagebox.showinfo("สำเร็จ", "ลงชื่อเข้าใช้สมาชิกสำเร็จ ได้รับส่วนลด 25%", parent=log_pop)
                 log_pop.destroy()
                 reload_cart() # คำนวณเงินใหม่เพราะได้ส่วนลด
             else:
                 messagebox.showerror("ไม่พบข้อมูล", "ไม่พบเบอร์โทรศัพท์นี้ในระบบ", parent=log_pop)
                 
-        tk.Button(log_pop, text="Check", command=do_login, bg="blue", fg="white").pack(pady=10)
+        tk.Button(log_pop, text="ตรวจสอบ", command=do_login, bg="blue", fg="white").pack(pady=10)
 
     btn_frame = tk.Frame(frame3)
     btn_frame.pack(fill=tk.X, pady=5)
-    tk.Button(btn_frame, text="Register", command=popup_register).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
-    tk.Button(btn_frame, text="Login (Get 25% Discount)", command=popup_login).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
+    tk.Button(btn_frame, text="สมัครสมาชิก", command=popup_register).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
+    tk.Button(btn_frame, text="เข้าสู่ระบบ", command=popup_login).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
     
     def logout_member():
         global current_member_info
         current_member_info = {"phone": None, "first_name": None, "last_name": None}
-        lbl_member_status_var.set("General Customer")
+        lbl_member_status_var.set("ลูกค้าทั่วไป")
         reload_cart()
-    tk.Button(frame3, text="Logout Membership", command=logout_member, fg="red").pack(fill=tk.X, pady=2)
+    tk.Button(frame3, text="ออกจากระบบสมาชิก", command=logout_member, fg="red").pack(fill=tk.X, pady=2)
 
 
     # ========================== ส่วนที่ 3 กลาง: สรุปยอด ==========================
-    tk.Label(frame3, text="Summary Of Payment", bg="lightcoral", font=("Kanit", 12, "bold")).pack(fill=tk.X, pady=10)
+    tk.Label(frame3, text="สรุปยอดชำระ", bg="lightcoral", font=("Kanit", 12, "bold")).pack(fill=tk.X, pady=10)
     
     summary_frame = tk.Frame(frame3)
     summary_frame.pack(fill=tk.X, padx=10, pady=5)
@@ -269,16 +274,16 @@ def create_three_frames(parent):
     lbl_vat_var = tk.StringVar(value="0.00 บาท")
     lbl_grand_total_var = tk.StringVar(value="0.00 บาท")
     
-    tk.Label(summary_frame, text="Total:", font=("Kanit", 10)).grid(row=0, column=0, sticky="w", pady=2)
+    tk.Label(summary_frame, text="ราคารวม:", font=("Kanit", 10)).grid(row=0, column=0, sticky="w", pady=2)
     tk.Label(summary_frame, textvariable=lbl_subtotal_var, font=("Kanit", 10)).grid(row=0, column=1, sticky="e", pady=2)
     
-    tk.Label(summary_frame, text="Membership Discount:", font=("Kanit", 10), fg="red").grid(row=1, column=0, sticky="w", pady=2)
+    tk.Label(summary_frame, text="ส่วนลดสมาชิก:", font=("Kanit", 10), fg="red").grid(row=1, column=0, sticky="w", pady=2)
     tk.Label(summary_frame, textvariable=lbl_discount_var, font=("Kanit", 10), fg="red").grid(row=1, column=1, sticky="e", pady=2)
     
     tk.Label(summary_frame, text="VAT 7%:", font=("Kanit", 10)).grid(row=2, column=0, sticky="w", pady=2)
     tk.Label(summary_frame, textvariable=lbl_vat_var, font=("Kanit", 10)).grid(row=2, column=1, sticky="e", pady=2)
     
-    tk.Label(summary_frame, text="Net Total:", font=("Kanit", 14, "bold"), fg="green").grid(row=3, column=0, sticky="w", pady=10)
+    tk.Label(summary_frame, text="ราคาสุทธิ:", font=("Kanit", 14, "bold"), fg="green").grid(row=3, column=0, sticky="w", pady=10)
     tk.Label(summary_frame, textvariable=lbl_grand_total_var, font=("Kanit", 14, "bold"), fg="green").grid(row=3, column=1, sticky="e", pady=10)
     summary_frame.columnconfigure(1, weight=1)
     
@@ -410,9 +415,9 @@ def create_three_frames(parent):
             
         tk.Button(recall_pop, text="เรียกคืนบิลนี้", command=do_recall, bg="lightblue").pack(pady=10)
         
-    tk.Button(action_frame, text="Hold Bill", command=hold_bill, bg="orange").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
-    tk.Button(action_frame, text="Recall Bill", command=recall_bill, bg="lightblue").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
-    tk.Button(action_frame, text="Clear Cart", command=clear_cart, bg="red", fg="white").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    tk.Button(action_frame, text="เก็บบิล", command=hold_bill, bg="orange").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    tk.Button(action_frame, text="เรียกคืนบิล", command=recall_bill, bg="lightblue").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    tk.Button(action_frame, text="ล้างตะกร้า", command=clear_cart, bg="red", fg="white").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
 
     def confirm_checkout():
         """ยืนยันการทำรายการแบบเต็มรูปแบบ"""
@@ -567,7 +572,7 @@ def open_numpad_popup(parent, on_add_to_cart_cb=None):
     ป๊อปอัปให้กดตัวเลข 0-9 เพื่อระบุจำนวนที่ต้องการ
     """
     popup = tk.Toplevel(parent)
-    popup.title("Amount Products")
+    popup.title("ระบุจำนวนสินค้า")
     popup.geometry("300x420")
     
     # ล็อคความสนใจไว้ที่หน้าต่างนี้จนกว่าจะปิด
@@ -662,4 +667,4 @@ def open_numpad_popup(parent, on_add_to_cart_cb=None):
             messagebox.showerror("ข้อผิดพลาด", "ไม่พบข้อมูลรหัสสินค้าที่เลือก", parent=popup)
             
     # ปุ่มยืนยัน
-    tk.Button(popup, text="Confirm", command=submit, font=("Kanit", 16, "bold"), bg="green", fg="white").pack(fill=tk.X, padx=10, pady=10)
+    tk.Button(popup, text="ยืนยัน", command=submit, font=("Kanit", 16, "bold"), bg="green", fg="white").pack(fill=tk.X, padx=10, pady=10)
