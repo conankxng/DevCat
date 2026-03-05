@@ -104,11 +104,12 @@ def process_sale(pid,quantity):
     """
     inventory = storage.load_products() #เรียกใช้ฟังก์ชันจากไฟล์ เพื่อดึงข้อมูล
     if pid in inventory: #ตรวจสอบข้อมูลรหัสสินค้า
+        current_stock = inventory[pid]['stock']
         if inventory[pid]['stock']>=quantity: #ตรวจสอบว่าจำนวนสินค้าในคลัง มีเพียงพอ ต่อการขายครั้งนี้หรือไม่
             inventory[pid]['stock']-=quantity #หากข้อมูลถูกต้องและสินค้าพอ ระบบจะทำการ ลบจำนวน สินค้าออกจากสต็อกในตัวแปร
             storage.save_products(inventory) #สั่งบันทึกข้อมูลที่ถูกหักสต็อกแล้วทับลงในไฟล์
             return True,'ตัดสต๊อกสำเร็จ!' 
-        return False, "สินค้าในสต๊อกไม่่เพียงพอ!" #ตรวจสอบแล้วของน้อยกว่าคนที่ต้องการซื้อแจ้งเตือน
+        return False, f"สินค้าในสต๊อกไม่่เพียงพอ!\n(ปัจจุบันเหลืออยู่เพียง {current_stock} ชิ้น)" #ตรวจสอบแล้วของน้อยกว่าคนที่ต้องการซื้อแจ้งเตือน
     return False,'ไม่พบสินค้า!' #ถ้ากรอก รหัสสินค้าผิดก็จะส่่งแจ้งเตือนกลับไป
 
 def record_sale(pid,quantity,total_price):

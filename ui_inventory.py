@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox #ttk คือ widget  messagebox คือหน้าต่างแจ้งเตือนpopup
 import product_manager as pm
 
-
 def setup_inventory_interface(parent):
     """
     ฟังก์ชันหลักสำหรับหน้า GUI คลังสินค้า
@@ -71,3 +70,24 @@ def setup_inventory_interface(parent):
     #     ฟังก์ชันสำหรับเช็ค สินค้าใกล้หมด
     #     """
     #     low_stock_list = pm.get_low_stock_list(threshold=5) #ไปฟังก์ชันเช็คสต๊อก
+    
+    #     def show_low_stock_details(event):
+    #         """
+    #         ฟังก์ชันสำหรับเมื่อคลิกจะแจ้งเตือนสินค้าที่ใกล้หมด
+    #         """
+    #         if not low_stock_list: #ถ้าไม่มีสินค้าใกล้หมดก็จะจบการทำงาน ไม่แสดงอะไร
+    #             return
+            
+    #         details = 'รายการสินค้าที่ใกล้หมดสต๊อก:\n\n' #หัวข้อของข้อความ
+    #         for item in low_stock_list: #ลูปสินค้าที่ใกล้หมด
+    #             details += f'- รหัส: {item['id']} | ชื่อ: {item['name']} | เหลือ: {item['stock']} ชิ้น\n' #เอาข้อความที่ใกล้หมดไปต่อที่หัวข้อคือตัวแปร
+                
+    #         messagebox.showwarning('เตือนสินค้าใกล้หมด!', details) #คำเด้งหน้าจอแจ้งเตือนขึ้นแล้วก็เรียกเนื้อหาขึ้นมา
+        
+    #     if low_stock_list:
+    #         #config เปลี่ยนคุณสมบัติป้ายชื่อ #cursor='hand2': เมื่อผู้ใช้ลากเมาส์ไปวางทับข้อความนี้ ลูกศรเมาส์จะเปลี่ยนเป็น "รูปมือจิ้ม" เหมือนเวลาเราจะกดลิงก์ในเว็บ เพื่อสื่อให้ผู้ใช้รู้ว่า "ป้ายนี้กดได้นะ"
+    #         ibl_alert.config(text = f'⚠️ แจ้งเตือน: มีสินค้าใกล้หมดสต๊อก {len(low_stock_list)} รายการ! คลิกเพื่อดู',fg='red',cursor='hand2') #ดึงจำนวนรายการมาแสดงโชว์ข้อความให้ผู้ใช้ 
+    #         ibl_alert.bind('<Button-1>',show_low_stock_details) #ทำเหตุการณ์ ให้คลิก แล้วก็แสดงให้ popup ขึ้นมา
+    #     else:                                                                       #cursor="arrow" คือการสั่งให้ "สัญลักษณ์ของเมาส์" กลับมาเป็น "รูปศรปกติ"
+    #         ibl_alert.config(text="✅ สถานะสต็อก: ปกติ", fg="green", cursor="arrow") #ถ้าไม่มีสินค้าใกล้หมดก็จะเข้าเงื่อนไขนี้ 
+    #         ibl_alert.unbind('<Button-1>') #.unbind ยกเลิกการคลิกของผู้ใช้
