@@ -276,7 +276,7 @@ def open_numpad_popup(parent, on_add_to_cart_cb=None):
     """
     popup = tk.Toplevel(parent)
     popup.title("Amount Products")
-    popup.geometry("300x420")
+    popup.geometry("300x420+900+300") # กำหนดขนาดและตำแหน่งของหน้าต่าง
     
     # ล็อคความสนใจไว้ที่หน้าต่างนี้จนกว่าจะปิด
     popup.grab_set()
