@@ -112,9 +112,9 @@ def load_products_to_frame(frame):
                 product_id = parts[0]
                 product_name = parts[1]
                 
-                # กำหนดฟังก์ชันย่อย (closure) เพื่อแนบไปกับคำสั่งผูกปุ่ม
-                def make_cmd(name=product_name):
-                    return lambda: print(f"เลือกสินค้า: {name}")
+                # # กำหนดฟังก์ชันย่อย (closure) เพื่อแนบไปกับคำสั่งผูกปุ่ม
+                # def make_cmd(name=product_name):
+                #     return lambda: print(f"เลือกสินค้า: {name}")
                 
                 # สร้างปุ่มโดยแสดงชื่อสินค้า (product_name)
                 btn = tk.Button(
@@ -122,7 +122,7 @@ def load_products_to_frame(frame):
                     text=product_name, 
                     font=("Arial", 10),
                     height=8,
-                    command=make_cmd()
+                    command=lambda: open_numpad_popup(frame, product_name) #เมื่อกดปุ่มสินค้าแล้วจะเปิดหน้าต่าง Numpad เพื่อกรอกจำนวนสินค้า
                 )
                 btn.place(relwidth=1, relheight=1)  # ให้ปุ่มขยายเต็มความกว้างและสูงของกริดคอลัมน์
                 
@@ -135,3 +135,77 @@ def load_products_to_frame(frame):
                 
                 button_count += 1
         
+def open_numpad_popup(parent):
+    """ฟังก์ชันเปิดหน้าต่าง Numpad (ป๊อปอัป) เพื่อกรอกจำนวนสินค้า"""
+    popup = tk.Toplevel("Amount Products")
+    popup.title(product_name)
+    popup.geometry("300x420+1000+200")  # กำหนดขนาดและตำแหน่งของหน้าต่าง
+    
+    # ล็อคหน้าต่างนี้ไว้ด้านหน้าสุด จนกว่าจะกดยกเลิกหรือตกลง
+    popup.grab_set()
+    popup.transient(parent)
+    popup.focus_force()
+    
+    # ตัวแปรแสดงจำนวนบนหน้าจอ
+    qty_var = tk.StringVar(value="0")  # เริ่มต้นที่ 0 หรือตามที่ต้องการ
+    
+    # จอแสดงตัวเลข
+    display = tk.Label(popup, textvariable=qty_var, font=("Arial", 28, "bold"), bg="white", relief="sunken", anchor="e")
+    display.pack(fill=tk.X, padx=10, pady=10, ipady=10)
+    
+    # เฟรมสำหรับปุ่มตัวเลข 1-9
+    keypad_frame = tk.Frame(popup)
+    keypad_frame.pack(expand=True, fill=tk.BOTH, padx=10, pady=5)
+    
+    # จัดการน้ำหนักแถวและคอลัมน์ของแป้นพิมพ์ให้ขยายเท่าๆ กัน
+    for i in range(3):
+        keypad_frame.columnconfigure(i, weight=1)
+    for i in range(4):
+        keypad_frame.rowconfigure(i, weight=1)
+        
+    def btn_press(key):
+        current = str(qty_var.get())
+        if key == "C":
+            qty_var.set("0") # รีเซ็ตกลับเป็น 0
+        elif key == "<-":
+            # ลบตัวเลขท้ายสุด
+            length = len(current)
+            new_val = current[0:length-1] if length > 0 else ""
+            qty_var.set(new_val if new_val else "0")
+        else:
+            # พิมพ์ตัวเลขต่อท้าย
+            if current == "0" or current == "1":
+                # ถ้าเป็น 0 หรือ 1 (ค่าเริ่มต้น) ให้ลองพิจารณาพิมพ์ทับถ้าเดิมเป็น 0
+                if current == "0":
+                    qty_var.set(key)
+                else:
+                    qty_var.set(current + key)
+            else:
+                qty_var.set(current + key)
+
+    def create_btn_command(k):
+        # Closure เพื่อให้ปุ่มจำค่าตัวแปร k ของตัวเอง
+        return lambda: btn_press(k)
+        
+    # ตำแหน่งของปุ่มบน Numpad
+    buttons = [
+        ('7', 0, 0), ('8', 0, 1), ('9', 0, 2),
+        ('4', 1, 0), ('5', 1, 1), ('6', 1, 2),
+        ('1', 2, 0), ('2', 2, 1), ('3', 2, 2),
+        ('C', 3, 0), ('0', 3, 1), ('<-', 3, 2),
+    ]
+    
+    for (text, row, col) in buttons:
+        btn = tk.Button(keypad_frame, text=text, font=("Arial", 18, "bold"), command=create_btn_command(text))
+        btn.grid(row=row, column=col, sticky="nsew", padx=2, pady=2)
+        
+    def submit():
+        qty = qty_var.get()
+        print(f"บันทึกข้อมูล: {product_name} จำนวน {qty} ชิ้น")
+        # TODO: นำค่า qty นี้ส่งไปใส่ในรายการตะกร้า (เฟรมที่ 2)
+        popup.destroy()
+        
+    # ปุ่มยืนยันด้านล่าง
+    submit_btn = tk.Button(popup, text="Confirm", font=("Arial", 16, "bold"), bg="green", fg="white", command=submit)
+    submit_btn.pack(fill=tk.X, padx=10, pady=10)
+    
