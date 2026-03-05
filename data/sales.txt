@@ -1,2 +1,4 @@
 2026-03-05 16:15:00, ID:P001, Name:มาม่าหมูสับ, Qty: 2, Total: 30.0, Profit: 10.0
 2026-03-05 16:20:00, ID:P002, Name:ยำยำช้างน้อย, Qty: 5, Total: 25.0, Profit: 5.0
+2026-03-05 23:21:32, ID:016,Name:switch Qty: 2, Total: 3000.0, Profit: 800.0
+2026-03-05 23:22:24, ID:011,Name:usb Qty: 20, Total: 3000.0, Profit: 2000.0
