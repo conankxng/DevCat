@@ -1,8 +1,8 @@
 from turtle import width
 import tkinter as tk
+from tkinter import messagebox
 import os
-
-#==================================================================#
+import product_manager#==================================================================#
 #------------------------------Create Frame-------------------------------
 #==================================================================#
 def create_scrollable_frame(parent):
@@ -89,8 +89,7 @@ def create_three_frames(parent):
 #------------------------------Frame1-------------------------------
 #==================================================================#
 # ตัวแปร Global สำหรับเก็บค่า ID และชื่อสินค้าที่ถูกเลือกคลิกล่าสุด
-current_selected_product_id = {"id": None}
-current_selected_product_name = {"name": None}
+current_selected_product = {"id": None, "name": None}
 
 def load_products_to_frame(frame):
     """ฟังก์ชันสำหรับอ่านไฟล์ products.txt และสร้างปุ่มสินค้า"""
@@ -119,10 +118,11 @@ def load_products_to_frame(frame):
                 
                 # กำหนดฟังก์ชันย่อยสำหรับการกดปุ่ม
                 def on_product_click(p_id=product_id, p_name=product_name):
-                    global current_selected_product_id, current_selected_product_name
+                    global current_selected_product
                     # เก็บค่า id และชื่อสินค้าไว้ในตัวแปร global
-                    current_selected_product_id["id"] = p_id
-                    current_selected_product_name["name"] = p_name
+                    current_selected_product["id"] = p_id
+                    current_selected_product["name"] = p_name
+                    print(f"Stored -> ID: {p_id}, Name: {p_name}")
                     
                     # เรียกเปิดหน้าพ็อปอัพ Numpad
                     open_numpad_popup(frame)
@@ -212,13 +212,32 @@ def open_numpad_popup(parent):
     for (text, row, col) in buttons:
         btn = tk.Button(keypad_frame, text=text, font=("Arial", 18, "bold"), command=create_btn_command(text))
         btn.grid(row=row, column=col, sticky="nsew", padx=2, pady=2)
-        
-        
-    # ปุ่มยืนยันด้านล่าง
-    submit_btn = tk.Button(popup, text="Confirm", command=lambda: confirm_amount_product(), font=("Arial", 16, "bold"), bg="green", fg="white")
-    submit_btn.pack(fill=tk.X, padx=10, pady=10)
     
-    def confirm_amount_product():
-        print(current_selected_product_id, current_selected_product_name, qty_var.get())  # แสดงข้อมูลที่เลือกในคอนโซล (สามารถเปลี่ยนเป็นการส่งข้อมูลไปยังฟังก์ชันอื่นได้)
-        popup.destroy()
+    # ฟังก์ชันสำหรับปุ่มยืนยัน (Confirm) ตัดสต็อก
+    def submit():
+        qty_str = qty_var.get()
+        try:
+            qty_int = int(qty_str)
+        except ValueError:
+            qty_int = 0
+            
+        if qty_int <= 0:
+            messagebox.showwarning("แจ้งเตือน", "กรุณาระบุจำนวนมากกว่า 0", parent=popup)
+            return
+            
+        pid = current_selected_product["id"]
+        if pid:
+            success, msg = product_manager.process_sale(pid, qty_int)
+            if success:
+                messagebox.showinfo("สำเร็จ", msg, parent=popup)
+                popup.destroy()
+                # ตรงนี้สามารถใส่โค้ดให้อัปเดตตาราง (Treeview) เพิ่มเข้าไปยังตะกร้าในอนาคตได้
+            else:
+                messagebox.showwarning("ข้อผิดพลาด", msg, parent=popup)
+        else:
+            messagebox.showerror("ข้อผิดพลาด", "ไม่พบข้อมูลรหัสสินค้าที่เลือก", parent=popup)
+            
+    # ปุ่มยืนยันด้านล่าง
+    submit_btn = tk.Button(popup, text="Confirm", command=submit, font=("Arial", 16, "bold"), bg="green", fg="white")
+    submit_btn.pack(fill=tk.X, padx=10, pady=10)
     
