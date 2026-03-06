@@ -370,10 +370,10 @@ def create_three_frames(parent):
         messagebox.showinfo("สำเร็จ", f"พักบิลไว้เรียบร้อย\n{timestamp}")
 
     def recall_bill():
-        held_dir = os.path.join(os.path.dirname(__file__), "data", "held_bills")
-        os.makedirs(held_dir, exist_ok=True)
+        hold_dir = os.path.join(os.path.dirname(__file__), "data", "hold_bills")
+        os.makedirs(hold_dir, exist_ok=True)
         
-        files = [f for f in os.listdir(held_dir) if f.endswith(".txt")]
+        files = [f for f in os.listdir(hold_dir) if f.endswith(".txt")]
         if not files:
             messagebox.showinfo("แจ้งเตือน", "ไม่มีบิลที่ถูกพักไว้")
             return
@@ -400,17 +400,17 @@ def create_three_frames(parent):
                 return
                 
             selected_file = files[selected[0]]
-            held_path = os.path.join(held_dir, selected_file)
+            hold_path = os.path.join(hold_dir, selected_file)
             
             # อ่านข้อมูลที่พักไว้มาใส่ท้าย bill.txt ปัจจุบัน
-            with open(held_path, "r", encoding="utf-8") as hf:
-                held_lines = hf.readlines()
+            with open(hold_path, "r", encoding="utf-8") as hf:
+                hold_lines = hf.readlines()
                 
             with open(bill_path, "a", encoding="utf-8") as bf:
-                bf.writelines(held_lines)
+                bf.writelines(hold_lines)
                 
             # ลบไฟล์ที่พักทิ้ง
-            os.remove(held_path)
+            os.remove(hold_path)
             
             messagebox.showinfo("สำเร็จ", "เรียกบิลเรียบร้อยแล้ว เพิ่มสินค้าลงตะกร้าแล้ว", parent=recall_pop)
             reload_cart()
