@@ -11,8 +11,9 @@ def on_closing():
     root.destroy()
 
 root = tk.Tk()
+root.geometry(f"{int(screen_width0.9)}x{int(screen_height0.9)}")
 root.title("DevCat")
-root.geometry("1920x1080")
+#root.geometry("1920x1080")
 
 #สร้างปุ่มเมนู
 tk.Button(root, text="Inventory", command=lambda: switch(p1), font=("Kanit", 18)).grid(row=0, column=0)
