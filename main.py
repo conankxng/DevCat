@@ -12,20 +12,12 @@ def on_closing():
 
 root = tk.Tk()
 root.title("DevCat")
-# วิธีที่ 2: ดึงค่าขนาดหน้าจอผู้ใช้มาคำนวณ (Responsive)
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
-#root.geometry("1920x1080")
-# ตั้งค่าให้เล็กลงกว่าหน้าจอผู้ใช้เล็กน้อย (เช่น 90% ของหน้าจอ) เพื่อไม่ให้ล้น
-root.geometry(f"{int(screen_width*0.9)}x{int(screen_height*0.9)}")
-#....
-
-
+root.geometry("1920x1080")
 
 #สร้างปุ่มเมนู
-tk.Button(root, text="Inventory", command=lambda: switch(p1), font=("Kanit", 18)).grid(row=0, column=0)
-tk.Button(root, text="POS", command=lambda: switch(p2), font=("Kanit", 18)).grid(row=0, column=1)
-tk.Button(root, text="Report", command=lambda: switch(p3), font=("Kanit", 18)).grid(row=0, column=2)
+tk.Button(root, text="Inventory", command=lambda: switch(p1), font=50, padx=300, pady=30).grid(row=0, column=0)
+tk.Button(root, text="POS", command=lambda: switch(p2), font=50, padx=300, pady=30).grid(row=0, column=1)
+tk.Button(root, text="Dashboard", command=lambda: switch(p3), font=50, padx=300, pady=30).grid(row=0, column=2)
 #สร้างหน้า
 
 

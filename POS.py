@@ -71,6 +71,59 @@ def create_scrollable_frame(parent):
 
 
 # ========================================================================= #
+# ส่วนที่ 1.5: แป้นกดตัวเลข (Numpad) ที่ใช้ร่วมกัน
+# ========================================================================= #
+def show_shared_numpad(parent_win, title, initial_value, callback):
+    popup = tk.Toplevel(parent_win)
+    popup.title(title)
+    popup.geometry("300x500")
+    popup.grab_set()
+    popup.transient(parent_win)
+    popup.focus_force()
+    
+    qty_var = tk.StringVar(value=initial_value)
+    
+    display = tk.Label(popup, textvariable=qty_var, font=("Kanit", 28, "bold"), bg="white", relief="sunken", anchor="e")
+    display.pack(fill=tk.X, padx=10, pady=10, ipady=10)
+    
+    keypad_frame = tk.Frame(popup)
+    keypad_frame.pack(expand=True, fill=tk.BOTH, padx=10, pady=5)
+    
+    for i in range(3): keypad_frame.columnconfigure(i, weight=1)
+    for i in range(4): keypad_frame.rowconfigure(i, weight=1)
+        
+    def btn_press(key):
+        current = qty_var.get()
+        if key == "C":
+            qty_var.set("")
+        elif key == "<-":
+            qty_var.set(current[:-1])
+        else:
+            qty_var.set(current + key)
+
+    def create_btn_command(k):
+        return lambda: btn_press(k)
+        
+    buttons = [
+        ('7', 0, 0), ('8', 0, 1), ('9', 0, 2),
+        ('4', 1, 0), ('5', 1, 1), ('6', 1, 2),
+        ('1', 2, 0), ('2', 2, 1), ('3', 2, 2),
+        ('C', 3, 0), ('0', 3, 1), ('<-', 3, 2),
+    ]
+    
+    for (text, row, col) in buttons:
+        btn = tk.Button(keypad_frame, text=text, font=("Kanit", 18, "bold"), command=create_btn_command(text))
+        btn.grid(row=row, column=col, sticky="nsew", padx=2, pady=2)
+        
+    def submit():
+        val = qty_var.get()
+        popup.destroy()
+        callback(val)
+        
+    tk.Button(popup, text="ยืนยัน", command=submit, font=("Kanit", 16, "bold"), bg="green", fg="white").pack(fill=tk.X, padx=10, pady=10)
+
+
+# ========================================================================= #
 # ส่วนที่ 2: ฟังก์ชันหลักของหน้าจอ POS
 # ========================================================================= #
 # ตัวแปรวงกว้าง (Global) สำหรับจำสเตตัสสินค้าที่คลิกล่าสุด
@@ -83,10 +136,24 @@ def create_three_frames(parent):
     ฟังก์ชันสำหรับแบ่งหน้าจอ POS ออกเป็น 3 ส่วนหลัก (ซ้าย: สินค้า, กลาง: ตะกร้า, ขวา: ดำเนินการ)
     """
     # ---------------------------------------------------------
-    # เฟรมที่ 1: รายการสินค้า (เลื่อนได้)
+    # เฟรมที่ 1: ค้นหาและรายการสินค้า (เลื่อนได้)
     # ---------------------------------------------------------
-    container1, frame1 = create_scrollable_frame(parent)
-    container1.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+    left_panel = tk.Frame(parent)
+    left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+    
+    search_frame = tk.Frame(left_panel)
+    search_frame.pack(fill=tk.X, pady=5)
+    
+    tk.Label(search_frame, text="ค้นหาสินค้า", font=("Kanit", 12, "bold")).pack(side=tk.LEFT)
+    search_var = tk.StringVar()
+    search_entry = tk.Entry(search_frame, textvariable=search_var, font=("Kanit", 12))
+    search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+    
+    tk.Button(search_frame, text="X", font=("Kanit", 10, "bold"), bg="red", fg="white", width=3,
+              command=lambda: search_var.set("")).pack(side=tk.RIGHT)
+    
+    container1, frame1 = create_scrollable_frame(left_panel)
+    container1.pack(fill=tk.BOTH, expand=True)
     
     # ---------------------------------------------------------
     # เฟรมที่ 2: ตะกร้าสินค้า (แสดงผลเป็นตาราง)
@@ -146,54 +213,10 @@ def create_three_frames(parent):
     
     
     def open_phone_numpad(parent_win, entry_widget):
-        popup = tk.Toplevel(parent_win)
-        popup.title("แป้นตัวเลข")
-        popup.geometry("300x500")
-        popup.grab_set()
-        popup.transient(parent_win)
-        popup.focus_force()
-        
-        current_val = entry_widget.get()
-        qty_var = tk.StringVar(value=current_val)
-        
-        display = tk.Label(popup, textvariable=qty_var, font=("Kanit", 28, "bold"), bg="white", relief="sunken", anchor="e")
-        display.pack(fill=tk.X, padx=10, pady=10, ipady=10)
-        
-        keypad_frame = tk.Frame(popup)
-        keypad_frame.pack(expand=True, fill=tk.BOTH, padx=10, pady=5)
-        
-        for i in range(3): keypad_frame.columnconfigure(i, weight=1)
-        for i in range(4): keypad_frame.rowconfigure(i, weight=1)
-            
-        def btn_press(key):
-            current = qty_var.get()
-            if key == "C":
-                qty_var.set("")
-            elif key == "<-":
-                qty_var.set(current[:-1])
-            else:
-                qty_var.set(current + key)
-
-        def create_btn_command(k):
-            return lambda: btn_press(k)
-            
-        buttons = [
-            ('7', 0, 0), ('8', 0, 1), ('9', 0, 2),
-            ('4', 1, 0), ('5', 1, 1), ('6', 1, 2),
-            ('1', 2, 0), ('2', 2, 1), ('3', 2, 2),
-            ('C', 3, 0), ('0', 3, 1), ('<-', 3, 2),
-        ]
-        
-        for (text, row, col) in buttons:
-            btn = tk.Button(keypad_frame, text=text, font=("Kanit", 18, "bold"), command=create_btn_command(text))
-            btn.grid(row=row, column=col, sticky="nsew", padx=2, pady=2)
-            
-        def submit():
+        def on_submit(val):
             entry_widget.delete(0, tk.END)
-            entry_widget.insert(0, qty_var.get())
-            popup.destroy()
-            
-        tk.Button(popup, text="ยืนยัน", command=submit, font=("Kanit", 16, "bold"), bg="green", fg="white").pack(fill=tk.X, padx=10, pady=10)
+            entry_widget.insert(0, val)
+        show_shared_numpad(parent_win, "แป้นตัวเลข", entry_widget.get(), on_submit)
     
     
     
@@ -321,6 +344,7 @@ def create_three_frames(parent):
         lbl_grand_total_var.set(f"{grand_total:,.2f} บาท")
 
     # โหลดตะกร้าครั้งแรก
+    search_var.trace_add("write", lambda *args: load_products_to_frame(frame1, reload_cart, search_var.get()))
     load_products_to_frame(frame1, reload_cart)
     reload_cart()
     
@@ -530,10 +554,14 @@ def create_three_frames(parent):
 # ========================================================================= #
 # ส่วนที่ 3: ฟังก์ชันโหลดปุ่มสินค้า
 # ========================================================================= #
-def load_products_to_frame(frame, reload_cart_cb=None):
+def load_products_to_frame(frame, reload_cart_cb=None, search_keyword=""):
     """
-    ฟังก์ชันสำหรับอ่านไฟล์ products.txt และสร้างปุ่มสินค้ามาวางเรียงกันในเฟรมซ้ายสุด
+    ฟังก์ชันสำหรับอ่านไฟล์ products.txt และสร้างปุ่มสินค้ามาวางเรียงกันในเฟรมซ้ายสุด (และค้นหาได้)
     """
+    # ล้างปุ่มเดิมออกก่อน (สำหรับตอนค้นหาและอัปเดต)
+    for widget in frame.winfo_children():
+        widget.destroy()
+
     file_path = os.path.join(os.path.dirname(__file__), "data", "products.txt")
     
     # สั่งให้จัดตารางเรียงน้ำหนัก 4 คอลัมน์ให้ขยายตัวเท่าๆ กัน
@@ -557,6 +585,11 @@ def load_products_to_frame(frame, reload_cart_cb=None):
                 product_id = parts[0]
                 product_name = parts[1]
                 
+                # กรองสินค้าจากคำค้นหา (หาได้ทั้งรหัสและชื่อ)
+                kw = search_keyword.strip().lower()
+                if kw and kw not in product_name.lower() and kw not in product_id.lower():
+                    continue
+
                 # ฟังก์ชันเมื่อปุ่มสินค้าถูกคลิก
                 def on_product_click(p_id=product_id, p_name=product_name):
                     global current_selected_product
@@ -595,72 +628,14 @@ def open_numpad_popup(parent, on_add_to_cart_cb=None):
     """
     ป๊อปอัปให้กดตัวเลข 0-9 เพื่อระบุจำนวนที่ต้องการ
     """
-    popup = tk.Toplevel(parent)
-    popup.title("ระบุจำนวนสินค้า")
-    popup.geometry("300x500")
-    
-    # ล็อคความสนใจไว้ที่หน้าต่างนี้จนกว่าจะปิด
-    popup.grab_set()
-    popup.transient(parent)
-    popup.focus_force()
-    
-    qty_var = tk.StringVar(value="0") # ค่าตั้งต้นบนจอ
-    
-    # หน้าจอแสดงตัวเลข
-    display = tk.Label(popup, textvariable=qty_var, font=("Kanit", 28, "bold"), bg="white", relief="sunken", anchor="e")
-    display.pack(fill=tk.X, padx=10, pady=10, ipady=10)
-    
-    # กรอบสำหรับเรียงปุ่ม
-    keypad_frame = tk.Frame(popup)
-    keypad_frame.pack(expand=True, fill=tk.BOTH, padx=10, pady=5)
-    
-    for i in range(3): keypad_frame.columnconfigure(i, weight=1)
-    for i in range(4): keypad_frame.rowconfigure(i, weight=1)
-        
-    def btn_press(key):
-        """ฟังก์ชันสำหรับปุ่มกดแต่ละตัวในป๊อปอัป"""
-        current = str(qty_var.get())
-        if key == "C":
-            qty_var.set("0") # เคลียร์ค่าคืนเป็น 0
-        elif key == "<-":
-            # ลบปลายถอยหลังไป 1 ตัว ถ้าไม่เหลืออะไรให้เป็น 0
-            if len(current) > 1:
-                qty_var.set(current[:-1])
-            else:
-                qty_var.set("0")
-        else:
-            # พิมพ์ตัวเลขต่อท้าย
-            if current == "0":
-                qty_var.set(key) # ถ้าเป็น 0 อยู่ ให้แทนที่เลย (เช่น 0 ตามด้วย 5 = 5)
-            else:
-                qty_var.set(current + key)
-
-    def create_btn_command(k):
-        # สร้าง Closure คืนค่าคำสั่งที่ตรงกับตัวปุ่ม
-        return lambda: btn_press(k)
-        
-    # ลิสต์จัดวางแผงปุ่ม
-    buttons = [
-        ('7', 0, 0), ('8', 0, 1), ('9', 0, 2),
-        ('4', 1, 0), ('5', 1, 1), ('6', 1, 2),
-        ('1', 2, 0), ('2', 2, 1), ('3', 2, 2),
-        ('C', 3, 0), ('0', 3, 1), ('<-', 3, 2),
-    ]
-    
-    # เจนเนอเรทและวางปุ่มเข้า Numpad
-    for (text, row, col) in buttons:
-        btn = tk.Button(keypad_frame, text=text, font=("Kanit", 18, "bold"), command=create_btn_command(text))
-        btn.grid(row=row, column=col, sticky="nsew", padx=2, pady=2)
-        
-    def submit():
-        """ฟังก์ชันเมื่อกดยืนยัน เพิ่มลงตะกร้า (bill)"""
+    def on_submit(val):
         try:
-            qty_int = int(qty_var.get())
+            qty_int = int(val or "0")
         except ValueError:
             qty_int = 0
             
         if qty_int <= 0:
-            messagebox.showwarning("แจ้งเตือน", "กรุณาระบุจำนวนมากกว่า 0", parent=popup)
+            messagebox.showwarning("แจ้งเตือน", "กรุณาระบุจำนวนมากกว่า 0", parent=parent)
             return
             
         pid = current_selected_product["id"]
@@ -668,7 +643,7 @@ def open_numpad_popup(parent, on_add_to_cart_cb=None):
             # โหลดคลังขึ้นมาดูว่าของพอไหม
             inventory = product_manager.get_all_products()
             if pid not in inventory or inventory[pid]['stock'] < qty_int:
-                messagebox.showwarning("ข้อผิดพลาด", "สินค้าในสต็อกไม่เพียงพอ!", parent=popup)
+                messagebox.showwarning("ข้อผิดพลาด", "สินค้าในสต็อกไม่เพียงพอ!", parent=parent)
                 return
                 
             price = float(inventory[pid].get("price", 0.0))
@@ -680,15 +655,12 @@ def open_numpad_popup(parent, on_add_to_cart_cb=None):
             with open(bill_path, "a", encoding="utf-8") as f:
                 f.write(f"{pid},{name},{price:.2f},{qty_int},{total_price:.2f}\n")
                 
-            messagebox.showinfo("สำเร็จ", "เพิ่มลงตะกร้าเรียบร้อยแล้ว", parent=popup)
+            messagebox.showinfo("สำเร็จ", "เพิ่มลงตะกร้าเรียบร้อยแล้ว", parent=parent)
             
             # เรียกรีโหลดตารางข้างนอก
             if on_add_to_cart_cb:
                 on_add_to_cart_cb()
-                
-            popup.destroy()
         else:
-            messagebox.showerror("ข้อผิดพลาด", "ไม่พบข้อมูลรหัสสินค้าที่เลือก", parent=popup)
-            
-    # ปุ่มยืนยัน
-    tk.Button(popup, text="ยืนยัน", command=submit, font=("Kanit", 16, "bold"), bg="green", fg="white").pack(fill=tk.X, padx=10, pady=10)
+            messagebox.showerror("ข้อผิดพลาด", "ไม่พบข้อมูลรหัสสินค้าที่เลือก", parent=parent)
+
+    show_shared_numpad(parent, "ระบุจำนวนสินค้า", "", on_submit)
