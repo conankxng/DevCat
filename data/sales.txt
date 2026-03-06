@@ -11,3 +11,5 @@
 2026-03-06 03:53:10, ID:012,Name:external_hdd Qty: 3, Total: 9600.0, Profit: 2100.0
 2026-03-07 00:24:28, ID:008,Name:tablet Qty: 1, Total: 12000.0, Profit: 2500.0
 2026-03-07 00:33:27, ID:011,Name:usb Qty: 2, Total: 300.0, Profit: 200.0
+2026-03-07 01:44:18, ID:005,Name:mouse Qty: 2, Total: 700.0, Profit: 300.0
+2026-03-07 01:44:18, ID:006,Name:monitor Qty: 2, Total: 9000.0, Profit: 2000.0
