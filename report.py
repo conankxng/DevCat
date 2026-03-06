@@ -65,7 +65,7 @@ def product_report():
     return inventory
 
 
-#ฟังก์ชันค้นหาประวัติจากขายแบบ Custom ผ่านวัน/เดือน/ปี 
+#ฟังก์ชันค้นหาประวัติจากขายแบบ Custom ผ่านวัน/เดือน/ปี ปล.จริงๆให้ใส่เปน ปี เดือน วัน
 def search_sale_history_custom(year,month,day):
     # เป็น แปลงint เพื่อให้จัดรูปแบบวันที่ให้เปน YYYY-MM-DD เรียงแบบนี้เพือให้ตรงกับไฟล์ sale.txt
     search_date = f"{int(year):04d}-{int(month):02d}-{int(day):02d}" #เกบวันที่
@@ -80,16 +80,18 @@ def search_sale_history_custom(year,month,day):
             for line in lines: #ลูปให้อ่านแต่ละบรรทัด
                 line = line.strip() #ตัดช่องว่างหน้า-หลัง
                 if line:
-                    if line.startswith(search_date): #ถ้าบรรทัดนั้นขึ้นต้นด้วยsearch_date 
+                    if line.startswith(search_date): #ถ้าบรรทัดนั้นขึ้นต้นด้วยวันในsearch_date 
                         results.append(line)  #ให้เก็บผลลัพนั้นลงใน results เปน line
     return results
 
 #ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่วัน
-def show_today_sales():
+def show_day_sales():
+
     # ดึงข้อมูลวัน/เดือน/ปี จากระบบ
     now = datetime.now()
-    today_sales = now.strftime("%Y-%m-%d") #.srtftime คือเพื่อดึงเฉพาะตัวเลขในวันที่ให้กลายเป็นสตริงเพื่อใช้ในการค้หา
-    today_day_num = now.day #ดึงเฉพาะวันออกมา 
+
+    day_sales = now.strftime("%Y-%m-%d") #.srtftime คือเพื่อดึงเฉพาะตัวเลขในวันที่ให้กลายเป็นสตริงเพื่อใช้ในการค้หา
+    day_day_num = now.day #ดึงเฉพาะวันออกมา 
     
     sale_data = stock.SALES_FILE
     results = []
@@ -100,7 +102,7 @@ def show_today_sales():
             for line in f:
                 line = line.strip() #ตัดช่องว่างหน้า-หลัง
                 #สร้างเงื่อนไขตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่หรือไม่
-                if line.startswith(today_sales):
+                if line.startswith(day_sales):
                     results.append(line)
                     print(line)  
                     total_sales_count += 1
@@ -109,7 +111,6 @@ def show_today_sales():
     if total_sales_count == 0:
         print(f"วันที่ {today_day_num} นี้ยังไม่มีรายการขาย")
     else:
-        print(f"---------------------------------------")
         print(f"สรุป: วันนี้พบทั้งหมด {total_sales_count} รายการ")
 
     return results
@@ -142,7 +143,6 @@ def show_month_sales():
     if total_sales_count == 0:
         print(f"วันที่ {month_num} นี้ยังไม่มีรายการขาย")
     else:
-        print(f"---------------------------------------")
         print(f"สรุป: วันนี้พบทั้งหมด {total_sales_count} รายการ")
 
     return results
@@ -174,13 +174,12 @@ def show_year_sales():
     if total_sales_count == 0:
         print(f"วันที่ {year_num} นี้ยังไม่มีรายการขาย")
     else:
-        print(f"---------------------------------------")
         print(f"สรุป: วันนี้พบทั้งหมด {total_sales_count} รายการ")
 
     return results
 
 
 # เรียกใช้งานฟังก์ชัน
-show_today_sales()
+show_day_sales()
 show_month_sales()
 show_year_sales()
