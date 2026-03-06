@@ -95,6 +95,8 @@ def show_today_sales():
     # 1. ดึงข้อมูลวัน/เดือน/ปี จากระบบ
     now = datetime.now()
     today_str = now.strftime("%Y-%m-%d") # ใช้สำหรับค้นหาในไฟล์ (เช่น 2026-03-07)
+    month_str = now.strftime("%Y-%m") 
+    year_str = now.strftime("%Y")
     
     # ดึงเฉพาะ "วัน" ออกมา (เลือกใช้อย่างใดอย่างหนึ่งตามงานของคุณ)
     today_day_num = now.day              # แบบตัวเลข (เช่น 7)
@@ -111,7 +113,7 @@ def show_today_sales():
             for line in f:
                 line = line.strip()
                 # 2. ตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่ของวันนี้หรือไม่
-                if line.startswith(today_str):
+                if line.startswith(year_str):
                     results.append(line)
                     print(line)  
                     total_sales_count += 1
