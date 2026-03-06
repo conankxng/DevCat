@@ -12,3 +12,4 @@
 [2026-03-06 03:52:51] Total: 802.50 THB | General Customer | Items: 1
 [2026-03-06 03:53:10] Total: 10272.00 THB | General Customer | Items: 1
 [2026-03-07 00:24:28] Total: 12840.00 THB | General Customer | Items: 1
+[2026-03-07 00:33:27] Total: 321.00 THB | General Customer | Items: 1
