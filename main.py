@@ -18,7 +18,6 @@ screen_height = root.winfo_screenheight()
 #root.geometry("1920x1080")
 # ตั้งค่าให้เล็กลงกว่าหน้าจอผู้ใช้เล็กน้อย (เช่น 90% ของหน้าจอ) เพื่อไม่ให้ล้น
 root.geometry(f"{int(screen_width*0.9)}x{int(screen_height*0.9)}")
-#....
 
 
 
