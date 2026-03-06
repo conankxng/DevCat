@@ -95,7 +95,6 @@ def show_day_sales():
     
     sale_data = stock.SALES_FILE
     results = []
-    total_sales_count = 0
 
     if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์ sale_data ว่ามีอยู่จริงบ่
         with open(sale_data, 'r', encoding='utf-8') as f:
@@ -104,15 +103,6 @@ def show_day_sales():
                 #สร้างเงื่อนไขตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่หรือไม่
                 if line.startswith(day_sales):
                     results.append(line)
-                    print(line)  
-                    total_sales_count += 1
-    
-    # 3. สรุปผล
-    if total_sales_count == 0:
-        print(f"วันที่ {today_day_num} นี้ยังไม่มีรายการขาย")
-    else:
-        print(f"สรุป: วันนี้พบทั้งหมด {total_sales_count} รายการ")
-
     return results
 
 
