@@ -85,35 +85,22 @@ def search_sale_history_custom(year,month,day):
     return results
 
 #ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่ วัน
-import os
-from datetime import datetime
-
-import os
-from datetime import datetime
-
 def show_today_sales():
     # 1. ดึงข้อมูลวัน/เดือน/ปี จากระบบ
     now = datetime.now()
-    today_str = now.strftime("%Y-%m-%d") # ใช้สำหรับค้นหาในไฟล์ (เช่น 2026-03-07)
-    month_str = now.strftime("%Y-%m") 
-    year_str = now.strftime("%Y")
-    
-    # ดึงเฉพาะ "วัน" ออกมา (เลือกใช้อย่างใดอย่างหนึ่งตามงานของคุณ)
-    today_day_num = now.day              # แบบตัวเลข (เช่น 7)
+    today_sales = now.strftime("%Y-%m-%d") #.srtftime คือ การแปลงวันที่ให้กลายเป็นสตริงในฟอแมทที่ต้องการ
+    today_day_num = now.day #ดึงเฉพาะวันออกมา 
     
     sale_data = stock.SALES_FILE
     results = []
     total_sales_count = 0
 
-    # พิมพ์หัวข้อโชว์วันที่และ "วัน" เฉพาะเจาะจง
-    print(f"--- รายงานการขายประจำวันที่ {today_day_num} (Full: {today_str}) ---")
-
-    if os.path.exists(sale_data):
+    if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์ sale_data ว่ามีอยู่จริงบ่
         with open(sale_data, 'r', encoding='utf-8') as f:
             for line in f:
-                line = line.strip()
+                line = line.strip() #ตัดช่องว่างหน้า-หลัง
                 # 2. ตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่ของวันนี้หรือไม่
-                if line.startswith(year_str):
+                if line.startswith(today_sales):
                     results.append(line)
                     print(line)  
                     total_sales_count += 1
@@ -127,7 +114,76 @@ def show_today_sales():
 
     return results
 
+
+#ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่เดือน
+def show_month_sales():
+    # 1. ดึงข้อมูลวัน/เดือน/ปี จากระบบ
+    now = datetime.now()
+    #.srtftime คือ การแปลงวันที่ให้กลายเป็นสตริงในฟอแมทที่ต้องการ
+    month_sales = now.strftime("%Y-%m") 
+    year_sales = now.strftime("%Y")
+    
+    month_num = now.day #ดึงเฉพาะเดือนออกมา
+    
+    sale_data = stock.SALES_FILE
+    results = []
+    total_sales_count = 0
+
+    if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์ sale_data ว่ามีอยู่จริงบ่
+        with open(sale_data, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip() #ตัดช่องว่างหน้า-หลัง
+                # 2. ตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่ของวันนี้หรือไม่
+                if line.startswith(month_sales):
+                    results.append(line)
+                    print(line)  
+                    total_sales_count += 1
+    
+    # 3. สรุปผล
+    if total_sales_count == 0:
+        print(f"วันที่ {month_num} นี้ยังไม่มีรายการขาย")
+    else:
+        print(f"---------------------------------------")
+        print(f"สรุป: วันนี้พบทั้งหมด {total_sales_count} รายการ")
+
+    return results
+
+#ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่ปี
+def show_year_sales():
+    #ดึงข้อมูลวัน/เดือน/ปี จากระบบ
+    now = datetime.now()
+    #.srtftime คือ การแปลงวันที่ให้กลายเป็นสตริงในฟอแมทที่ต้องการ
+    year_sales = now.strftime("%Y")
+    
+    year_num = now.day #ดึงเฉพาะเดือนออกมา
+    
+    sale_data = stock.SALES_FILE
+    results = []
+    total_sales_count = 0
+
+    if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์ sale_data ว่ามีอยู่จริงบ่
+        with open(sale_data, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip() #ตัดช่องว่างหน้า-หลัง
+                # 2. ตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่ของวันนี้หรือไม่
+                if line.startswith(year_sales):
+                    results.append(line)
+                    print(line)  
+                    total_sales_count += 1
+    
+    # 3. สรุปผล
+    if total_sales_count == 0:
+        print(f"วันที่ {year_num} นี้ยังไม่มีรายการขาย")
+    else:
+        print(f"---------------------------------------")
+        print(f"สรุป: วันนี้พบทั้งหมด {total_sales_count} รายการ")
+
+    return results
+
+
 # เรียกใช้งานฟังก์ชัน
 show_today_sales()
+show_month_sales()
+show_year_sales()
 
 # print(search_sale_history_day())
