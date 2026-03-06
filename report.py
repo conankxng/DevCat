@@ -88,7 +88,7 @@ def search_sale_history_custom(year,month,day):
 def show_today_sales():
     # ดึงข้อมูลวัน/เดือน/ปี จากระบบ
     now = datetime.now()
-    today_sales = now.strftime("%Y-%m-%d") #.srtftime คือ การแปลงวันที่ให้กลายเป็นสตริงในฟอแมทที่ต้องการ
+    today_sales = now.strftime("%Y-%m-%d") #.srtftime คือเพื่อดึงเฉพาะตัวเลขในวันที่ให้กลายเป็นสตริงเพื่อใช้ในการค้หา
     today_day_num = now.day #ดึงเฉพาะวันออกมา 
     
     sale_data = stock.SALES_FILE
@@ -99,7 +99,7 @@ def show_today_sales():
         with open(sale_data, 'r', encoding='utf-8') as f:
             for line in f:
                 line = line.strip() #ตัดช่องว่างหน้า-หลัง
-                # 2. ตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่ของวันนี้หรือไม่
+                #สร้างเงื่อนไขตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่หรือไม่
                 if line.startswith(today_sales):
                     results.append(line)
                     print(line)  
@@ -119,8 +119,8 @@ def show_today_sales():
 def show_month_sales():
     # ดึงข้อมูลวัน/เดือน/ปี จากระบบ
     now = datetime.now() #ตัวแปรเก็บdatetimeแล้วใช้เมดธอด.now
-    #.srtftime คือ การแปลงวันที่ให้กลายเป็นสตริงในฟอแมทที่ต้องการ
-    month_sales = now.strftime("%Y-%m") 
+    #.srtftime คือเพื่อดึงเฉพาะตัวเลขในเดือนให้กลายเป็นสตริงเพื่อใช้ในการค้หา
+    month_sales = now.strftime("%Y-%m")
     
     month_num = now.day #ดึงเฉพาะเดือนออกมา
     
@@ -132,7 +132,7 @@ def show_month_sales():
         with open(sale_data, 'r', encoding='utf-8') as f:
             for line in f:
                 line = line.strip() #ตัดช่องว่างหน้า-หลัง
-                # 2. ตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่ของวันนี้หรือไม่
+                #สร้างเงื่อนไขตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยเดือนหรือไม่
                 if line.startswith(month_sales):
                     results.append(line)
                     print(line)  
@@ -151,7 +151,7 @@ def show_month_sales():
 def show_year_sales():
     #ดึงข้อมูลวัน/เดือน/ปี จากระบบ
     now = datetime.now()
-    #.srtftime คือ การแปลงวันที่ให้กลายเป็นสตริงในฟอแมทที่ต้องการ
+    #.srtftime คือเพื่อดึงเฉพาะตัวเลขในปีให้กลายเป็นสตริงเพื่อใช้ในการค้หา
     year_sales = now.strftime("%Y")
     
     year_num = now.day #ดึงเฉพาะปีออกมา
@@ -164,11 +164,11 @@ def show_year_sales():
         with open(sale_data, 'r', encoding='utf-8') as f:
             for line in f:
                 line = line.strip() #ตัดช่องว่างหน้า-หลัง
-                # 2. ตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่ของวันนี้หรือไม่
+                #สร้างเงื่อนไขตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยปีหรือไม่
                 if line.startswith(year_sales):
                     results.append(line)
                     print(line)  
-                    total_sales_count += 1
+                    total_sales_count += 1 
     
     # 3. สรุปผล
     if total_sales_count == 0:
@@ -184,5 +184,3 @@ def show_year_sales():
 show_today_sales()
 show_month_sales()
 show_year_sales()
-
-# print(search_sale_history_day())
