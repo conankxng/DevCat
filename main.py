@@ -11,8 +11,10 @@ def on_closing():
     root.destroy()
 
 root = tk.Tk()
+root.state("zoomed")
 root.title("DevCat")
 root.geometry("1920x1080")
+#root.attributes("-fullscreen", True)
 
 #สร้างปุ่มเมนู
 tk.Button(root, text="Inventory", command=lambda: switch(p1), font=50, padx=300, pady=30).grid(row=0, column=0)
