@@ -14,3 +14,4 @@
 [2026-03-07 00:24:28] Total: 12840.00 THB | General Customer | Items: 1
 [2026-03-07 00:33:27] Total: 321.00 THB | General Customer | Items: 1
 [2026-03-07 01:44:18] Total: 10379.00 THB | General Customer | Items: 2
+[2026-03-07 02:16:34] Total: 7222.50 THB | Member: TMK 01 (1234567890) | Items: 1

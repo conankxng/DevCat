@@ -13,3 +13,4 @@
 2026-03-07 00:33:27, ID:011,Name:usb Qty: 2, Total: 300.0, Profit: 200.0
 2026-03-07 01:44:18, ID:005,Name:mouse Qty: 2, Total: 700.0, Profit: 300.0
 2026-03-07 01:44:18, ID:006,Name:monitor Qty: 2, Total: 9000.0, Profit: 2000.0
+2026-03-07 02:16:34, ID:006,Name:monitor Qty: 2, Total: 9000.0, Profit: 2000.0
