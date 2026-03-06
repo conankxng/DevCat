@@ -91,10 +91,9 @@ def show_day_sales():
     now = datetime.now()
 
     day_sales = now.strftime("%Y-%m-%d") #.srtftime คือเพื่อดึงเฉพาะตัวเลขในวันที่ให้กลายเป็นสตริงเพื่อใช้ในการค้หา
-    day_day_num = now.day #ดึงเฉพาะวันออกมา 
-    
     sale_data = stock.SALES_FILE
     results = []
+    total_sales_count = 0
 
     if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์ sale_data ว่ามีอยู่จริงบ่
         with open(sale_data, 'r', encoding='utf-8') as f:
@@ -112,12 +111,8 @@ def show_month_sales():
     now = datetime.now() #ตัวแปรเก็บdatetimeแล้วใช้เมดธอด.now
     #.srtftime คือเพื่อดึงเฉพาะตัวเลขในเดือนให้กลายเป็นสตริงเพื่อใช้ในการค้หา
     month_sales = now.strftime("%Y-%m")
-    
-    month_num = now.day #ดึงเฉพาะเดือนออกมา
-    
     sale_data = stock.SALES_FILE
     results = []
-    total_sales_count = 0
 
     if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์ sale_data ว่ามีอยู่จริงบ่
         with open(sale_data, 'r', encoding='utf-8') as f:
@@ -126,15 +121,6 @@ def show_month_sales():
                 #สร้างเงื่อนไขตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยเดือนหรือไม่
                 if line.startswith(month_sales):
                     results.append(line)
-                    print(line)  
-                    total_sales_count += 1
-    
-    # 3. สรุปผล
-    if total_sales_count == 0:
-        print(f"วันที่ {month_num} นี้ยังไม่มีรายการขาย")
-    else:
-        print(f"สรุป: วันนี้พบทั้งหมด {total_sales_count} รายการ")
-
     return results
 
 #ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่ปี
@@ -143,12 +129,8 @@ def show_year_sales():
     now = datetime.now()
     #.srtftime คือเพื่อดึงเฉพาะตัวเลขในปีให้กลายเป็นสตริงเพื่อใช้ในการค้หา
     year_sales = now.strftime("%Y")
-    
-    year_num = now.day #ดึงเฉพาะปีออกมา
-    
     sale_data = stock.SALES_FILE
     results = []
-    total_sales_count = 0
 
     if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์ sale_data ว่ามีอยู่จริงบ่
         with open(sale_data, 'r', encoding='utf-8') as f:
@@ -157,19 +139,12 @@ def show_year_sales():
                 #สร้างเงื่อนไขตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยปีหรือไม่
                 if line.startswith(year_sales):
                     results.append(line)
-                    print(line)  
-                    total_sales_count += 1 
-    
-    # 3. สรุปผล
-    if total_sales_count == 0:
-        print(f"วันที่ {year_num} นี้ยังไม่มีรายการขาย")
-    else:
-        print(f"สรุป: วันนี้พบทั้งหมด {total_sales_count} รายการ")
-
     return results
 
 
 # เรียกใช้งานฟังก์ชัน
-show_day_sales()
-show_month_sales()
-show_year_sales()
+'''
+print(show_day_sales())
+print(show_month_sales())
+print(show_year_sales())
+'''
