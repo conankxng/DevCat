@@ -1,5 +1,6 @@
 import storage_product as stock
 import product_manager as manage
+from datetime import datetime #นำเข้าเพื่อดึงปีและเดือนปัจจุบัน
 import os 
 
 #ฟังก์ชั่นแสดงข้อมูลการขาย
@@ -64,8 +65,8 @@ def product_report():
     return inventory
 
 
-#ฟังก์ชันค้นหาประวัติจากขาย ผ่าน วัน/เดือน/ปี 
-def search_sale_history(year,month,day):
+#ฟังก์ชันค้นหาประวัติจากขายแบบ Custom ผ่านวัน/เดือน/ปี 
+def search_sale_history_custom(year,month,day):
     # เป็น แปลงint เพื่อให้จัดรูปแบบวันที่ให้เปน YYYY-MM-DD เรียงแบบนี้เพือให้ตรงกับไฟล์ sale.txt
     search_date = f"{int(year):04d}-{int(month):02d}-{int(day):02d}" #เกบวันที่
     #d = แสดงเป็นตัวเลขจำนวนเต็ม #ใช้ :04d :02d :02d เพื่อกำหนดจำนวนอักษรให้ตรงตามล็อค ใส่0 เพื่อเติมในเดือนที่เป็นเลขตัวเดียว
@@ -83,10 +84,27 @@ def search_sale_history(year,month,day):
                         results.append(line)  #ให้เก็บผลลัพนั้นลงใน results เปน line
     return results
 
+#ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่ วัน
+def search_sale_history_day(day):
+    #ดึงปีและเดือนปัจจุบันมาจากคอม
+    
+    now = datetime.now()
+    year = now.year
+    month = now.month
+    
+    search_day = f"{(year):04d}-{(month):02d}-{int(day):02d}"
+    # เป็น แปลงint เพื่อให้จัดรูปแบบวันที่ให้เปน YYYY-MM-DD เรียงแบบนี้เพือให้ตรงกับไฟล์ sale.txt
+    sale_data = stock.SALES_FILE
+    results = [] #ใช้เก็บเนื้อหาที่ค้นเจอ
+    
+    if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์sale_data มีอยู่จริงไหม
+        with open(sale_data,'r',encoding='utf-8') as f:
+            lines = f.readlines() #อ่านไฟล์ในบรรทัด
+            for line in lines: #ลูปให้อ่านแต่ละบรรทัด
+                line = line.strip() #ตัดช่องว่างหน้า-หลัง
+                if line:
+                    if line.startswith(search_day): #ถ้าบรรทัดนั้นขึ้นต้นด้วยsearch_date 
+                        results.append(line)  #ให้เก็บผลลัพนั้นลงใน results เปน line
+    return results
 
-# print(product_sale_data())
-# print(total_revenue())
-# print(product_cost_data())
-# print(total_expense())
-# print(product_report())
-# print(search_sale_history(2026,3,5))
+print(search_sale_history_day())
