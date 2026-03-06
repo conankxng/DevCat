@@ -84,9 +84,9 @@ def search_sale_history_custom(year,month,day):
                         results.append(line)  #ให้เก็บผลลัพนั้นลงใน results เปน line
     return results
 
-#ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่ วัน
+#ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่วัน
 def show_today_sales():
-    # 1. ดึงข้อมูลวัน/เดือน/ปี จากระบบ
+    # ดึงข้อมูลวัน/เดือน/ปี จากระบบ
     now = datetime.now()
     today_sales = now.strftime("%Y-%m-%d") #.srtftime คือ การแปลงวันที่ให้กลายเป็นสตริงในฟอแมทที่ต้องการ
     today_day_num = now.day #ดึงเฉพาะวันออกมา 
@@ -117,11 +117,10 @@ def show_today_sales():
 
 #ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่เดือน
 def show_month_sales():
-    # 1. ดึงข้อมูลวัน/เดือน/ปี จากระบบ
-    now = datetime.now()
+    # ดึงข้อมูลวัน/เดือน/ปี จากระบบ
+    now = datetime.now() #ตัวแปรเก็บdatetimeแล้วใช้เมดธอด.now
     #.srtftime คือ การแปลงวันที่ให้กลายเป็นสตริงในฟอแมทที่ต้องการ
     month_sales = now.strftime("%Y-%m") 
-    year_sales = now.strftime("%Y")
     
     month_num = now.day #ดึงเฉพาะเดือนออกมา
     
@@ -155,7 +154,7 @@ def show_year_sales():
     #.srtftime คือ การแปลงวันที่ให้กลายเป็นสตริงในฟอแมทที่ต้องการ
     year_sales = now.strftime("%Y")
     
-    year_num = now.day #ดึงเฉพาะเดือนออกมา
+    year_num = now.day #ดึงเฉพาะปีออกมา
     
     sale_data = stock.SALES_FILE
     results = []
