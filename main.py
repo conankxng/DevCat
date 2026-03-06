@@ -17,9 +17,9 @@ root.geometry("1920x1080")
 #root.attributes("-fullscreen", True)
 
 #สร้างปุ่มเมนู
-tk.Button(root, text="Inventory", command=lambda: switch(p1), font=50, padx=300, pady=30).grid(row=0, column=0)
-tk.Button(root, text="POS", command=lambda: switch(p2), font=50, padx=300, pady=30).grid(row=0, column=1)
-tk.Button(root, text="Report", command=lambda: switch(p3), font=50, padx=300, pady=30).grid(row=0, column=2)
+tk.Button(root, text="Inventory", command=lambda: switch(p1), font=("Kanit", 18)).grid(row=0, column=0)
+tk.Button(root, text="POS", command=lambda: switch(p2), font=("Kanit", 18)).grid(row=0, column=1)
+tk.Button(root, text="Report", command=lambda: switch(p3), font=("Kanit", 18)).grid(row=0, column=2)
 #สร้างหน้า
 
 
