@@ -8,5 +8,5 @@ def setup_Report_interface(parent):
     default_font = ("Kanit", 12)  #เก็บตัวแปรฟอนต์แบบปกติ
     bold_font = ("Kanit", 14, "bold") #เก็บตัวแปรฟอนต์แบบตัวหนา
 
-    revenue_frame = tk.Frame(parent,background="#FF9EE4")
+    revenue_frame = tk.Frame(parent, background="#FF9EE4")
     revenue_frame
