@@ -85,26 +85,47 @@ def search_sale_history_custom(year,month,day):
     return results
 
 #ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่ วัน
-def search_sale_history_day(day):
-    #ดึงปีและเดือนปัจจุบันมาจากคอม
-    
+import os
+from datetime import datetime
+
+import os
+from datetime import datetime
+
+def show_today_sales():
+    # 1. ดึงข้อมูลวัน/เดือน/ปี จากระบบ
     now = datetime.now()
-    year = now.year
-    month = now.month
+    today_str = now.strftime("%Y-%m-%d") # ใช้สำหรับค้นหาในไฟล์ (เช่น 2026-03-07)
     
-    search_day = f"{(year):04d}-{(month):02d}-{int(day):02d}"
-    # เป็น แปลงint เพื่อให้จัดรูปแบบวันที่ให้เปน YYYY-MM-DD เรียงแบบนี้เพือให้ตรงกับไฟล์ sale.txt
+    # ดึงเฉพาะ "วัน" ออกมา (เลือกใช้อย่างใดอย่างหนึ่งตามงานของคุณ)
+    today_day_num = now.day              # แบบตัวเลข (เช่น 7)
+    
     sale_data = stock.SALES_FILE
-    results = [] #ใช้เก็บเนื้อหาที่ค้นเจอ
+    results = []
+    total_sales_count = 0
+
+    # พิมพ์หัวข้อโชว์วันที่และ "วัน" เฉพาะเจาะจง
+    print(f"--- รายงานการขายประจำวันที่ {today_day_num} (Full: {today_str}) ---")
+
+    if os.path.exists(sale_data):
+        with open(sale_data, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                # 2. ตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่ของวันนี้หรือไม่
+                if line.startswith(today_str):
+                    results.append(line)
+                    print(line)  
+                    total_sales_count += 1
     
-    if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์sale_data มีอยู่จริงไหม
-        with open(sale_data,'r',encoding='utf-8') as f:
-            lines = f.readlines() #อ่านไฟล์ในบรรทัด
-            for line in lines: #ลูปให้อ่านแต่ละบรรทัด
-                line = line.strip() #ตัดช่องว่างหน้า-หลัง
-                if line:
-                    if line.startswith(search_day): #ถ้าบรรทัดนั้นขึ้นต้นด้วยsearch_date 
-                        results.append(line)  #ให้เก็บผลลัพนั้นลงใน results เปน line
+    # 3. สรุปผล
+    if total_sales_count == 0:
+        print(f"วันที่ {today_day_num} นี้ยังไม่มีรายการขาย")
+    else:
+        print(f"---------------------------------------")
+        print(f"สรุป: วันนี้พบทั้งหมด {total_sales_count} รายการ")
+
     return results
 
-print(search_sale_history_day())
+# เรียกใช้งานฟังก์ชัน
+show_today_sales()
+
+# print(search_sale_history_day())
