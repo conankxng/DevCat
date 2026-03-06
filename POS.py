@@ -144,7 +144,7 @@ def create_three_frames(parent):
     search_frame = tk.Frame(left_panel)
     search_frame.pack(fill=tk.X, pady=5)
     
-    tk.Label(search_frame, text="🔍 ค้นหาสินค้า:", font=("Kanit", 12, "bold")).pack(side=tk.LEFT)
+    tk.Label(search_frame, text="ค้นหาสินค้า", font=("Kanit", 12, "bold")).pack(side=tk.LEFT)
     search_var = tk.StringVar()
     search_entry = tk.Entry(search_frame, textvariable=search_var, font=("Kanit", 12))
     search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
