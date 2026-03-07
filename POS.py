@@ -7,86 +7,25 @@ import sales_logger
 from datetime import datetime
 from PIL import Image, ImageTk
 from playsound import playsound 
-
-
-# ========================================================================= #
-# ส่วนที่ 1: ฟังก์ชันสำหรับสร้างกล่องแบบเลื่อนได้ (Scrollable Frame)
-# ========================================================================= #
-def create_scrollable_frame(parent):
-    """
-    ฟังก์ชันนี้ช่วยสร้าง Frame ที่สามารถใช้ลูกกลิ้งเมาส์เลื่อนขึ้นลงได้
-    เหมาะสำหรับหน้าที่มีของเยอะจนล้นจอ เช่น ปุ่มสินค้า
-    """
-    # 1. สร้างกรอบนอกสุด (Container) เพื่อเป็นฐานหลัห
-    container = tk.Frame(parent)
-    
-    # 2. สร้าง Canvas เพราะ Frame ปกติไม่รองรับการเลื่อน (Scroll)
-    # เราจะเอาสิ่งต่างๆ ไปวาดแปะไว้บน Canvas แทน
-    canvas = tk.Canvas(container, highlightthickness=0)
-    
-    # 3. สร้างแถบเลื่อน (Scrollbar) แนวตั้ง แล้วผูกมันเข้ากับมุมมองของ Canvas
-    scrollbar = tk.Scrollbar(container, orient="vertical", command=canvas.yview)
-    
-    # 4. สร้าง Frame ด้านใน (Inner Frame) เพื่อเอาไว้เก็บปุ่มสินค้าจริงๆ
-    inner_frame = tk.Frame(canvas)
-    
-    # 5. ฟังก์ชันคอยอัปเดตขนาดพื้นที่ที่เลื่อนได้ (Scrollregion)
-    # เพื่อให้รู้ว่าควรเลื่อนได้ยาวแค่ไหนเมื่อมีปุ่มเพิ่มเข้ามา
-    def configure_scroll_region(event):
-        canvas.configure(scrollregion=canvas.bbox("all"))
-        
-    inner_frame.bind("<Configure>", configure_scroll_region)
-    
-    # 6. นำ Frame ด้านใน วางแปะลงไปบน Canvas ที่จุดมุมซ้ายบนสุด (0,0)
-    canvas.create_window((0, 0), window=inner_frame, anchor="nw")
-    canvas.configure(yscrollcommand=scrollbar.set)
-    
-    # 7. ทำให้ความกว้างของ Canvas ล็อคพอดีกับหน้าจอเสมอ
-    def configure_canvas_width(event):
-        canvas.itemconfig(canvas.find_withtag("all")[0], width=event.width)
-    canvas.bind("<Configure>", configure_canvas_width)
-    
-    # 8. ฟังก์ชันตรวจจับลูกกลิ้งเมาส์ เพื่อเลื่อนหน้าจอ
-    def _on_mousewheel(event):
-        # canvas.yview() คืนค่าตำแหน่งบนและล่างสุดมา (0.0 ถึง 1.0)
-        top, bottom = canvas.yview()
-        
-        if event.delta > 0:       # หมุนลูกกลิ้งชี้ขึ้นด้านบน
-            if top > 0.0:         # ถ้ายังไม่ถึงยอดสุด ให้เลื่อนขึ้น
-                canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-        elif event.delta < 0:     # หมุนลูกกลิ้งชี้ลงด้านล่าง
-            if bottom < 1.0:      # ถ้ายังไม่ถึงขอบล่าง ให้เลื่อนลง
-                canvas.yview_scroll(int(-1*(event.delta/120)), "units")
-        
-    # 9. ผูกคำสั่งเลื่อนเมาส์เฉพาะเวลาเมาส์อยู่ในกรอบนี้เท่านั้น
-    canvas.bind('<Enter>', lambda _: canvas.bind_all("<MouseWheel>", _on_mousewheel))
-    canvas.bind('<Leave>', lambda _: canvas.unbind_all("<MouseWheel>"))
-
-    # 10. จัดเรียงให้ Canvas อยู่ทางซ้าย และแถบ Scrollbar แปะอยู่ทางขวาสุด
-    canvas.pack(side="left", fill="both", expand=True)
-    scrollbar.pack(side="right", fill="y")
-    
-    # คืนค่า container (ไปจัดวางในเมนูหลัก) และ inner_frame (เอาไปใส่ปุ่มสินค้าข้างใน)
-    return container, inner_frame
-
+import customtkinter as ctk
 
 # ========================================================================= #
 # ส่วนที่ 1.5: แป้นกดตัวเลข (Numpad) ที่ใช้ร่วมกัน
 # ========================================================================= #
 def show_shared_numpad(parent_win, title, initial_value, callback):
-    popup = tk.Toplevel(parent_win)
+    popup = ctk.CTkToplevel(parent_win)
     popup.title(title)
     popup.geometry("300x500")
     popup.grab_set()
     popup.transient(parent_win)
     popup.focus_force()
     
-    qty_var = tk.StringVar(value=initial_value)
+    qty_var = ctk.StringVar(value=initial_value)
     
-    display = tk.Label(popup, textvariable=qty_var, font=("Kanit", 28, "bold"), bg="white", relief="sunken", anchor="e")
-    display.pack(fill=tk.X, padx=10, pady=10, ipady=10)
+    display = ctk.CTkLabel(popup, textvariable=qty_var, font=("Kanit", 28, "bold"), fg_color="white", anchor="e")
+    display.pack(fill=tk.X, padx=10, pady=(10, 10))
     
-    keypad_frame = tk.Frame(popup)
+    keypad_frame = ctk.CTkFrame(popup)
     keypad_frame.pack(expand=True, fill=tk.BOTH, padx=10, pady=5)
     
     for i in range(3): keypad_frame.columnconfigure(i, weight=1)
@@ -112,7 +51,7 @@ def show_shared_numpad(parent_win, title, initial_value, callback):
     ]
     
     for (text, row, col) in buttons:
-        btn = tk.Button(keypad_frame, text=text, font=("Kanit", 18, "bold"), command=create_btn_command(text))
+        btn = ctk.CTkButton(keypad_frame, text=text, font=("Kanit", 18, "bold"), command=create_btn_command(text))
         btn.grid(row=row, column=col, sticky="nsew", padx=2, pady=2)
         
     def submit():
@@ -120,7 +59,7 @@ def show_shared_numpad(parent_win, title, initial_value, callback):
         popup.destroy()
         callback(val)
         
-    tk.Button(popup, text="ยืนยัน", command=submit, font=("Kanit", 16, "bold"), bg="green", fg="white").pack(fill=tk.X, padx=10, pady=10)
+    ctk.CTkButton(popup, text="ยืนยัน", command=submit, font=("Kanit", 16, "bold"), fg_color="green", text_color="white").pack(fill=tk.X, padx=10, pady=10)
 
 
 # ========================================================================= #
@@ -131,41 +70,75 @@ current_selected_product = {"id": None, "name": None}
 # ตัวแปรจำสถานะสมาชิกปัจจุบัน
 current_member_info = {"phone": None, "first_name": None, "last_name": None}
 
-def create_three_frames(parent):
+def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
     """
     ฟังก์ชันสำหรับแบ่งหน้าจอ POS ออกเป็น 3 ส่วนหลัก (ซ้าย: สินค้า, กลาง: ตะกร้า, ขวา: ดำเนินการ)
     """
-    # ---------------------------------------------------------
+    def add_background_image(widget, image_path):
+        if not image_path or not os.path.exists(image_path):
+            return
+        try:
+            original_img = Image.open(image_path)
+        except Exception:
+            return
+            
+        bg_label = ctk.CTkLabel(widget)
+        bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+        bg_label.lower()
+        
+        widget._bg_size = (0, 0)
+        
+        def on_resize(event):
+            if event.widget == widget:
+                w, h = event.width, event.height
+                if w < 10 or h < 10: return
+                if abs(w - widget._bg_size[0]) > 5 or abs(h - widget._bg_size[1]) > 5:
+                    widget._bg_size = (w, h)
+                    resized = original_img.resize((w, h), Image.Resampling.LANCZOS)
+                    photo = ImageTk.PhotoImage(resized)
+                    bg_label.config(image=photo)
+                    bg_label.image = photo
+                    
+        widget.bind("<Configure>", on_resize, add='+')
+
+# ---------------------------------------------------------
     # เฟรมที่ 1: ค้นหาและรายการสินค้า (เลื่อนได้)
     # ---------------------------------------------------------
-    left_panel = tk.Frame(parent)
+    left_panel = ctk.CTkFrame(parent, fg_color="transparent")
     left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
     
-    search_frame = tk.Frame(left_panel)
+    # --- 2. ส่วนค้นหา (ทำให้โปร่งใสด้วย) ---
+    search_frame = ctk.CTkFrame(left_panel, fg_color="transparent") # ตั้งเป็น transparent
     search_frame.pack(fill=tk.X, pady=5)
     
-    tk.Label(search_frame, text="ค้นหาสินค้า", font=("Kanit", 12, "bold")).pack(side=tk.LEFT)
-    search_var = tk.StringVar()
-    search_entry = tk.Entry(search_frame, textvariable=search_var, font=("Kanit", 12))
+    ctk.CTkLabel(search_frame, text="ค้นหาสินค้า", font=("Kanit", 12, "bold")).pack(side=tk.LEFT)
+    search_var = ctk.StringVar()
+    search_entry = ctk.CTkEntry(search_frame, textvariable=search_var, font=("Kanit", 12))
     search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
     
-    tk.Button(search_frame, text="X", font=("Kanit", 10, "bold"), bg="red", fg="white", width=3,
-              command=lambda: search_var.set("")).pack(side=tk.RIGHT)
+    ctk.CTkButton(search_frame, text="X", font=("Kanit", 10, "bold"), fg_color="red", text_color="white", width=3, command=lambda: search_var.set("")).pack(side=tk.RIGHT)
     
-    container1, frame1 = create_scrollable_frame(left_panel)
-    container1.pack(fill=tk.BOTH, expand=True)
+    # --- 3. ส่วนรายการสินค้า (Scrollable) ---
+    frame1 = ctk.CTkScrollableFrame(left_panel)
+    frame1.pack(fill=tk.BOTH, expand=True)
+
+    # --- 4. บังคับลำดับแกน Z ---
+    # img1.lower() # ส่งรูปภาพไปอยู่ชั้นล่างสุดของ left_panel
+
+
     
     # ---------------------------------------------------------
     # เฟรมที่ 2: ตะกร้าสินค้า (แสดงผลเป็นตาราง)
     # ---------------------------------------------------------
-    frame2 = tk.Frame(parent)
+    frame2 = ctk.CTkFrame(parent)
     frame2.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+    add_background_image(frame2, bg_img2)
     
     # ป้ายหัวข้อตะกร้าสินค้า
-    tk.Label(frame2, text="รายการสินค้า", font=("Kanit", 12, "bold")).pack(pady=10)
+    ctk.CTkLabel(frame2, text="รายการสินค้า", font=("Kanit", 12, "bold")).pack(pady=10)
     
     # กรอบสำหรับตารางและแถบเลื่อน
-    tree_frame = tk.Frame(frame2)
+    tree_frame = ctk.CTkFrame(frame2)
     tree_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
     
     # แถบเลื่อน (Scrollbar) ของตาราง
@@ -201,15 +174,16 @@ def create_three_frames(parent):
     bill_path = os.path.join(os.path.dirname(__file__), "data", "bill.txt")
     
     # สร้าง Frame 3 ก่อนเพื่อให้ reload_cart เรียกใช้ Label ได้
-    frame3 = tk.Frame(parent)
+    frame3 = ctk.CTkFrame(parent)
     frame3.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+    add_background_image(frame3, bg_img3)
     
     # ========================== ส่วนที่ 3 บน: สมาชิก ==========================
-    member_frame = tk.Frame(frame3, relief="groove", bd=2)
+    member_frame = ctk.CTkFrame(frame3, border_width=2)
     member_frame.pack(fill=tk.X, pady=5)
     
-    lbl_member_status_var = tk.StringVar(value="ลูกค้าทั่วไป")
-    tk.Label(member_frame, textvariable=lbl_member_status_var, font=("Kanit", 11, "bold"), fg="blue").pack(pady=5)
+    lbl_member_status_var = ctk.StringVar(value="ลูกค้าทั่วไป")
+    ctk.CTkLabel(member_frame, textvariable=lbl_member_status_var, font=("Kanit", 11, "bold"), text_color="blue").pack(pady=5)
     
     
     def open_phone_numpad(parent_win, entry_widget):
@@ -221,22 +195,22 @@ def create_three_frames(parent):
     
     
     def popup_register():
-        reg_pop = tk.Toplevel(parent)
+        reg_pop = ctk.CTkToplevel(parent)
         reg_pop.title("ลงทะเบียนสมาชิกใหม่")
         reg_pop.geometry("300x250")
         reg_pop.grab_set()
         
-        tk.Label(reg_pop, text="เบอร์โทรศัพท์:").pack(pady=5)
-        ent_phone = tk.Entry(reg_pop)
+        ctk.CTkLabel(reg_pop, text="เบอร์โทรศัพท์:").pack(pady=5)
+        ent_phone = ctk.CTkEntry(reg_pop)
         ent_phone.pack()
         ent_phone.bind("<Button-1>", lambda e: open_phone_numpad(reg_pop, ent_phone))
         
-        tk.Label(reg_pop, text="ชื่อ:").pack(pady=5)
-        ent_fname = tk.Entry(reg_pop)
+        ctk.CTkLabel(reg_pop, text="ชื่อ:").pack(pady=5)
+        ent_fname = ctk.CTkEntry(reg_pop)
         ent_fname.pack()
         
-        tk.Label(reg_pop, text="นามสกุล:").pack(pady=5)
-        ent_lname = tk.Entry(reg_pop)
+        ctk.CTkLabel(reg_pop, text="นามสกุล:").pack(pady=5)
+        ent_lname = ctk.CTkEntry(reg_pop)
         ent_lname.pack()
         
         def do_register():
@@ -247,16 +221,16 @@ def create_three_frames(parent):
             else:
                 messagebox.showwarning("แจ้งเตือน", msg, parent=reg_pop)
                 
-        tk.Button(reg_pop, text="ยืนยันสมาชิก", command=do_register, bg="green", fg="white").pack(pady=15)
+        ctk.CTkButton(reg_pop, text="ยืนยันสมาชิก", command=do_register, fg_color="green", text_color="white").pack(pady=15)
 
     def popup_login():
-        log_pop = tk.Toplevel(parent)
+        log_pop = ctk.CTkToplevel(parent)
         log_pop.title("เข้าสู่ระบบสมาชิก")
         log_pop.geometry("250x150")
         log_pop.grab_set()
         
-        tk.Label(log_pop, text="ใส่เบอร์โทรศัพท์").pack(pady=10)
-        ent_phone = tk.Entry(log_pop)
+        ctk.CTkLabel(log_pop, text="ใส่เบอร์โทรศัพท์").pack(pady=10)
+        ent_phone = ctk.CTkEntry(log_pop)
         ent_phone.pack()
         ent_phone.bind("<Button-1>", lambda e: open_phone_numpad(log_pop, ent_phone))
         
@@ -274,43 +248,43 @@ def create_three_frames(parent):
             else:
                 messagebox.showerror("ไม่พบข้อมูล", "ไม่พบเบอร์โทรศัพท์นี้ในระบบ", parent=log_pop)
                 
-        tk.Button(log_pop, text="ตรวจสอบ", command=do_login, bg="blue", fg="white").pack(pady=10)
+        ctk.CTkButton(log_pop, text="ตรวจสอบ", command=do_login, fg_color="blue", text_color="white").pack(pady=10)
 
-    btn_frame = tk.Frame(frame3)
+    btn_frame = ctk.CTkFrame(frame3)
     btn_frame.pack(fill=tk.X, pady=5)
-    tk.Button(btn_frame, text="สมัครสมาชิก", font=("Kanit", 12), command=popup_register).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
-    tk.Button(btn_frame, text="เข้าสู่ระบบ", font=("Kanit", 12), command=popup_login).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
+    ctk.CTkButton(btn_frame, text="สมัครสมาชิก", font=("Kanit", 12), command=popup_register).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
+    ctk.CTkButton(btn_frame, text="เข้าสู่ระบบ", font=("Kanit", 12), command=popup_login).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
     
     def logout_member():
         global current_member_info
         current_member_info = {"phone": None, "first_name": None, "last_name": None}
         lbl_member_status_var.set("ลูกค้าทั่วไป")
         reload_cart()
-    tk.Button(frame3, text="ออกจากระบบสมาชิก", font=("Kanit", 12), command=logout_member, fg="red").pack(fill=tk.X, pady=2)
+    ctk.CTkButton(frame3, text="ออกจากระบบสมาชิก", font=("Kanit", 12), command=logout_member, text_color="red").pack(fill=tk.X, pady=2)
 
 
     # ========================== ส่วนที่ 3 กลาง: สรุปยอด ==========================
-    tk.Label(frame3, text="สรุปยอดชำระ", bg="lightcoral", font=("Kanit", 12, "bold")).pack(fill=tk.X, pady=10)
+    ctk.CTkLabel(frame3, text="สรุปยอดชำระ", fg_color="lightcoral", font=("Kanit", 12, "bold")).pack(fill=tk.X, pady=10)
     
-    summary_frame = tk.Frame(frame3)
+    summary_frame = ctk.CTkFrame(frame3)
     summary_frame.pack(fill=tk.X, padx=10, pady=5)
     
-    lbl_subtotal_var = tk.StringVar(value="0.00 บาท")
-    lbl_discount_var = tk.StringVar(value="0.00 บาท")
-    lbl_vat_var = tk.StringVar(value="0.00 บาท")
-    lbl_grand_total_var = tk.StringVar(value="0.00 บาท")
+    lbl_subtotal_var = ctk.StringVar(value="0.00 บาท")
+    lbl_discount_var = ctk.StringVar(value="0.00 บาท")
+    lbl_vat_var = ctk.StringVar(value="0.00 บาท")
+    lbl_grand_total_var = ctk.StringVar(value="0.00 บาท")
     
-    tk.Label(summary_frame, text="ราคารวม:", font=("Kanit", 10)).grid(row=0, column=0, sticky="w", pady=2)
-    tk.Label(summary_frame, textvariable=lbl_subtotal_var, font=("Kanit", 10)).grid(row=0, column=1, sticky="e", pady=2)
+    ctk.CTkLabel(summary_frame, text="ราคารวม:", font=("Kanit", 10)).grid(row=0, column=0, sticky="w", pady=2)
+    ctk.CTkLabel(summary_frame, textvariable=lbl_subtotal_var, font=("Kanit", 10)).grid(row=0, column=1, sticky="e", pady=2)
     
-    tk.Label(summary_frame, text="ส่วนลดสมาชิก:", font=("Kanit", 10), fg="red").grid(row=1, column=0, sticky="w", pady=2)
-    tk.Label(summary_frame, textvariable=lbl_discount_var, font=("Kanit", 10), fg="red").grid(row=1, column=1, sticky="e", pady=2)
+    ctk.CTkLabel(summary_frame, text="ส่วนลดสมาชิก:", font=("Kanit", 10), text_color="red").grid(row=1, column=0, sticky="w", pady=2)
+    ctk.CTkLabel(summary_frame, textvariable=lbl_discount_var, font=("Kanit", 10), text_color="red").grid(row=1, column=1, sticky="e", pady=2)
     
-    tk.Label(summary_frame, text="VAT 7%:", font=("Kanit", 10)).grid(row=2, column=0, sticky="w", pady=2)
-    tk.Label(summary_frame, textvariable=lbl_vat_var, font=("Kanit", 10)).grid(row=2, column=1, sticky="e", pady=2)
+    ctk.CTkLabel(summary_frame, text="VAT 7%:", font=("Kanit", 10)).grid(row=2, column=0, sticky="w", pady=2)
+    ctk.CTkLabel(summary_frame, textvariable=lbl_vat_var, font=("Kanit", 10)).grid(row=2, column=1, sticky="e", pady=2)
     
-    tk.Label(summary_frame, text="ราคาสุทธิ:", font=("Kanit", 14, "bold"), fg="green").grid(row=3, column=0, sticky="w", pady=10)
-    tk.Label(summary_frame, textvariable=lbl_grand_total_var, font=("Kanit", 14, "bold"), fg="green").grid(row=3, column=1, sticky="e", pady=10)
+    ctk.CTkLabel(summary_frame, text="ราคาสุทธิ:", font=("Kanit", 14, "bold"), text_color="green").grid(row=3, column=0, sticky="w", pady=10)
+    ctk.CTkLabel(summary_frame, textvariable=lbl_grand_total_var, font=("Kanit", 14, "bold"), text_color="green").grid(row=3, column=1, sticky="e", pady=10)
     summary_frame.columnconfigure(1, weight=1)
     
     
@@ -349,7 +323,7 @@ def create_three_frames(parent):
     reload_cart()
     
     # ========================== ส่วนที่ 3 ล่าง: ดำเนินการ ==========================
-    action_frame = tk.Frame(frame3)
+    action_frame = ctk.CTkFrame(frame3)
     # ลบ expand=True ทิ้งเพื่อป้องกันไม่ให้ปุ่มข้างล่างโดนดันตกขอบจอ
     action_frame.pack(fill=tk.X, pady=10)
     
@@ -402,12 +376,12 @@ def create_three_frames(parent):
             messagebox.showinfo("แจ้งเตือน", "ไม่มีบิลที่ถูกพักไว้")
             return
             
-        recall_pop = tk.Toplevel(parent)
+        recall_pop = ctk.CTkToplevel(parent)
         recall_pop.title("เลือกบิลที่ต้องการเรียกคืน")
         recall_pop.geometry("300x300")
         recall_pop.grab_set()
         
-        tk.Label(recall_pop, text="รายการพักบิลทั้งหมด:", font=("Kanit", 10, "bold")).pack(pady=5)
+        ctk.CTkLabel(recall_pop, text="รายการพักบิลทั้งหมด:", font=("Kanit", 10, "bold")).pack(pady=5)
         
         listbox = tk.Listbox(recall_pop, font=("Kanit", 10))
         listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
@@ -440,11 +414,11 @@ def create_three_frames(parent):
             reload_cart()
             recall_pop.destroy()
             
-        tk.Button(recall_pop, text="เรียกคืนบิลนี้", command=do_recall, bg="lightblue").pack(pady=10)
+        ctk.CTkButton(recall_pop, text="เรียกคืนบิลนี้", command=do_recall, fg_color="lightblue").pack(pady=10)
         
-    tk.Button(action_frame, text="พักบิล", font=("Kanit", 12, "bold"), command=hold_bill, bg="orange").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
-    tk.Button(action_frame, text="เรียกคืนบิล", font=("Kanit", 12, "bold"), command=recall_bill, bg="lightblue").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
-    tk.Button(action_frame, text="ล้างตะกร้า", font=("Kanit", 12, "bold"), command=clear_cart, bg="red", fg="white").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    ctk.CTkButton(action_frame, text="พักบิล", font=("Kanit", 12, "bold"), command=hold_bill, fg_color="orange").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    ctk.CTkButton(action_frame, text="เรียกคืนบิล", font=("Kanit", 12, "bold"), command=recall_bill, fg_color="lightblue").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    ctk.CTkButton(action_frame, text="ล้างตะกร้า", font=("Kanit", 12, "bold"), command=clear_cart, fg_color="red", text_color="white").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
 
     def confirm_checkout():
         """ยืนยันการทำรายการแบบเต็มรูปแบบ"""
@@ -525,25 +499,20 @@ def create_three_frames(parent):
                 
     try:
         img = Image.open("img/cat_btn.png")
-        # ปรับขนาดตามต้องการ (กว้าง, สูง)
-        resized = img.resize((170, 130), Image.Resampling.LANCZOS)
-        cat_button_img = ImageTk.PhotoImage(resized)
+        cat_button_img = ctk.CTkImage(img, size=(170, 130))
     except:
         cat_button_img = None
         print("ไม่พบรูปภาพ")         
 
     # ปุ่มยืนยันรายการจ่ายเงิน (แพ็คให้ติดขอบล่างเสมอ ป้องกันการโดนดันตกจอ)
-    btn_cat = tk.Button(
+    btn_cat = ctk.CTkButton(
         frame3, 
+        text="",
         image=cat_button_img if "cat_button_img" in locals() else None,
-        borderwidth=0,
-        highlightthickness=0,
-        activebackground="#f0f2f5",
+        hover_color="#f0f2f5",
+        fg_color="transparent",
         command=confirm_checkout
     )
-    # ผูกรูปไว้กับ Widget กันโดน Garbage Collector ลบ
-    if "cat_button_img" in locals() and cat_button_img:
-        btn_cat.image = cat_button_img
         
     btn_cat.pack()
     
@@ -600,7 +569,7 @@ def load_products_to_frame(frame, reload_cart_cb=None, search_keyword=""):
                     open_numpad_popup(frame, reload_cart_cb)
                 
                 # สร้างปุ่มสำหรับสินค้านั้นๆ
-                btn = tk.Button(
+                btn = ctk.CTkButton(
                     frame, 
                     text=product_name, 
                     font=("Kanit", 10),
@@ -618,7 +587,7 @@ def load_products_to_frame(frame, reload_cart_cb=None, search_keyword=""):
                 button_count = button_count + 1
                 
     except FileNotFoundError:
-        tk.Label(frame, text="⚠️ ไม่พบไฟล์ data/products.txt", fg="red").grid(row=0, column=0, columnspan=4, pady=20)
+        ctk.CTkLabel(frame, text="⚠️ ไม่พบไฟล์ data/products.txt", text_color="red").grid(row=0, column=0, columnspan=4, pady=20)
         
 
 # ========================================================================= #
