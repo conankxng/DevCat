@@ -15,3 +15,5 @@
 2026-03-07 01:44:18, ID:006,Name:monitor Qty: 2, Total: 9000.0, Profit: 2000.0
 2026-03-07 02:16:34, ID:006,Name:monitor Qty: 2, Total: 9000.0, Profit: 2000.0
 2026-03-07 04:52:55, ID:028,Name:mousepad Qty: 5, Total: 1000.0, Profit: 600.0
+2026-03-07 22:13:58, ID:015,Name:router Qty: 2, Total: 4400.0, Profit: 1000.0
+2026-03-07 22:18:32, ID:016,Name:switch Qty: 2, Total: 3000.0, Profit: 800.0

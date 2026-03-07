@@ -92,8 +92,7 @@ def show_day_sales():
 
     day_sales = now.strftime("%Y-%m-%d") #.srtftime คือเพื่อดึงเฉพาะตัวเลขในวันที่ให้กลายเป็นสตริงเพื่อใช้ในการค้หา
     sale_data = stock.SALES_FILE
-    results = []
-    total_sales_count = 0
+    total_sales = 0.0
 
     if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์ sale_data ว่ามีอยู่จริงบ่
         with open(sale_data, 'r', encoding='utf-8') as f:
@@ -101,8 +100,16 @@ def show_day_sales():
                 line = line.strip() #ตัดช่องว่างหน้า-หลัง
                 #สร้างเงื่อนไขตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่หรือไม่
                 if line.startswith(day_sales):
-                    results.append(line)
-    return results
+                    try:
+                        parts = line.split(',')
+                        for part in parts:
+                            if "Total:" in part:
+                                total_value = float(part.split(':')[1].strip())
+                                total_sales += total_value
+                                break
+                    except:
+                        pass
+    return f"{total_sales:.2f}"
 
 
 #ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่เดือน
@@ -112,7 +119,7 @@ def show_month_sales():
     #.srtftime คือเพื่อดึงเฉพาะตัวเลขในเดือนให้กลายเป็นสตริงเพื่อใช้ในการค้หา
     month_sales = now.strftime("%Y-%m")
     sale_data = stock.SALES_FILE
-    results = []
+    total_sales = 0.0
 
     if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์ sale_data ว่ามีอยู่จริงบ่
         with open(sale_data, 'r', encoding='utf-8') as f:
@@ -120,8 +127,16 @@ def show_month_sales():
                 line = line.strip() #ตัดช่องว่างหน้า-หลัง
                 #สร้างเงื่อนไขตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยเดือนหรือไม่
                 if line.startswith(month_sales):
-                    results.append(line)
-    return results
+                    try:
+                        parts = line.split(',')
+                        for part in parts:
+                            if "Total:" in part:
+                                total_value = float(part.split(':')[1].strip())
+                                total_sales += total_value
+                                break
+                    except:
+                        pass
+    return f"{total_sales:.2f}"
 
 #ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่ปี
 def show_year_sales():
@@ -130,7 +145,7 @@ def show_year_sales():
     #.srtftime คือเพื่อดึงเฉพาะตัวเลขในปีให้กลายเป็นสตริงเพื่อใช้ในการค้หา
     year_sales = now.strftime("%Y")
     sale_data = stock.SALES_FILE
-    results = []
+    total_sales = 0.0
 
     if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์ sale_data ว่ามีอยู่จริงบ่
         with open(sale_data, 'r', encoding='utf-8') as f:
@@ -138,9 +153,67 @@ def show_year_sales():
                 line = line.strip() #ตัดช่องว่างหน้า-หลัง
                 #สร้างเงื่อนไขตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยปีหรือไม่
                 if line.startswith(year_sales):
-                    results.append(line)
-    return results
+                    try:
+                        parts = line.split(',')
+                        for part in parts:
+                            if "Total:" in part:
+                                total_value = float(part.split(':')[1].strip())
+                                total_sales += total_value
+                                break
+                    except:
+                        pass
+    return f"{total_sales:.2f}"
 
+#ฟังก์ชันแสดงจำนวนสมาชิกทั้งหมด
+def total_members():
+    member_file = os.path.join(stock.DATA_DIR, "members.txt")
+    count = 0
+    if os.path.exists(member_file):
+        with open(member_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.strip():
+                    count += 1
+    return count
+
+# ฟังก์ชันดึงข้อมูลจาก master_sales.txt เพื่อไปแสดงในตาราง
+def get_master_sales_data():
+    master_file = os.path.join(stock.DATA_DIR, "master_sales.txt")
+    sales_list = []
+    
+    if os.path.exists(master_file):
+        with open(master_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    # ตัวอย่างบรรทัด: [2026-03-05 22:45:10] Total: 7490.00 THB | General Customer | Items: 2
+                    try:
+                        # แยกส่วนวันที่และเวลาออกจากข้อความที่เหลือ
+                        date_part, rest = line.split('] ', 1)
+                        date_str = date_part.replace('[', '').strip()
+                        
+                        # แยกข้อมูลที่เหลือด้วย "|"
+                        parts = [p.strip() for p in rest.split('|')]
+                        
+                        # ดึงข้อมูลแต่ละส่วน
+                        total_str = parts[0].replace('Total:', '').strip()
+                        customer_str = parts[1].strip()
+                        items_str = parts[2].replace('Items:', '').strip()
+                        
+                        sales_list.append({
+                            "date": date_str,
+                            "customer": customer_str,
+                            "items": items_str,
+                            "total": total_str
+                        })
+                    except Exception as e:
+                        pass
+    return sales_list
+
+# y = show_year_sales()
+# m = show_month_sales()
+# d = show_day_sales()
+
+# print(f"{y=}, {m=}, {d=}")
 
 # เรียกใช้งานฟังก์ชัน
 '''

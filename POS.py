@@ -147,13 +147,30 @@ def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
     
     # การตั้งค่าตาราง (Treeview) เพื่อแสดงรายการสินค้าที่เลือก
     columns = ("id", "name", "price", "total")
-    cart_tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=15, yscrollcommand=tree_scroll.set)
+    cart_tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=15, yscrollcommand=tree_scroll.set, selectmode="browse")
     tree_scroll.config(command=cart_tree.yview)
     
-    #ปรับแต่งตารางให้สวยงาม
+    #ปรับแต่งตารางให้สวยงาม (Modern Look)
     style = ttk.Style()
-    style.configure("Treeview.Heading", font=("Kanit", 11, "bold"))
-    style.configure("Treeview", font=("Kanit", 11), rowheight=30)
+    style.theme_use("clam")
+    
+    style.configure("Treeview", 
+                    background="white",
+                    foreground="#333333",
+                    rowheight=35,
+                    fieldbackground="white",
+                    font=("Kanit", 11),
+                    borderwidth=0)
+                    
+    style.configure("Treeview.Heading", 
+                    font=("Kanit", 12, "bold"), 
+                    background="#F8F9FA", 
+                    foreground="#495057",
+                    borderwidth=0,
+                    relief="flat")
+                    
+    style.map('Treeview', background=[('selected', '#E3F2FD')], foreground=[('selected', '#000000')])
+    style.map('Treeview.Heading', background=[('active', '#E9ECEF')])
     
     # กำหนดหัวข้อคอลัมน์ของตาราง
     cart_tree.heading("id", text="รหัสสินค้า")
@@ -293,16 +310,21 @@ def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
         for row in cart_tree.get_children():
             cart_tree.delete(row)
             
+        # ใส่ tag เพื่อสลับสีแถว (Zebra striping)
+        cart_tree.tag_configure('evenrow', background='#FFFFFF')
+        cart_tree.tag_configure('oddrow', background='#F8F9FA')
+            
         total_sum = 0.0
         if os.path.exists(bill_path):
             with open(bill_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
-            for line in lines:
+            for idx, line in enumerate(lines):
                 parts = line.strip().split(",")
                 if len(parts) == 5:
                     pid, name, price, qty, total = parts
                     total_sum += float(total)
-                    cart_tree.insert("", tk.END, values=(pid, f"{name} (x{qty})", price, total))
+                    tag = 'evenrow' if idx % 2 == 0 else 'oddrow'
+                    cart_tree.insert("", tk.END, values=(pid, f"{name} (x{qty})", price, total), tags=(tag,))
 
         discount = 0.0
         if current_member_info["phone"] is not None:
