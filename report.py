@@ -65,7 +65,7 @@ def product_report():
     return inventory
 
 
-#ฟังก์ชันค้นหาประวัติจากขายแบบ Custom ผ่านวัน/เดือน/ปี 
+#ฟังก์ชันค้นหาประวัติจากขายแบบ Custom ผ่านวัน/เดือน/ปี ปล.จริงๆให้ใส่เปน ปี เดือน วัน
 def search_sale_history_custom(year,month,day):
     # เป็น แปลงint เพื่อให้จัดรูปแบบวันที่ให้เปน YYYY-MM-DD เรียงแบบนี้เพือให้ตรงกับไฟล์ sale.txt
     search_date = f"{int(year):04d}-{int(month):02d}-{int(day):02d}" #เกบวันที่
@@ -80,54 +80,71 @@ def search_sale_history_custom(year,month,day):
             for line in lines: #ลูปให้อ่านแต่ละบรรทัด
                 line = line.strip() #ตัดช่องว่างหน้า-หลัง
                 if line:
-                    if line.startswith(search_date): #ถ้าบรรทัดนั้นขึ้นต้นด้วยsearch_date 
+                    if line.startswith(search_date): #ถ้าบรรทัดนั้นขึ้นต้นด้วยวันในsearch_date 
                         results.append(line)  #ให้เก็บผลลัพนั้นลงใน results เปน line
     return results
 
-#ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่ วัน
-import os
-from datetime import datetime
+#ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่วัน
+def show_day_sales():
 
-import os
-from datetime import datetime
-
-def show_today_sales():
-    # 1. ดึงข้อมูลวัน/เดือน/ปี จากระบบ
+    # ดึงข้อมูลวัน/เดือน/ปี จากระบบ
     now = datetime.now()
-    today_str = now.strftime("%Y-%m-%d") # ใช้สำหรับค้นหาในไฟล์ (เช่น 2026-03-07)
-    month_str = now.strftime("%Y-%m") 
-    year_str = now.strftime("%Y")
-    
-    # ดึงเฉพาะ "วัน" ออกมา (เลือกใช้อย่างใดอย่างหนึ่งตามงานของคุณ)
-    today_day_num = now.day              # แบบตัวเลข (เช่น 7)
-    
+
+    day_sales = now.strftime("%Y-%m-%d") #.srtftime คือเพื่อดึงเฉพาะตัวเลขในวันที่ให้กลายเป็นสตริงเพื่อใช้ในการค้หา
     sale_data = stock.SALES_FILE
     results = []
     total_sales_count = 0
 
-    # พิมพ์หัวข้อโชว์วันที่และ "วัน" เฉพาะเจาะจง
-    print(f"--- รายงานการขายประจำวันที่ {today_day_num} (Full: {today_str}) ---")
-
-    if os.path.exists(sale_data):
+    if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์ sale_data ว่ามีอยู่จริงบ่
         with open(sale_data, 'r', encoding='utf-8') as f:
             for line in f:
-                line = line.strip()
-                # 2. ตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่ของวันนี้หรือไม่
-                if line.startswith(year_str):
+                line = line.strip() #ตัดช่องว่างหน้า-หลัง
+                #สร้างเงื่อนไขตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยวันที่หรือไม่
+                if line.startswith(day_sales):
                     results.append(line)
-                    print(line)  
-                    total_sales_count += 1
-    
-    # 3. สรุปผล
-    if total_sales_count == 0:
-        print(f"วันที่ {today_day_num} นี้ยังไม่มีรายการขาย")
-    else:
-        print(f"---------------------------------------")
-        print(f"สรุป: วันนี้พบทั้งหมด {total_sales_count} รายการ")
-
     return results
 
-# เรียกใช้งานฟังก์ชัน
-show_today_sales()
 
-# print(search_sale_history_day())
+#ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่เดือน
+def show_month_sales():
+    # ดึงข้อมูลวัน/เดือน/ปี จากระบบ
+    now = datetime.now() #ตัวแปรเก็บdatetimeแล้วใช้เมดธอด.now
+    #.srtftime คือเพื่อดึงเฉพาะตัวเลขในเดือนให้กลายเป็นสตริงเพื่อใช้ในการค้หา
+    month_sales = now.strftime("%Y-%m")
+    sale_data = stock.SALES_FILE
+    results = []
+
+    if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์ sale_data ว่ามีอยู่จริงบ่
+        with open(sale_data, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip() #ตัดช่องว่างหน้า-หลัง
+                #สร้างเงื่อนไขตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยเดือนหรือไม่
+                if line.startswith(month_sales):
+                    results.append(line)
+    return results
+
+#ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่ปี
+def show_year_sales():
+    #ดึงข้อมูลวัน/เดือน/ปี จากระบบ
+    now = datetime.now()
+    #.srtftime คือเพื่อดึงเฉพาะตัวเลขในปีให้กลายเป็นสตริงเพื่อใช้ในการค้หา
+    year_sales = now.strftime("%Y")
+    sale_data = stock.SALES_FILE
+    results = []
+
+    if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์ sale_data ว่ามีอยู่จริงบ่
+        with open(sale_data, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip() #ตัดช่องว่างหน้า-หลัง
+                #สร้างเงื่อนไขตรวจสอบว่าบรรทัดนั้นขึ้นต้นด้วยปีหรือไม่
+                if line.startswith(year_sales):
+                    results.append(line)
+    return results
+
+
+# เรียกใช้งานฟังก์ชัน
+'''
+print(show_day_sales())
+print(show_month_sales())
+print(show_year_sales())
+'''
