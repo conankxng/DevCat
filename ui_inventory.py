@@ -50,6 +50,7 @@ def setup_inventory_interface(parent):
         for pid, data in products.items(): #ทำการลูปเอาข้อมูลใส่ตาราง
             tree.insert('', 'end', values=(pid, data['name'], data['price'], data['stock'], data['cost']))
         
+        entry_search.delete(0,tk.END) #เคลียร์ช่องคนหาเมื่อกดรีเฟรช
         update_summary() # พอ รีเฟรช ก็แสดงจำนวนยอดเงินใหม่
         check_low_stock() # พอ รีเฟรช ก็จะดูว่ามีสินค้าไหนใกล้หมดไหม
     
@@ -254,7 +255,6 @@ def setup_inventory_interface(parent):
     entry_search = tk.Entry(search_frame,font=default_font,width=30) #สร้างช่องกรอกข้อมูล
     entry_search.pack(side='left',padx=10)
     entry_search.bind('<Return>',lambda event: search_item()) #.bind นำเหตุการณ์  <Return> ปุ่ม ถ้าผู้ใช้กรอกช้อมูลแล้วกดปุ่ม ก็จะส่งไปให้ฟังก์ชันทำงาน
-    
     tk.Button(search_frame, text='ค้นหา',font=default_font,bg='#ffc107', command=search_item).pack(side='left',padx=5)
     tk.Button(search_frame, text='รีเฟรชข้อมูล', font=default_font, command=refresh_data).pack(side='left', padx=5)
     
