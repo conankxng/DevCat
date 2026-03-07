@@ -8,6 +8,8 @@ from datetime import datetime
 from PIL import Image, ImageTk
 from playsound import playsound 
 import customtkinter as ctk
+import textwrap
+
 
 # ========================================================================= #
 # ส่วนที่ 1.5: แป้นกดตัวเลข (Numpad) ที่ใช้ร่วมกัน
@@ -15,14 +17,14 @@ import customtkinter as ctk
 def show_shared_numpad(parent_win, title, initial_value, callback):
     popup = ctk.CTkToplevel(parent_win)
     popup.title(title)
-    popup.geometry("300x500")
+    popup.geometry("300x500+550+300")
     popup.grab_set()
     popup.transient(parent_win)
     popup.focus_force()
     
     qty_var = ctk.StringVar(value=initial_value)
     
-    display = ctk.CTkLabel(popup, textvariable=qty_var, font=("Kanit", 28, "bold"), fg_color="white", anchor="e")
+    display = ctk.CTkLabel(popup, textvariable=qty_var, font=("Kanit", 28, "bold"), fg_color="white", text_color="#1e683e", anchor="e")
     display.pack(fill=tk.X, padx=10, pady=(10, 10))
     
     keypad_frame = ctk.CTkFrame(popup)
@@ -51,7 +53,13 @@ def show_shared_numpad(parent_win, title, initial_value, callback):
     ]
     
     for (text, row, col) in buttons:
-        btn = ctk.CTkButton(keypad_frame, text=text, font=("Kanit", 18, "bold"), command=create_btn_command(text))
+        btn = ctk.CTkButton(keypad_frame, text=text, font=("Kanit", 25, "bold"), command=create_btn_command(text),
+                            border_color="#1e683e",
+                            border_width=4,
+                            fg_color="transparent",
+                            text_color="#1e683e",
+                            hover_color="#61bc85"
+                            )
         btn.grid(row=row, column=col, sticky="nsew", padx=2, pady=2)
         
     def submit():
@@ -59,7 +67,7 @@ def show_shared_numpad(parent_win, title, initial_value, callback):
         popup.destroy()
         callback(val)
         
-    ctk.CTkButton(popup, text="ยืนยัน", command=submit, font=("Kanit", 16, "bold"), fg_color="green", text_color="white").pack(fill=tk.X, padx=10, pady=10)
+    ctk.CTkButton(popup, text="ยืนยัน", command=submit, font=("Kanit", 30, "bold"), fg_color="green", text_color="white").pack(fill=tk.X, padx=10, pady=20)
 
 
 # ========================================================================= #
@@ -70,75 +78,66 @@ current_selected_product = {"id": None, "name": None}
 # ตัวแปรจำสถานะสมาชิกปัจจุบัน
 current_member_info = {"phone": None, "first_name": None, "last_name": None}
 
-def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
+def create_three_frames(parent):
     """
     ฟังก์ชันสำหรับแบ่งหน้าจอ POS ออกเป็น 3 ส่วนหลัก (ซ้าย: สินค้า, กลาง: ตะกร้า, ขวา: ดำเนินการ)
     """
-    def add_background_image(widget, image_path):
-        if not image_path or not os.path.exists(image_path):
-            return
-        try:
-            original_img = Image.open(image_path)
-        except Exception:
-            return
-            
-        bg_label = ctk.CTkLabel(widget)
-        bg_label.place(x=0, y=0, relwidth=1, relheight=1)
-        bg_label.lower()
-        
-        widget._bg_size = (0, 0)
-        
-        def on_resize(event):
-            if event.widget == widget:
-                w, h = event.width, event.height
-                if w < 10 or h < 10: return
-                if abs(w - widget._bg_size[0]) > 5 or abs(h - widget._bg_size[1]) > 5:
-                    widget._bg_size = (w, h)
-                    resized = original_img.resize((w, h), Image.Resampling.LANCZOS)
-                    photo = ImageTk.PhotoImage(resized)
-                    bg_label.config(image=photo)
-                    bg_label.image = photo
-                    
-        widget.bind("<Configure>", on_resize, add='+')
 
 # ---------------------------------------------------------
     # เฟรมที่ 1: ค้นหาและรายการสินค้า (เลื่อนได้)
     # ---------------------------------------------------------
-    left_panel = ctk.CTkFrame(parent, fg_color="transparent")
-    left_panel.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+    left_panel = ctk.CTkFrame(parent, fg_color="transparent", width=500) # ตั้งเป็น transparent
+    left_panel.pack_propagate(False)
+    left_panel.pack(side=tk.LEFT, fill=tk.BOTH, padx=5, pady=(10, 0))
     
     # --- 2. ส่วนค้นหา (ทำให้โปร่งใสด้วย) ---
     search_frame = ctk.CTkFrame(left_panel, fg_color="transparent") # ตั้งเป็น transparent
     search_frame.pack(fill=tk.X, pady=5)
     
-    ctk.CTkLabel(search_frame, text="ค้นหาสินค้า", font=("Kanit", 12, "bold")).pack(side=tk.LEFT)
+    # 1. สร้าง Frame เพื่อทำเป็นกรอบโค้ง
+    search_label_bg = ctk.CTkFrame(
+        search_frame, 
+        fg_color="transparent",          # สีพื้นหลังของกรอบ
+        corner_radius=10,# ปรับความโค้งตรงนี้
+    )
+    search_label_bg.pack(padx=(5, 20))
+
+    # 2. สร้าง Label ไว้ข้างใน Frame นั้น
+    ctk.CTkLabel(
+        search_label_bg, 
+        text="ค้นหาสินค้า", 
+        font=("Kanit", 30, "bold"),
+        text_color="#1e683e"       # ปรับสีตัวอักษรให้ตัดกับพื้นหลัง
+    ).pack(padx=15, pady=5)      # padx/pady ตรงนี้คือ "ระยะห่างระหว่างกรอบกับตัวอักษร"
     search_var = ctk.StringVar()
-    search_entry = ctk.CTkEntry(search_frame, textvariable=search_var, font=("Kanit", 12))
-    search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+    search_entry = ctk.CTkEntry(search_frame, textvariable=search_var, font=("Kanit", 15))
+    search_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=10)
     
-    ctk.CTkButton(search_frame, text="X", font=("Kanit", 10, "bold"), fg_color="red", text_color="white", width=3, command=lambda: search_var.set("")).pack(side=tk.RIGHT)
+    ctk.CTkButton(search_frame, text="X", font=("Kanit", 15, "bold"), fg_color="#1e683e", text_color="white", width=3, command=lambda: search_var.set("")).pack(side=tk.RIGHT)
     
     # --- 3. ส่วนรายการสินค้า (Scrollable) ---
-    frame1 = ctk.CTkScrollableFrame(left_panel)
-    frame1.pack(fill=tk.BOTH, expand=True)
-
-    # --- 4. บังคับลำดับแกน Z ---
-    # img1.lower() # ส่งรูปภาพไปอยู่ชั้นล่างสุดของ left_panel
-
+    frame1 = ctk.CTkScrollableFrame(
+                                    left_panel,
+                                    fg_color="#FFFFFF", # ตั้งเป็น transparent
+                                    scrollbar_fg_color="transparent", # สีพื้นหลังของ scrollbar (ทำให้โปร่งใส)
+                                    scrollbar_button_color="gray",
+                                    scrollbar_button_hover_color="#1e683e",
+                                    )
+    frame1.pack(fill=tk.BOTH, expand=True, pady=(10, 15), padx=(10, 0))
 
     
     # ---------------------------------------------------------
     # เฟรมที่ 2: ตะกร้าสินค้า (แสดงผลเป็นตาราง)
     # ---------------------------------------------------------
-    frame2 = ctk.CTkFrame(parent)
-    frame2.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
-    add_background_image(frame2, bg_img2)
+    frame2 = ctk.CTkFrame(parent, fg_color="white", width=820)
+    frame2.pack_propagate(False)
+    frame2.pack(side=tk.LEFT, fill=tk.BOTH, padx=(10, 10), pady=(10, 15))
     
     # ป้ายหัวข้อตะกร้าสินค้า
-    ctk.CTkLabel(frame2, text="รายการสินค้า", font=("Kanit", 12, "bold")).pack(pady=10)
+    ctk.CTkLabel(frame2, text="รายการสินค้า", font=("Kanit", 25, "bold"), text_color="#1e683e").pack(pady=10)
     
     # กรอบสำหรับตารางและแถบเลื่อน
-    tree_frame = ctk.CTkFrame(frame2)
+    tree_frame = ctk.CTkFrame(frame2, fg_color="transparent")
     tree_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
     
     # แถบเลื่อน (Scrollbar) ของตาราง
@@ -150,12 +149,12 @@ def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
     cart_tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=15, yscrollcommand=tree_scroll.set, selectmode="browse")
     tree_scroll.config(command=cart_tree.yview)
     
-    #ปรับแต่งตารางให้สวยงาม (Modern Look)
+    #ปรับแต่งตารางให้สวยงาม (เข้ากับธีมสีเขียวของร้าน)
     style = ttk.Style()
     style.theme_use("clam")
     
     style.configure("Treeview", 
-                    background="white",
+                    background="#000000",
                     foreground="#333333",
                     rowheight=35,
                     fieldbackground="white",
@@ -164,13 +163,13 @@ def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
                     
     style.configure("Treeview.Heading", 
                     font=("Kanit", 12, "bold"), 
-                    background="#F8F9FA", 
-                    foreground="#495057",
+                    background="#1e683e", 
+                    foreground="white",
                     borderwidth=0,
                     relief="flat")
                     
-    style.map('Treeview', background=[('selected', '#E3F2FD')], foreground=[('selected', '#000000')])
-    style.map('Treeview.Heading', background=[('active', '#E9ECEF')])
+    style.map('Treeview', background=[('selected', '#C8E6C9')], foreground=[('selected', '#000000')])
+    style.map('Treeview.Heading', background=[('active', '#144e2d')])
     
     # กำหนดหัวข้อคอลัมน์ของตาราง
     cart_tree.heading("id", text="รหัสสินค้า")
@@ -191,16 +190,16 @@ def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
     bill_path = os.path.join(os.path.dirname(__file__), "data", "bill.txt")
     
     # สร้าง Frame 3 ก่อนเพื่อให้ reload_cart เรียกใช้ Label ได้
-    frame3 = ctk.CTkFrame(parent)
-    frame3.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
-    add_background_image(frame3, bg_img3)
+    frame3 = ctk.CTkFrame(parent, fg_color="#FFFFFF", width=600)
+    frame3.pack_propagate(False)
+    frame3.pack(side=tk.LEFT, fill=tk.BOTH, padx=(5, 20), pady=(10, 15))
     
     # ========================== ส่วนที่ 3 บน: สมาชิก ==========================
-    member_frame = ctk.CTkFrame(frame3, border_width=2)
-    member_frame.pack(fill=tk.X, pady=5)
+    member_frame = ctk.CTkFrame(frame3, border_width=5, fg_color="white", border_color="#1e683e", corner_radius=10)
+    member_frame.pack(fill=tk.X, pady=(10, 10), padx=(10, 10))
     
     lbl_member_status_var = ctk.StringVar(value="ลูกค้าทั่วไป")
-    ctk.CTkLabel(member_frame, textvariable=lbl_member_status_var, font=("Kanit", 11, "bold"), text_color="blue").pack(pady=5)
+    ctk.CTkLabel(member_frame, textvariable=lbl_member_status_var, font=("Kanit", 40, "bold"), text_color="#1e683e").pack(pady=(30, 30))
     
     
     def open_phone_numpad(parent_win, entry_widget):
@@ -214,21 +213,21 @@ def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
     def popup_register():
         reg_pop = ctk.CTkToplevel(parent)
         reg_pop.title("ลงทะเบียนสมาชิกใหม่")
-        reg_pop.geometry("300x250")
+        reg_pop.geometry("400x350+700+300")
         reg_pop.grab_set()
         
-        ctk.CTkLabel(reg_pop, text="เบอร์โทรศัพท์:").pack(pady=5)
+        ctk.CTkLabel(reg_pop, text="เบอร์โทรศัพท์", font=("Kanit", 30, "bold"), text_color="#1e683e").pack(pady=5)
         ent_phone = ctk.CTkEntry(reg_pop)
-        ent_phone.pack()
+        ent_phone.pack(fill="both", padx=30)
         ent_phone.bind("<Button-1>", lambda e: open_phone_numpad(reg_pop, ent_phone))
         
-        ctk.CTkLabel(reg_pop, text="ชื่อ:").pack(pady=5)
+        ctk.CTkLabel(reg_pop, text="ชื่อ", font=("Kanit", 30, "bold"), text_color="#1e683e").pack(pady=5)
         ent_fname = ctk.CTkEntry(reg_pop)
-        ent_fname.pack()
+        ent_fname.pack(fill="both", padx=30)
         
-        ctk.CTkLabel(reg_pop, text="นามสกุล:").pack(pady=5)
+        ctk.CTkLabel(reg_pop, text="นามสกุล", font=("Kanit", 30, "bold"), text_color="#1e683e").pack(pady=5)
         ent_lname = ctk.CTkEntry(reg_pop)
-        ent_lname.pack()
+        ent_lname.pack(fill="both", padx=30)
         
         def do_register():
             success, msg = member_manager.register_member(ent_phone.get(), ent_fname.get(), ent_lname.get())
@@ -238,17 +237,17 @@ def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
             else:
                 messagebox.showwarning("แจ้งเตือน", msg, parent=reg_pop)
                 
-        ctk.CTkButton(reg_pop, text="ยืนยันสมาชิก", command=do_register, fg_color="green", text_color="white").pack(pady=15)
+        ctk.CTkButton(reg_pop, text="ยืนยันสมาชิก", font=("Kanit", 20, "bold"), command=do_register, fg_color="#1e683e", hover_color="#003315", text_color="white").pack(pady=15)
 
     def popup_login():
         log_pop = ctk.CTkToplevel(parent)
         log_pop.title("เข้าสู่ระบบสมาชิก")
-        log_pop.geometry("250x150")
+        log_pop.geometry("400x350+700+300")
         log_pop.grab_set()
         
-        ctk.CTkLabel(log_pop, text="ใส่เบอร์โทรศัพท์").pack(pady=10)
+        ctk.CTkLabel(log_pop, text="ใส่เบอร์โทรศัพท์", font=("Kanit", 30, "bold"), text_color="#1e683e").pack(pady=10)
         ent_phone = ctk.CTkEntry(log_pop)
-        ent_phone.pack()
+        ent_phone.pack(fill="both", padx=30)
         ent_phone.bind("<Button-1>", lambda e: open_phone_numpad(log_pop, ent_phone))
         
         def do_login():
@@ -265,25 +264,34 @@ def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
             else:
                 messagebox.showerror("ไม่พบข้อมูล", "ไม่พบเบอร์โทรศัพท์นี้ในระบบ", parent=log_pop)
                 
-        ctk.CTkButton(log_pop, text="ตรวจสอบ", command=do_login, fg_color="blue", text_color="white").pack(pady=10)
+        ctk.CTkButton(log_pop, text="ตรวจสอบ", font=("Kanit", 20, "bold"), command=do_login, fg_color="#1e683e", hover_color="#003315", text_color="white").pack(pady=15)
 
-    btn_frame = ctk.CTkFrame(frame3)
-    btn_frame.pack(fill=tk.X, pady=5)
-    ctk.CTkButton(btn_frame, text="สมัครสมาชิก", font=("Kanit", 12), command=popup_register).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
-    ctk.CTkButton(btn_frame, text="เข้าสู่ระบบ", font=("Kanit", 12), command=popup_login).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=2)
+    btn_frame = ctk.CTkFrame(frame3, fg_color="transparent")
+    btn_frame.pack(fill=tk.X, padx=(10, 10))
+    ctk.CTkButton(btn_frame, text="สมัครสมาชิก", font=("Kanit", 25), command=popup_register,
+                  fg_color="#1e683e",
+                  hover_color="#003a17",
+                  ).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(0, 5))
+    ctk.CTkButton(btn_frame, text="เข้าสู่ระบบ", font=("Kanit", 25), command=popup_login,
+                  fg_color="#1e683e",
+                  hover_color="#003a17",
+                  ).pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(5, 0))
     
     def logout_member():
         global current_member_info
         current_member_info = {"phone": None, "first_name": None, "last_name": None}
         lbl_member_status_var.set("ลูกค้าทั่วไป")
         reload_cart()
-    ctk.CTkButton(frame3, text="ออกจากระบบสมาชิก", font=("Kanit", 12), command=logout_member, text_color="red").pack(fill=tk.X, pady=2)
+    ctk.CTkButton(frame3, text="ออกจากระบบสมาชิก", font=("Kanit", 18), command=logout_member, text_color="#FFFFFF",
+                  fg_color="#1e683e",
+                  hover_color="#003a17"
+                  ).pack(fill=tk.X, padx=(10, 10), pady=2)
 
 
     # ========================== ส่วนที่ 3 กลาง: สรุปยอด ==========================
-    ctk.CTkLabel(frame3, text="สรุปยอดชำระ", fg_color="lightcoral", font=("Kanit", 12, "bold")).pack(fill=tk.X, pady=10)
+    ctk.CTkLabel(frame3, text="สรุปยอดชำระ", font=("Kanit", 25, "bold"), text_color="#1e683e").pack(fill=tk.X, padx=(10, 10), pady=(20, 0))
     
-    summary_frame = ctk.CTkFrame(frame3)
+    summary_frame = ctk.CTkFrame(frame3, fg_color="white", border_width=5, border_color="#1e683e", corner_radius=10)
     summary_frame.pack(fill=tk.X, padx=10, pady=5)
     
     lbl_subtotal_var = ctk.StringVar(value="0.00 บาท")
@@ -291,17 +299,17 @@ def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
     lbl_vat_var = ctk.StringVar(value="0.00 บาท")
     lbl_grand_total_var = ctk.StringVar(value="0.00 บาท")
     
-    ctk.CTkLabel(summary_frame, text="ราคารวม:", font=("Kanit", 10)).grid(row=0, column=0, sticky="w", pady=2)
-    ctk.CTkLabel(summary_frame, textvariable=lbl_subtotal_var, font=("Kanit", 10)).grid(row=0, column=1, sticky="e", pady=2)
+    ctk.CTkLabel(summary_frame, text="ราคารวม", font=("Kanit", 20)).grid(row=0, column=0, sticky="w", padx=(20, 0), pady=10)
+    ctk.CTkLabel(summary_frame, textvariable=lbl_subtotal_var, font=("Kanit", 20)).grid(row=0, column=1, sticky="e", padx=(0, 20), pady=10)
     
-    ctk.CTkLabel(summary_frame, text="ส่วนลดสมาชิก:", font=("Kanit", 10), text_color="red").grid(row=1, column=0, sticky="w", pady=2)
-    ctk.CTkLabel(summary_frame, textvariable=lbl_discount_var, font=("Kanit", 10), text_color="red").grid(row=1, column=1, sticky="e", pady=2)
+    ctk.CTkLabel(summary_frame, text="ส่วนลดสมาชิก:", font=("Kanit", 20), text_color="red").grid(row=1, column=0, sticky="w", padx=(20, 0), pady=10)
+    ctk.CTkLabel(summary_frame, textvariable=lbl_discount_var, font=("Kanit", 20), text_color="red").grid(row=1, column=1, sticky="e", padx=(0, 20), pady=10)
     
-    ctk.CTkLabel(summary_frame, text="VAT 7%:", font=("Kanit", 10)).grid(row=2, column=0, sticky="w", pady=2)
-    ctk.CTkLabel(summary_frame, textvariable=lbl_vat_var, font=("Kanit", 10)).grid(row=2, column=1, sticky="e", pady=2)
+    ctk.CTkLabel(summary_frame, text="VAT 7%:", font=("Kanit", 20), text_color="orange").grid(row=2, column=0, sticky="w", padx=(20, 0), pady=10)
+    ctk.CTkLabel(summary_frame, textvariable=lbl_vat_var, font=("Kanit", 20), text_color="#f98404").grid(row=2, column=1, sticky="e", padx=(0, 20), pady=10)
     
-    ctk.CTkLabel(summary_frame, text="ราคาสุทธิ:", font=("Kanit", 14, "bold"), text_color="green").grid(row=3, column=0, sticky="w", pady=10)
-    ctk.CTkLabel(summary_frame, textvariable=lbl_grand_total_var, font=("Kanit", 14, "bold"), text_color="green").grid(row=3, column=1, sticky="e", pady=10)
+    ctk.CTkLabel(summary_frame, text="ราคาสุทธิ", font=("Kanit", 30, "bold"), text_color="green").grid(row=3, column=0, sticky="w", padx=(20, 0), pady=(40, 10))
+    ctk.CTkLabel(summary_frame, textvariable=lbl_grand_total_var, font=("Kanit", 30, "bold"), text_color="green").grid(row=3, column=1, sticky="e", padx=(0, 20), pady=(40, 10))
     summary_frame.columnconfigure(1, weight=1)
     
     
@@ -310,9 +318,9 @@ def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
         for row in cart_tree.get_children():
             cart_tree.delete(row)
             
-        # ใส่ tag เพื่อสลับสีแถว (Zebra striping)
+        # ใส่ tag เพื่อสลับสีแถว (Zebra striping) ให้เป็นโทนเขียวอ่อน
         cart_tree.tag_configure('evenrow', background='#FFFFFF')
-        cart_tree.tag_configure('oddrow', background='#F8F9FA')
+        cart_tree.tag_configure('oddrow', background='#F1F8E9')
             
         total_sum = 0.0
         if os.path.exists(bill_path):
@@ -345,9 +353,9 @@ def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
     reload_cart()
     
     # ========================== ส่วนที่ 3 ล่าง: ดำเนินการ ==========================
-    action_frame = ctk.CTkFrame(frame3)
+    action_frame = ctk.CTkFrame(frame3, fg_color="transparent")
     # ลบ expand=True ทิ้งเพื่อป้องกันไม่ให้ปุ่มข้างล่างโดนดันตกขอบจอ
-    action_frame.pack(fill=tk.X, pady=10)
+    action_frame.pack(fill=tk.X, padx=(10, 10), pady=(20, 0))
     
     def clear_cart():
         if os.path.exists(bill_path):
@@ -438,9 +446,15 @@ def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
             
         ctk.CTkButton(recall_pop, text="เรียกคืนบิลนี้", command=do_recall, fg_color="lightblue").pack(pady=10)
         
-    ctk.CTkButton(action_frame, text="พักบิล", font=("Kanit", 12, "bold"), command=hold_bill, fg_color="orange").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
-    ctk.CTkButton(action_frame, text="เรียกคืนบิล", font=("Kanit", 12, "bold"), command=recall_bill, fg_color="lightblue").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
-    ctk.CTkButton(action_frame, text="ล้างตะกร้า", font=("Kanit", 12, "bold"), command=clear_cart, fg_color="red", text_color="white").pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=2)
+    ctk.CTkButton(action_frame, text="พักบิล", font=("Kanit", 25, "bold"), command=hold_bill, fg_color="orange",
+                  hover_color="#9b5c00"
+                  ).pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=(0, 5))
+    ctk.CTkButton(action_frame, text="เรียกคืนบิล", font=("Kanit", 25, "bold"), command=recall_bill, fg_color="#006b70",
+                  hover_color="#003a3a"
+                  ).pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=(5, 5))
+    ctk.CTkButton(action_frame, text="ล้างตะกร้า", font=("Kanit", 25, "bold"), command=clear_cart, fg_color="red", text_color="white",
+                  hover_color="#8e0000"
+                  ).pack(side=tk.LEFT, expand=True, fill=tk.BOTH, padx=(5, 0))
 
     def confirm_checkout():
         """ยืนยันการทำรายการแบบเต็มรูปแบบ"""
@@ -516,27 +530,38 @@ def create_three_frames(parent, bg_img1=None, bg_img2=None, bg_img3=None):
             # เล่นเสียง (ใส่ Path ไฟล์เสียงของคุณ)
             # block=False เพื่อให้เสียงเล่นไปโดยไม่ทำให้หน้าจอโปรแกรมค้าง
             playsound("sound/cat.mp3", block=False)
+            playsound("sound/money_pickup.mp3", block=False)
         except Exception as e:
             print(f"เล่นเสียงไม่ได้")
-                
-    try:
-        img = Image.open("img/cat_btn.png")
-        cat_button_img = ctk.CTkImage(img, size=(170, 130))
-    except:
-        cat_button_img = None
-        print("ไม่พบรูปภาพ")         
-
+                 
+    cat_img_normal = ctk.CTkImage(light_image=Image.open("img/cat_normal.png"), size=(500, 150))
+    cat_img_hover = ctk.CTkImage(light_image=Image.open("img/cat_hover.png"), size=(500, 150))
+    
     # ปุ่มยืนยันรายการจ่ายเงิน (แพ็คให้ติดขอบล่างเสมอ ป้องกันการโดนดันตกจอ)
     btn_cat = ctk.CTkButton(
         frame3, 
         text="",
-        image=cat_button_img if "cat_button_img" in locals() else None,
-        hover_color="#f0f2f5",
+        image=cat_img_normal,
         fg_color="transparent",
+        hover_color="#FFFFFF",
         command=confirm_checkout
     )
         
-    btn_cat.pack()
+    btn_cat.pack(pady=(20, 0))
+    
+    # 3. สร้างฟังก์ชันสำหรับเปลี่ยนรูป
+    def on_enter(event):
+        btn_cat.configure(image=cat_img_hover) # เปลี่ยนเป็นรูปตอน Hover
+
+    def on_leave(event):
+        btn_cat.configure(image=cat_img_normal) # กลับเป็นรูปปกติ
+
+    # 4. เชื่อมต่อ (Bind) เหตุการณ์เข้ากับปุ่ม
+    btn_cat.bind("<Enter>", on_enter)
+    btn_cat.bind("<Leave>", on_leave)
+    
+    thk = ctk.CTkLabel(frame3, text="ขอบคุณที่อุดหนุนนะ เมี๊ยววว!!", font=("Kanit", 40, "bold"), text_color="#1e683e")
+    thk.pack(pady=(30, 0))
     
     # ส่งเฟรมทั้ง 3 กลับเป็นก้อน
     return frame1, frame2, frame3
@@ -591,12 +616,19 @@ def load_products_to_frame(frame, reload_cart_cb=None, search_keyword=""):
                     open_numpad_popup(frame, reload_cart_cb)
                 
                 # สร้างปุ่มสำหรับสินค้านั้นๆ
+                wrapped_name = "\n".join(textwrap.wrap(product_name, width=10))
                 btn = ctk.CTkButton(
                     frame, 
-                    text=product_name, 
-                    font=("Kanit", 10),
-                    height=8,
-                    command=on_product_click
+                    text=wrapped_name, 
+                    font=("Kanit", 20, "bold"),
+                    height=100,
+                    text_color="#1e683e",
+                    fg_color="#FFFFFF",
+                    hover_color="#74c494",
+                    border_color="#1e683e",
+                    border_width=3,
+                    command=on_product_click,
+                    anchor="center"      # จัดวางข้อความทั้งหมดไว้กลางปุ่ม
                 )
                 btn.place(relwidth=1, relheight=1)
                 

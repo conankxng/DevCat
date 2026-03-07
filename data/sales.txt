@@ -19,3 +19,8 @@
 2026-03-07 22:18:32, ID:016,Name:switch Qty: 2, Total: 3000.0, Profit: 800.0
 2026-03-07 22:52:14, ID:019,Name:microphone Qty: 5, Total: 6000.0, Profit: 2000.0
 2026-03-08 00:08:59, ID:044,Name:ups Qty: 5, Total: 17500.0, Profit: 3000.0
+2026-03-08 05:13:19, ID:006,Name:monitor Qty: 2, Total: 9000.0, Profit: 2000.0
+2026-03-08 05:13:59, ID:008,Name:tablet Qty: 2, Total: 24000.0, Profit: 5000.0
+2026-03-08 05:14:13, ID:011,Name:usb Qty: 2, Total: 300.0, Profit: 200.0
+2026-03-08 05:57:12, ID:006,Name:monitor Qty: 5, Total: 22500.0, Profit: 5000.0
+2026-03-08 05:57:54, ID:010,Name:scanner Qty: 2, Total: 8400.0, Profit: 1400.0
