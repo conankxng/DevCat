@@ -1,3 +1,4 @@
+import product_manager
 import storage_product as stock
 import product_manager as manage
 from datetime import datetime #นำเข้าเพื่อดึงปีและเดือนปัจจุบัน
@@ -60,8 +61,8 @@ def total_expense():
     return sum(expense) #sumเพื่อรวม
 
 #ฟังก์ชั่นที่แสดงว่าสินค้าขายดี
-def product_report(): 
-    inventory = manage.best_seller() # เรียกใช้ฟังก์ชันจาก product_manager 
+def product_report():
+    inventory = manage.best_seller(threshold=20) # เรียกใช้ฟังก์ชันจาก product_manager 
     return inventory
 
 
@@ -176,9 +177,11 @@ def total_members():
     return count
 
 # ฟังก์ชันดึงข้อมูลจาก master_sales.txt เพื่อไปแสดงในตาราง
-def get_master_sales_data():
+def get_master_sales_data(days_filter=None):
     master_file = os.path.join(stock.DATA_DIR, "master_sales.txt")
     sales_list = []
+    
+    now = datetime.now()
     
     if os.path.exists(master_file):
         with open(master_file, 'r', encoding='utf-8') as f:
@@ -190,6 +193,15 @@ def get_master_sales_data():
                         # แยกส่วนวันที่และเวลาออกจากข้อความที่เหลือ
                         date_part, rest = line.split('] ', 1)
                         date_str = date_part.replace('[', '').strip()
+                        
+                        if days_filter is not None:
+                            try:
+                                # แปลงจาก string เป็น datetime เพื่อคำนวณระยะห่าง
+                                row_date = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+                                if (now - row_date).days > days_filter:
+                                    continue
+                            except ValueError:
+                                pass
                         
                         # แยกข้อมูลที่เหลือด้วย "|"
                         parts = [p.strip() for p in rest.split('|')]
@@ -209,13 +221,15 @@ def get_master_sales_data():
                         pass
     return sales_list
 
+# a = search_sale_history_custom("2026","03","05") #ทดสอบฟังก์ชันค้นหาประวัติจากขายแบบ Custom ผ่านวัน/เดือน/ปี
+# print(a)
 # y = show_year_sales()
 # m = show_month_sales()
 # d = show_day_sales()
 
 # print(f"{y=}, {m=}, {d=}")
 
-# เรียกใช้งานฟังก์ชัน
+
 '''
 print(show_day_sales())
 print(show_month_sales())
