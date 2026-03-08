@@ -38,21 +38,29 @@ def total_revenue():
 #ฟังก์ชันแสดงรายจ่าย หรือ ต้นทุน
 def product_cost_data():
     cost_data = stock.FILE_NAME 
-    if os.path.exists(cost_data): #เช็คว่าไฟล์มีอยู่จริงไหม
-        costs = [] #สร้างลิสต์ว่าง ไว้เก็บข้อมูลรายจ่ายที่ดึงออกมาจากไฟล์ FILE_NAME  ทีละบรรทัด
-        with open(cost_data,'r',encoding='utf-8') as f: #เปิดไฟล์เพื่ออ่าน เป็นภาษาไทย
-            lines= f.readlines() 
-            for line in lines: #วนลูปเพื่ออ่านข้อมูลทีละบรรทัด
-                line = line.strip() #.strip เพื่อตัดช่องว่างหัว-ท้าย
+    if os.path.exists(cost_data):
+        total_costs_list = [] # เปลี่ยนชื่อให้สื่อความหมายว่าเป็น "ต้นทุนรวม"
+        with open(cost_data, 'r', encoding='utf-8') as f:
+            lines = f.readlines() 
+            for line in lines:
+                line = line.strip()
                 if line: 
                     try:
-                        parts = line.split(',') #แยกส่วนข้อมูลแต่ละพาร์ท ตามลูกน้ำ
-                        # cost_value คือข้อมูลต้นทุนที่อยู่ใน FILE_NAME โดยคอลั่มท้ายสุดคือต้นทุน
-                        cost_value = float(parts[-1].strip()) #ตัดช่องว่างหัวท้าย
-                        costs.append(cost_value) #เก็บcost_valueไปไว้ในcost
-                    except :
-                        costs.append(0.0) #ถ้าเกิดerror ระหว่างการแปลงค่า ให้ใส่ 0.0 ลงไปแทน
-        return costs
+                        parts = line.split(',')
+                        # ดึงค่าตามที่คุณต้องการ:
+                        # parts[-1] คือ ต้นทุนต่อหน่วย (Cost per unit)
+                        # parts[-3] คือ จำนวน (Quantity)
+                        unit_cost = float(parts[-1].strip())
+                        quantity = float(parts[-3].strip())
+                        
+                        # นำมาคูณกันตามโจทย์
+                        line_total_cost = unit_cost * quantity
+                        
+                        total_costs_list.append(line_total_cost)
+                    except (ValueError, IndexError):
+                        # ถ้าแปลงเลขไม่ได้ หรือ index ไม่ครบ ให้ใส่ 0.0
+                        total_costs_list.append(0.0)
+        return total_costs_list
     return []
 
 #ฟังก์ชั่นแสดงรายจ่ายรวมทั้งหมด
