@@ -231,16 +231,16 @@ def create_report_ui(parent):
         in_out_come_custom.columnconfigure(i, weight=1)
 
     # 3. ตรวจสอบว่าปุ่มทุกปุ่มมี sticky="nsew" (เพื่อให้ปุ่มยืดไปแตะขอบ Grid)
-    btn_all = ctk.CTkButton(in_out_come_custom, text="ทั้งหมด", font=("Kanit", 12), command=lambda: render_sales_table(None))
+    btn_all = ctk.CTkButton(in_out_come_custom, text="ทั้งหมด", font=("Kanit", 20, "bold"), command=lambda: render_sales_table(None), fg_color="#1e683e", hover_color="#002c13")
     btn_all.grid(row=0, column=0, padx=(0, 5), pady=(5, 0), sticky="nsew")
 
-    btn_7 = ctk.CTkButton(in_out_come_custom, text="7 วัน", font=("Kanit", 12), command=lambda: render_sales_table(7))
+    btn_7 = ctk.CTkButton(in_out_come_custom, text="7 วัน", font=("Kanit", 20, "bold"), command=lambda: render_sales_table(7), fg_color="#1e683e", hover_color="#002c13")
     btn_7.grid(row=0, column=1, padx=5, pady=(5, 0), sticky="nsew")
 
-    btn_15 = ctk.CTkButton(in_out_come_custom, text="15 วัน", font=("Kanit", 12), command=lambda: render_sales_table(15))
+    btn_15 = ctk.CTkButton(in_out_come_custom, text="15 วัน", font=("Kanit", 20, "bold"), command=lambda: render_sales_table(15), fg_color="#1e683e", hover_color="#002c13")
     btn_15.grid(row=0, column=2, padx=5, pady=(5, 0), sticky="nsew")
 
-    btn_30 = ctk.CTkButton(in_out_come_custom, text="1 เดือน", font=("Kanit", 12), command=lambda: render_sales_table(30))
+    btn_30 = ctk.CTkButton(in_out_come_custom, text="1 เดือน", font=("Kanit", 20, "bold"), command=lambda: render_sales_table(30), fg_color="#1e683e", hover_color="#002c13")
     btn_30.grid(row=0, column=3, padx=(5, 0), pady=(5, 0), sticky="nsew")
 
     # 3.2 Frame ขวาล่าง (Best Sellers Table)

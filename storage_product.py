@@ -18,7 +18,7 @@ def load_products():
         with open(FILE_NAME,'r', encoding="utf-8") as f: #อ่านข้อมูลไฟล์เปิดแค่อ่านเฉยๆ
             for line in f: #วนลูปไฟล์ที่เปิดอ่านที่ละบรรทัด
                 parts = line.strip().split(",") #แยกข้อมูล strip()ลบช่องว่างและลบ\n split(",") แยกข้อมูลตามเครืี่องหมาย , แล้วก็เก็บเข้าตัวแปรเป็น list
-                if len(parts) == 5: # เช็คข้อมูลว่ามีครบ 5 ช่องไหม
+                if len(parts) == 5: # เช็คข้อมูลว่ามีครบ 6 ช่องไหม
                     pid, name, stock, price, cost = parts #Unpacking การเอาค่าใน list มาใส่ตัวแปรที่ละตัว
                     inventory[pid] = {  #เก็บข้อมูลลง Dictionary
                         "name":name,

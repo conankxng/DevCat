@@ -1,5 +1,4 @@
 import storage_product as storage
-import datetime #ดึงโมดูลเวลามาใช้
 
 def add_product(pid,name,price,stock,cost):
     """
@@ -132,10 +131,8 @@ def record_sale(pid,quantity,total_price):
     """
     บันทีกประวัติการขาย พร้อมอัพลง Data
     """
+    import datetime #ดึงโมดูลเวลามาใช้
     inventory = storage.load_products()
-    
-    if pid not in inventory:
-        return False, 'ไม่พบรหัสสินค้าในระบบ!'
     
     # คำนวณกำไร = (ราคาขายรวม - (ต้นทุนต่อชิ้น * จำนวนที่ขาย))
     cost_price = inventory[pid]['cost'] * quantity
