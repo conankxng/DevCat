@@ -1,5 +1,0 @@
-
-2026-03-08 20:23:14, ID:006,Name:monitor Qty: 5, Total: 22500.0, Profit: 5000.0
-2026-03-08 20:28:29, ID:005,Name:mouse Qty: 2, Total: 700.0, Profit: 300.0
-2026-03-08 23:19:00, ID:011,Name:usb Qty: 50, Total: 7500.0, Profit: 5000.0
-2026-03-08 23:19:45, ID:006,Name:monitor Qty: 5, Total: 22500.0, Profit: 5000.0

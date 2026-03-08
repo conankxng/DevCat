@@ -1,7 +1,6 @@
 """
 ไฟล์นี้รวบรวมฟังก์ชันด้าน Logic ทั้งหมดของระบบ POS
 """
-
 import os
 import product_manager
 import member_manager
@@ -12,10 +11,8 @@ from datetime import datetime
 # ========================================================================= #
 # ตัวแปร Global สำหรับจำสถานะ
 # ========================================================================= #
-
 # จำสินค้าที่ถูกเลือกล่าสุดจากหน้าจอซ้าย
 current_selected_product = {"id": None, "name": None}
-
 # จำข้อมูลสมาชิกที่ Login อยู่ในขณะนี้
 current_member_info = {"phone": None, "first_name": None, "last_name": None}
 
@@ -23,18 +20,15 @@ current_member_info = {"phone": None, "first_name": None, "last_name": None}
 # ========================================================================= #
 # ฟังก์ชันเกี่ยวกับสมาชิก (Member)
 # ========================================================================= #
-
 def do_login_member(phone):
     """
     ตรวจสอบเบอร์โทรศัพท์ในระบบสมาชิก
-    คืนค่า: dict ข้อมูลสมาชิก หรือ None ถ้าไม่พบ
     """
     return member_manager.get_member(phone)
 
-
 def save_member_to_state(mem):
     """
-    บันทึกข้อมูลสมาชิกที่ Login สำเร็จลงใน current_member_info (Global State)
+    บันทึกข้อมูลสมาชิกที่ Login สำเร็จลงใน (Global State)
     """
     global current_member_info
     current_member_info["phone"] = mem["phone"]
@@ -44,7 +38,7 @@ def save_member_to_state(mem):
 
 def logout_member_state():
     """
-    ล้างข้อมูลสมาชิกออกจาก Global State (ใช้ตอนออกจากระบบหรือชำระเงินเสร็จ)
+    ล้างข้อมูลสมาชิกออกจาก Global State
     """
     global current_member_info
     current_member_info = {"phone": None, "first_name": None, "last_name": None}
@@ -53,7 +47,6 @@ def logout_member_state():
 def do_register_member(phone, fname, lname):
     """
     ลงทะเบียนสมาชิกใหม่
-    คืนค่า: (success: bool, message: str)
     """
     return member_manager.register_member(phone, fname, lname)
 
@@ -61,15 +54,14 @@ def do_register_member(phone, fname, lname):
 def is_member_logged_in():
     """
     ตรวจสอบว่ามีสมาชิก Login อยู่หรือไม่
-    คืนค่า: True ถ้ามีสมาชิก Login อยู่
+    คืนค่า True ถ้ามีสมาชิก Login อยู่
     """
     return current_member_info["phone"] is not None
 
 
 # ========================================================================= #
-# ฟังก์ชันเกี่ยวกับตะกร้าสินค้า (Cart / Bill)
+# ฟังก์ชันเกี่ยวกับตะกร้าสินค้า
 # ========================================================================= #
-
 def get_bill_path():
     """
     คืนค่า Path เต็มของไฟล์บิลปัจจุบัน (bill.txt)
@@ -80,7 +72,6 @@ def get_bill_path():
 def read_bill_lines():
     """
     อ่านบิลปัจจุบันจากไฟล์และคืนค่าเป็น list ของ dict แต่ละรายการสินค้า
-    คืนค่า: list of dict (pid, name, price, qty, total) หรือ list ว่างถ้าไม่มีไฟล์
     """
     bill_path = get_bill_path()
     items = []
@@ -88,7 +79,7 @@ def read_bill_lines():
         with open(bill_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
         for line in lines:
-            parts = line.strip().split(",")
+            parts = line.strip().split(",") #คั่นข้อมูล ลบช่องว่าง
             if len(parts) == 5:
                 pid, name, price, qty, total = parts
                 items.append({
@@ -103,7 +94,7 @@ def read_bill_lines():
 
 def clear_bill_file():
     """
-    ล้างไฟล์บิลให้ว่างเปล่า (ใช้หลังชำระเงินหรือล้างตะกร้า)
+    ล้างไฟล์บิลให้ว่างเปล่า
     """
     open(get_bill_path(), "w").close()
 
@@ -111,11 +102,8 @@ def clear_bill_file():
 def calculate_totals(raw_total):
     """
     คำนวณสรุปยอด: ส่วนลดสมาชิก, VAT, และยอดสุทธิ
-    พารามิเตอร์:
-        raw_total (float): ยอดรวมก่อนคิดส่วนลด
-    คืนค่า: dict ที่มีกุญแจ subtotal, discount, vat, grand_total
     """
-    discount = raw_total * 0.25 if is_member_logged_in() else 0.0
+    discount = raw_total * 0.25 if is_member_logged_in() else 0.0 #ถ้าเป็นสมาชิกลด 25%
     after_discount = raw_total - discount
     vat = after_discount * 0.07
     grand_total = after_discount + vat
@@ -129,8 +117,7 @@ def calculate_totals(raw_total):
 
 def add_item_to_bill(pid, name, price, qty):
     """
-    เพิ่มสินค้าลงในไฟล์บิล และตรวจสอบสต็อกก่อนเพิ่ม
-    คืนค่า: (success: bool, message: str)
+    เพิ่มสินค้าลงใน bill.txt และตรวจสอบสต็อกก่อนเพิ่ม
     """
     inventory = product_manager.get_all_products()
     if pid not in inventory or inventory[pid]["stock"] < qty:
@@ -142,11 +129,9 @@ def add_item_to_bill(pid, name, price, qty):
         f.write(f"{pid},{name},{price:.2f},{qty},{total_price:.2f}\n")
     return True, "เพิ่มลงตะกร้าเรียบร้อยแล้ว"
 
-
 def get_product_price(pid):
     """
     ดึงราคาสินค้าจากคลังสินค้า
-    คืนค่า: float ราคาสินค้า หรือ 0.0 ถ้าไม่พบ
     """
     inventory = product_manager.get_all_products()
     if pid in inventory:
@@ -155,12 +140,11 @@ def get_product_price(pid):
 
 
 # ========================================================================= #
-# ฟังก์ชันเกี่ยวกับการพักบิล (Hold / Recall Bill)
+# ฟังก์ชันเกี่ยวกับการพักบิล
 # ========================================================================= #
-
 def get_hold_dir():
     """
-    คืนค่า Path ของโฟลเดอร์เก็บบิลพัก (data/hold_bills/)
+    คืนค่า Path ของโฟลเดอร์เก็บบิลพัก
     """
     return os.path.join(os.path.dirname(__file__), "data", "hold_bills")
 
@@ -168,7 +152,6 @@ def get_hold_dir():
 def hold_bill():
     """
     ย้ายบิลปัจจุบันไปพักไว้ในโฟลเดอร์ hold_bills
-    คืนค่า: (success: bool, message: str)
     """
     bill_path = get_bill_path()
     if not os.path.exists(bill_path):
@@ -199,16 +182,13 @@ def get_held_bill_files():
     คืนค่า list ชื่อไฟล์บิลที่ถูกพักไว้ทั้งหมด
     """
     hold_dir = get_hold_dir()
-    os.makedirs(hold_dir, exist_ok=True)
-    return [f for f in os.listdir(hold_dir) if f.endswith(".txt")]
+    os.makedirs(hold_dir, exist_ok=True) #ตรวจสอบว่ามีโฟลเดอร์นี้อยู่ไหม ถ้าไม่มีก็สร้างขึ้นมา
+    return [f for f in os.listdir(hold_dir) if f.endswith(".txt")] #เอาแค่ txt
 
 
 def recall_bill(selected_file):
     """
     เรียกคืนบิลที่พักไว้ มาเพิ่มต่อใน bill.txt ปัจจุบัน แล้วลบไฟล์พักทิ้ง
-    พารามิเตอร์:
-        selected_file (str): ชื่อไฟล์บิลพักที่ต้องการเรียกคืน
-    คืนค่า: (success: bool, message: str)
     """
     hold_dir = get_hold_dir()
     hold_path = os.path.join(hold_dir, selected_file)
