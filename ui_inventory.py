@@ -388,3 +388,4 @@ def setup_inventory_interface(parent):
     
     # ดึงข้อมูลมาแสดงครั้งแรก
     refresh_data()
+    
