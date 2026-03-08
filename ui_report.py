@@ -15,6 +15,8 @@ def create_report_ui(parent):
         total_of_month.configure(text=str(report.show_month_sales()))
         total_of_day.configure(text=str(report.show_day_sales()))
         total_members.configure(text=str(report.total_members()))
+        income.configure(text=str(report.total_revenue()))
+        expense.configure(text=str(report.total_expense()))
         render_sales_table()
 
     # --- 2. แถวของการ์ด 4 ใบ (Summary Cards) ---
@@ -198,24 +200,24 @@ def create_report_ui(parent):
     best_sellers.grid_columnconfigure(1, weight=1)
 
     # --- ส่วนของ Income ---
-    in_come = ctk.CTkFrame(best_sellers, fg_color="white", corner_radius=15)
+    in_come = ctk.CTkFrame(best_sellers, fg_color="#FFFFFF", corner_radius=15, border_width=5, border_color="#1e683e")
     in_come.grid(row=0, column=0, sticky="nsew", padx=(5, 5), pady=(0, 5))
 
     lbl_inc_title = ctk.CTkLabel(in_come, text="Income", font=("Kanit", 30, "bold"), text_color="#1e683e")
     lbl_inc_title.pack(side="top", pady=(10, 0))
 
     income = ctk.CTkLabel(in_come, text=report.total_revenue(), font=("Kanit", 80, "bold"), text_color="#1e683e")
-    income.pack(expand=True, fill="both", padx=10, pady=(0, 0))
+    income.pack(expand=True, fill="both", padx=10, pady=(0, 10))
 
     # --- ส่วนของ Expense ---
-    out_come = ctk.CTkFrame(best_sellers, fg_color="#2b2b2b", corner_radius=15) # เปลี่ยนจากดำสนิทให้ดูมีมิติ
+    out_come = ctk.CTkFrame(best_sellers, fg_color="#FFFFFF", corner_radius=15, border_width=5, border_color="#1e683e") # เปลี่ยนจากดำสนิทให้ดูมีมิติ
     out_come.grid(row=0, column=1, sticky="nsew", padx=5, pady=(0, 5))
 
-    lbl_exp_title = ctk.CTkLabel(out_come, text="Expense", font=("Kanit", 30, "bold"), text_color="red")
+    lbl_exp_title = ctk.CTkLabel(out_come, text="Expense", font=("Kanit", 30, "bold"), text_color="#8e0000")
     lbl_exp_title.pack(side="top", pady=(10, 0))
 
-    expense = ctk.CTkLabel(out_come, text=report.total_expense(), font=("Kanit", 80, "bold"), text_color="red")
-    expense.pack(expand=True, fill="both", padx=10, pady=(0, 0))
+    expense = ctk.CTkLabel(out_come, text=report.total_expense(), font=("Kanit", 80, "bold"), text_color="#8e0000")
+    expense.pack(expand=True, fill="both", padx=10, pady=(0, 10))
 
     # --- ส่วนของ Custom (ปุ่ม) ---
     in_out_come_custom = ctk.CTkFrame(best_sellers, fg_color="transparent", corner_radius=15)
