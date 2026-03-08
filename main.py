@@ -1,18 +1,9 @@
 """
-main.py
-=======
 ไฟล์หลักของ Application DevCat
-มีหน้าที่:
-  1. สร้าง Root Window และ Header (Navbar)
-  2. สร้าง Page ทั้งหมด (Main, Members, Inventory, POS, Report)
-  3. จัดการการสลับหน้าพร้อม Loading Screen
-  4. เริ่มต้นโปรแกรม (mainloop)
 """
-
 import tkinter as tk
 import customtkinter as ctk
 from PIL import Image, ImageTk, ImageSequence
-
 import POS
 import ui_inventory
 import ui_report
