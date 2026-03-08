@@ -3,9 +3,8 @@ import storage_product as storage
 def add_product(pid,name,price,stock,cost):
     """
     ฟังก์ชันสำหรับเพิ่มสินค้า
-    คืนค่า: (สถานะความสำเร็จ True/False, ข้อความแจ้งเตือน)
     """
-    inventory = storage.load_products() #เรียกฟังก์ชันในไฟล์เก็บข้อมูลเพื่อดึงรายการสินค้า มาเก็บในตัวแปร เป็นDictionary
+    inventory = storage.load_products() #เรียกฟังก์ชันในไฟล์เก็บข้อมูลเพื่อดึงรายการสินค้า
     
     if pid in inventory:
         return False, f'เกิดข้อผิดพลาด: รหัสสินค้า "{pid}" มีอยู่แล้ว!' #เช็คว่ารหัสสินค้าซ้ำกับที่่อยู่ในระบบไหม หาซ้ำจะหยุดทำงานและส่งค่่า False
@@ -29,7 +28,6 @@ def get_all_products():
 def update_product(pid,name,price,stock,cost):
     """
     ฟังก์ชันสำหรับแก้ไขข้อมูลสินค้า
-    คืนค่าเป็น True/False ,เพื่อแจ้งเตือน
     """
     inventory = storage.load_products() #อ่านไฟลฺ์แล้วดึงข้อมูลมาเก็บไว้ในตัวแปร
     
@@ -52,7 +50,6 @@ def update_product(pid,name,price,stock,cost):
 def delete_product(pid):
     """
     ฟังก์ชันสำหรับลบสินค้า
-    คืนค่า: (สถานะความสำเร็จ True/False, ข้อความแจ้งเตือน)
     """
     
     inventory = storage.load_products() #โหลดข้อมูลสินค้าแล้วมาเก็บในตัวแปร
@@ -83,7 +80,6 @@ def best_seller(threshold=20):
 def get_low_stock_list(threshold=5):
     """
     ฟังก์ชันสำหรับเช็คสินค้าใกล้หมด
-    คืนค่า: รายชื่อสินค้าที่เป็น List เพื่อให้ GUI นำไปแสดง Popup หรือ Label
     """
     inventory = storage.load_products() #ดึงข้อมูลในไฟล์มาเก็บใน ตัวแปร
     low_stock_items = [] #สร้างตัวแปรสำหรับเก็บข้อมูลสำหรับรายชื่อสินค้าใกล้หมด
