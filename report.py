@@ -33,7 +33,9 @@ def product_sale_data():
 #ฟังก์ชั่นแสดงรายรับรวมทั้งหมด
 def total_revenue():
     revenue = product_sale_data()
-    return sum(revenue) #sumเพื่อรวมยอดขาย
+    total = sum(revenue)
+    # ใช้ f-string ในการใส่คอมมาและทศนิยม 2 ตำแหน่ง
+    return f"{total:,.2f}"
 
 #ฟังก์ชันแสดงรายจ่าย หรือ ต้นทุน
 def product_cost_data():
@@ -66,32 +68,14 @@ def product_cost_data():
 #ฟังก์ชั่นแสดงรายจ่ายรวมทั้งหมด
 def total_expense():
     expense = product_cost_data()
-    return sum(expense) #sumเพื่อรวม
+    total = sum(expense)
+    # ใช้ f-string ในการใส่คอมมาและทศนิยม 2 ตำแหน่ง
+    return f"{total:,.2f}"
 
 #ฟังก์ชั่นที่แสดงว่าสินค้าขายดี
 def product_report():
     inventory = manage.best_seller(threshold=20) # เรียกใช้ฟังก์ชันจาก product_manager 
     return inventory
-
-
-# #ฟังก์ชันค้นหาประวัติจากขายแบบ Custom ผ่านวัน/เดือน/ปี ปล.จริงๆให้ใส่เปน ปี เดือน วัน
-# def search_sale_history_custom(year,month,day):
-#     # เป็น แปลงint เพื่อให้จัดรูปแบบวันที่ให้เปน YYYY-MM-DD เรียงแบบนี้เพือให้ตรงกับไฟล์ sale.txt
-#     search_date = f"{int(year):04d}-{int(month):02d}-{int(day):02d}" #เกบวันที่
-#     #d = แสดงเป็นตัวเลขจำนวนเต็ม #ใช้ :04d :02d :02d เพื่อกำหนดจำนวนอักษรให้ตรงตามล็อค ใส่0 เพื่อเติมในเดือนที่เป็นเลขตัวเดียว
-
-#     sale_data = stock.SALES_FILE
-#     results = [] #ใช้เก็บเนื้อหาที่ค้นเจอ
-    
-#     if os.path.exists(sale_data): #ตรวจสอบว่าไฟล์sale_data มีอยู่จริงไหม
-#         with open(sale_data,'r',encoding='utf-8') as f:
-#             lines = f.readlines() #อ่านไฟล์ในบรรทัด
-#             for line in lines: #ลูปให้อ่านแต่ละบรรทัด
-#                 line = line.strip() #ตัดช่องว่างหน้า-หลัง
-#                 if line:
-#                     if line.startswith(search_date): #ถ้าบรรทัดนั้นขึ้นต้นด้วยวันในsearch_date 
-#                         results.append(line)  #ให้เก็บผลลัพนั้นลงใน results เปน line
-#     return results
 
 #ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่วัน
 def show_day_sales():
@@ -118,7 +102,7 @@ def show_day_sales():
                                 break
                     except:
                         pass
-    return f"{total_sales:.2f}"
+    return f"{total_sales:,.2f}"
 
 
 #ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่เดือน
@@ -145,7 +129,7 @@ def show_month_sales():
                                 break
                     except:
                         pass
-    return f"{total_sales:.2f}"
+    return f"{total_sales:,.2f}"
 
 #ฟังก์ชันค้นหาประวัติจากขายโดยระบุแค่ปี
 def show_year_sales():
@@ -171,7 +155,7 @@ def show_year_sales():
                                 break
                     except:
                         pass
-    return f"{total_sales:.2f}"
+    return f"{total_sales:,.2f}"
 
 #ฟังก์ชันแสดงจำนวนสมาชิกทั้งหมด
 def total_members():
@@ -182,7 +166,7 @@ def total_members():
             for line in f:
                 if line.strip():
                     count += 1
-    return count
+    return f"{count:,}"
 
 # ฟังก์ชันดึงข้อมูลจาก master_sales.txt เพื่อไปแสดงในตาราง
 def get_master_sales_data(days_filter=None):

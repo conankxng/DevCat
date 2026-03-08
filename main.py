@@ -1,34 +1,63 @@
+"""
+ไฟล์หลักของ Application DevCat
+"""
 import tkinter as tk
-import POS
-import os
-from tkinter import messagebox  # ต้องเพิ่มบรรทัดนี้เพื่อใช้การแจ้งเตือน
 import customtkinter as ctk
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageSequence
+import POS
+import ui_inventory
+import ui_report
+
+
+# =========================================================================== #
+# ส่วนที่ 1: State การทำงานของแอป
+# =========================================================================== #
 
 class AppState:
-    current_page = None
-    is_animating = False
-    loading_frame = None
-    progress_bar = None
+    """เก็บสถานะการทำงานของแอปพลิเคชัน (หน้าปัจจุบัน, สถานะ Animation)"""
+    current_page = None   # Frame ที่แสดงอยู่ตอนนี้
+    is_animating = False  # True ขณะกำลังเล่น Loading Animation (ป้องกันการกดซ้ำ)
+    loading_frame = None  # Frame ของ Loading Screen
+    progress_bar  = None  # Progress Bar ใน Loading Screen
+
+
+# =========================================================================== #
+# ส่วนที่ 2: ฟังก์ชันหลัก
+# =========================================================================== #
 
 def init_loading_screen(parent):
+    """
+    สร้าง Loading Screen (ข้อความ + Progress Bar แบบ Indeterminate)
+    ซ่อนอยู่ใต้หน้าอื่นๆ และจะ raise ขึ้นมาตอนสลับหน้า
+    """
     AppState.loading_frame = ctk.CTkFrame(parent, fg_color="#191919", width=1920, height=960)
     AppState.loading_frame.place(x=0, y=90)
-    
+
+    # จัดให้อยู่กึ่งกลางหน้าจอ
     inner_frame = ctk.CTkFrame(AppState.loading_frame, fg_color="transparent")
     inner_frame.place(relx=0.5, rely=0.5, anchor="center")
-    
-    lbl = ctk.CTkLabel(inner_frame, text="รอสักครู่นะเมี๊ยวว...", font=("Kanit", 50, "bold"), text_color="white")
-    lbl.pack(pady=(0, 20))
-    
-    AppState.progress_bar = ctk.CTkProgressBar(inner_frame, width=500, mode="indeterminate", progress_color="#1e683e")
+
+    ctk.CTkLabel(
+        inner_frame, text="รอสักครู่นะเมี๊ยวว...",
+        font=("Kanit", 50, "bold"), text_color="white"
+    ).pack(pady=(0, 20))
+
+    AppState.progress_bar = ctk.CTkProgressBar(
+        inner_frame, width=500,
+        mode="indeterminate", progress_color="#1e683e"
+    )
     AppState.progress_bar.pack(pady=20)
 
-#ฟังก์ชันสลับหน้าตอนโหลดข้อมูล
+
 def switch(page):
+    """
+    สลับไปยัง page ที่ระบุ พร้อมแสดง Loading Screen ชั่วคราว 1.5 วินาที
+    - ถ้ากำลัง Animate อยู่ หรือ page เดิม → ไม่ทำอะไร
+    - ถ้ายังไม่มี Loading Screen → สลับทันที
+    """
     if AppState.is_animating or AppState.current_page == page:
         return
-        
+
     if AppState.loading_frame is None:
         page.tkraise()
         AppState.current_page = page
@@ -37,196 +66,179 @@ def switch(page):
     AppState.is_animating = True
     AppState.loading_frame.tkraise()
     AppState.progress_bar.start()
-    
+
     def finish_switch():
+        """หยุด Animation และแสดงหน้าปลายทาง"""
         AppState.progress_bar.stop()
         page.tkraise()
         AppState.current_page = page
         AppState.is_animating = False
-        
+
     root.after(1500, finish_switch)
 
+
 def on_closing():
+    """จัดการเมื่อผู้ใช้กดปุ่มปิดหน้าต่าง"""
     root.destroy()
+
+
+# =========================================================================== #
+# ส่วนที่ 3: สร้าง Root Window
+# =========================================================================== #
 
 root = tk.Tk()
 root.title("DevCat")
 root.geometry("1920x1080")
+root.protocol("WM_DELETE_WINDOW", on_closing)
+
+
+# =========================================================================== #
+# ส่วนที่ 4: Header / Navbar
+# =========================================================================== #
 
 header = ctk.CTkFrame(root, height=90, fg_color="#FFFFFF")
 header.pack(fill=ctk.X)
-# 1. ตั้งค่าให้ header กระจายน้ำหนักทั้งแนวตั้ง (Row) และแนวนอน (Column)
-header.grid_rowconfigure(0, weight=1, minsize=80)    # ทำให้แถวที่ 0 ขยายความสูงได้
-header.grid_columnconfigure(0, weight=1) # แบ่ง 3 คอลัมน์เท่าๆ กัน
+
+# แบ่ง Header เป็น 3 ส่วน: ซ้าย (Logo), กลาง (Nav), ขวา (Members/Exit)
+header.grid_rowconfigure(0, weight=1, minsize=80)
+header.grid_columnconfigure(0, weight=1)
 header.grid_columnconfigure(1, weight=1)
 header.grid_columnconfigure(2, weight=1)
 
-in_header_left = ctk.CTkFrame(header, fg_color="#FFFFFF") #สร้างเฟรมย่อยใน header เพื่อแยกส่วนซ้ายและขวา
-in_header_left.grid(row=0, column=0, sticky="nsew")
-    
+# --- ซ้าย: โลโก้ ---
+header_left = ctk.CTkFrame(header, fg_color="#FFFFFF")
+header_left.grid(row=0, column=0, sticky="nsew")
 
 try:
-    raw_img_logo = Image.open("img/Logo_devcat.png")
-    
-    # กำหนดขนาดปุ่มและภาพให้สัมพันธ์กัน
-    image_logo = ctk.CTkImage(light_image=raw_img_logo, dark_image=raw_img_logo, size=(200, 50)) 
-    
-    # เปลี่ยนจาก ctk.CTkLabel เป็น ctk.CTkButton
-    btn_logo = ctk.CTkButton(
-        in_header_left, 
-        image=image_logo, 
-        text="",               # ลบข้อความออกเพื่อให้เห็นแต่รูป
-        fg_color="transparent", # ทำให้พื้นหลังปุ่มโปร่งใส (กลมกลืนกับ Header)
-        hover_color="#eeeeee",  # สีเวลาเอาเมาส์ไปวาง (ปรับตามใจชอบ)
-        width=200, 
-        height=50,
-        command=lambda: switch(main)
-    ) 
-    btn_logo.place(x=20, y=10) 
-
+    raw_logo = Image.open("img/Logo_devcat.png")
+    image_logo = ctk.CTkImage(light_image=raw_logo, dark_image=raw_logo, size=(200, 50))
+    ctk.CTkButton(
+        header_left, image=image_logo, text="",
+        fg_color="transparent", hover_color="#eeeeee",
+        width=200, height=50,
+        command=lambda: switch(page_main)
+    ).place(x=20, y=10)
 except Exception as e:
     print(f"Error loading logo: {e}")
-    # กรณีโหลดภาพไม่ได้ ให้สร้างปุ่มข้อความแทน
     ctk.CTkButton(
-        in_header_left, 
-        text="DevCat Logo", 
+        header_left, text="DevCat",
         font=("Kanit", 20, "bold"),
-        command=lambda: print("Text Logo Clicked!")
+        command=lambda: switch(page_main)
     ).place(x=20, y=20)
 
-in_header_right = ctk.CTkFrame(header, fg_color="#FFFFFF") #สร้างเฟรมย่อยใน header เพื่อแยกส่วนซ้ายและขวา
-in_header_right.grid(row=0, column=1 , sticky="nsew")
-in_header_right.grid_columnconfigure(0, weight=1)
-in_header_right.grid_columnconfigure(1, weight=1)
-in_header_right.grid_columnconfigure(2, weight=1)
+# --- กลาง: ปุ่ม Nav (Inventory, POS, Report) ---
+header_center = ctk.CTkFrame(header, fg_color="#FFFFFF")
+header_center.grid(row=0, column=1, sticky="nsew")
+for i in range(3):
+    header_center.grid_columnconfigure(i, weight=1)
 
-ctk.CTkButton(in_header_right, text="Inventory", 
-              command=lambda: switch(p1), 
-              font=("Kanit", 30, "bold"),
-              height=70,
-              fg_color="#FFFFFF",
-              hover_color="#eeeeee",
-              text_color="#1e683e",
-              border_width=2,
-              border_color="#1e683e",
-              corner_radius=10).grid(row=0, column=0, sticky="nsew", padx=10, pady=(10, 5))
+# สไตล์ปุ่ม Nav ที่ใช้ซ้ำกันทุกปุ่ม
+NAV_BTN_STYLE = dict(
+    font=("Kanit", 30, "bold"),
+    height=70,
+    fg_color="#FFFFFF",
+    hover_color="#eeeeee",
+    text_color="#1e683e",
+    border_width=2,
+    border_color="#1e683e",
+    corner_radius=10
+)
+NAV_BTN_GRID = dict(sticky="nsew", padx=10, pady=(10, 5))
 
-ctk.CTkButton(in_header_right, text="POS", 
-              command=lambda: switch(p2), 
-              font=("Kanit", 30, "bold"),
-              height=70,
-              fg_color="#FFFFFF",
-              hover_color="#eeeeee",
-              text_color="#1e683e",
-              border_width=2,
-              border_color="#1e683e",
-              corner_radius=10).grid(row=0, column=1, sticky="nsew", padx=10, pady=(10, 5))
+ctk.CTkButton(header_center, text="Inventory", command=lambda: switch(page_inventory), **NAV_BTN_STYLE).grid(row=0, column=0, **NAV_BTN_GRID)
+ctk.CTkButton(header_center, text="POS",       command=lambda: switch(page_pos),       **NAV_BTN_STYLE).grid(row=0, column=1, **NAV_BTN_GRID)
+ctk.CTkButton(header_center, text="Report",    command=lambda: switch(page_report),    **NAV_BTN_STYLE).grid(row=0, column=2, **NAV_BTN_GRID)
 
-ctk.CTkButton(in_header_right, text="Report", 
-              command=lambda: switch(p3), 
-              font=("Kanit", 30, "bold"), 
-              height=70, 
-              fg_color="#FFFFFF",
-              hover_color="#eeeeee",
-              text_color="#1e683e",
-              border_width=2,
-              border_color="#1e683e",
-              corner_radius=10).grid(row=0, column=2, sticky="nsew", padx=10, pady=(10, 5))
+# --- ขวา: Members + Exit ---
+header_right = ctk.CTkFrame(header, fg_color="#FFFFFF")
+header_right.grid(row=0, column=2, sticky="nsew")
+header_right.grid_columnconfigure(0, weight=1)
+header_right.grid_columnconfigure(1, weight=1)
 
-about = ctk.CTkFrame(header, fg_color="#FFFFFF")
-about.grid(row=0, column=2, sticky="nsew")
-about.grid_columnconfigure(0, weight=1) # ให้คอลัมน์ปุ่ม Members ขยาย
-about.grid_columnconfigure(1, weight=1) # ให้คอลัมน์ปุ่ม Exit ขยาย
-ctk.CTkButton(about, text="Members", 
-              command=lambda: switch(members), 
-              font=("Kanit", 30, "bold"),
-              height=70,
-              fg_color="#FFFFFF",
-              hover_color="#eeeeee",
-              text_color="#1e683e",
-              border_width=2,
-              border_color="#1e683e",
-              corner_radius=10).grid(row=0, column=0, sticky="nsew", padx=10, pady=(10, 5))
-
-ctk.CTkButton(about, text="Exit", 
-              command=lambda: root.destroy(), 
-              font=("Kanit", 30, "bold"),
-              height=70,
-              fg_color="#FFFFFF",
-              hover_color="#eeeeee",
-              text_color="#1e683e",
-              border_width=2,
-              border_color="#1e683e",
-              corner_radius=10).grid(row=0, column=1, sticky="nsew", padx=10, pady=(10, 5))
+ctk.CTkButton(header_right, text="Members", command=lambda: switch(page_members), **NAV_BTN_STYLE).grid(row=0, column=0, **NAV_BTN_GRID)
+ctk.CTkButton(header_right, text="Exit",    command=root.destroy,                 **NAV_BTN_STYLE).grid(row=0, column=1, **NAV_BTN_GRID)
 
 
-main = tk.Frame(root, bg='red') #สร้างหน้าเข้าไปใน root และเปลี่ยนสี Bg
-main.place(x=0, y=90, width=1920, height=960) #วางแบบกำหนดค่าเองคือ แกน x และ y พร้อมกำหนดขนาด
-bg_image = Image.open("img/Main.png") # ใส่ชื่อไฟล์ภาพของคุณ
-bg_image = bg_image.resize((1920, 960)) # ปรับขนาดภาพให้เท่ากับ Frame
-bg_photo = ImageTk.PhotoImage(bg_image)
-# 3. สร้าง Label ไว้ใน main เพื่อแสดงภาพเป็น Background
-bg_label = tk.Label(main, image=bg_photo)
-bg_label.place(relwidth=1, relheight=1) # ทำให้ภาพเต็มพื้นที่ Frame ตลอดเวลา
+# =========================================================================== #
+# ส่วนที่ 5: สร้าง Page ทั้งหมด (ซ้อนกันอยู่ที่ตำแหน่งเดียวกัน)
+# =========================================================================== #
 
-members = tk.Frame(root, bg='green') #สร้างหน้าเข้าไปใน root และเปลี่ยนสี Bg
-members.place(x=0, y=90, width=1920, height=960) #วางแบบกำหนดค่าเองคือ แกน x และ y พร้อมกำหนดขนาด
-members_image = Image.open("img/Members.png") # ใส่ชื่อไฟล์ภาพของคุณ
-members_image = members_image.resize((1920, 960)) # ปรับขนาดภาพให้เท่ากับ Frame
-members_photo = ImageTk.PhotoImage(members_image)
-# 3. สร้าง Label ไว้ใน main เพื่อแสดงภาพเป็น Background
-bg_label = tk.Label(members, image=members_photo)
-bg_label.place(relwidth=1, relheight=1) # ทำให้ภาพเต็มพื้นที่ Frame ตลอดเวลา
-
-"""
-ส่วนของ เนส Inventory
-"""
-# Inventory = p1
-p1 = tk.Frame(root, bg='#191919') #สร้างหน้าเข้าไปใน root และเปลี่ยนสี Bg
-p1.place(x=0, y=90, width=1920, height=960) #วางแบบกำหนดค่าเองคือ แกน x และ y พร้อมกำหนดขนาด
-import ui_inventory #ดึงข้อมูลมา
-ui_inventory.setup_inventory_interface(p1) #เรียกดึง GUI ของ inventory มาแสดงในส่วนของ P1 พารามิตเตอร์
-"""
-อนุพงค์ พลจันทึก 681310024
-"""
+# ขนาดและตำแหน่งมาตรฐานของทุก Page
+PAGE_CONFIG = dict(x=0, y=90, width=1920, height=960)
 
 
-"""
-ส่วนของ อุ้ม POS
-"""
-p2 = tk.Frame(root, bg="#191919") #สร้างหน้าเข้าไปใน root และเปลี่ยนสี Bg
-p2.place(x=0, y=90, width=1920, height=960) #วางแบบกำหนดค่าเองคือ แกน x และ y พร้อมกำหนดขนาด
+# --- หน้า Main (ภาพ GIF พื้นหลังเคลื่อนไหว) ---
+page_main = tk.Frame(root, bg="#191919")
+page_main.place(**PAGE_CONFIG)
 
-POS.create_three_frames(p2) # เรียกใช้ฟังก์ชันสร้าง 3 เฟรมใน POS เพื่อเตรียมพื้นที่สำหรับแสดงข้อมูลต่างๆ
+gif_frames_main = [
+    ImageTk.PhotoImage(frame.copy())
+    for frame in ImageSequence.Iterator(Image.open("gif/main.gif"))
+]
+current_frame_index = 0
+gif_label = tk.Label(page_main)
+gif_label.pack(fill="both", expand=True)
 
-"""
-อภิรักษ์ ธรรมแก้ว 681310025
-"""
+def update_gif():
+    """วนเล่น GIF ทุก 100ms — เรียกตัวเองซ้ำผ่าน root.after()"""
+    global current_frame_index
+    gif_label.configure(image=gif_frames_main[current_frame_index])
+    current_frame_index = (current_frame_index + 1) % len(gif_frames_main)
+    root.after(100, update_gif)
 
-
-"""
-ส่วนของ เบนโตะ Report
-"""
-p3 = tk.Frame(root, bg='#191919') #สร้างหน้าเข้าไปใน root และเปลี่ยนสี Bg
-p3.place(x=0, y=90, width=1920, height=960) #วางแบบกำหนดค่าเองคือ แกน x และ y พร้อมกำหนดขนาด
-import ui_report
-ui_report.create_report_ui(p3) #เรียกใช้ฟังก์ชันสร้าง UI
-"""
-กัญญ์กณิษฐ์ เชื้อฉลาด  681310001
-"""
+update_gif()
 
 
+# --- หน้า Members (GIF เคลื่อนไหวเหมือนหน้า Main) ---
+page_members = tk.Frame(root, bg="#191919")
+page_members.place(**PAGE_CONFIG)
 
-# สร้างหน้าโหลดให้เรียบร้อยก่อนโชว์หน้าแรก
+gif_frames_menbers = [
+    ImageTk.PhotoImage(frame.copy())
+    for frame in ImageSequence.Iterator(Image.open("gif/members.gif"))
+]
+
+members_frame_index = 0
+members_gif_label = tk.Label(page_members)
+members_gif_label.pack(fill="both", expand=True)
+
+def update_members_gif():
+    """วนเล่น GIF บนหน้า Members ทุก 100ms"""
+    global members_frame_index
+    members_gif_label.configure(image=gif_frames_menbers[members_frame_index])
+    members_frame_index = (members_frame_index + 1) % len(gif_frames_menbers)
+    root.after(100, update_members_gif)
+
+update_members_gif()
+
+
+# --- หน้า Inventory (p1) ---
+# อนุพงค์ พลจันทึก 681310024
+page_inventory = tk.Frame(root, bg="#191919")
+page_inventory.place(**PAGE_CONFIG)
+ui_inventory.setup_inventory_interface(page_inventory)
+
+
+# --- หน้า POS (p2) ---
+# อภิรักษ์ ธรรมแก้ว 681310025
+page_pos = tk.Frame(root, bg="#191919")
+page_pos.place(**PAGE_CONFIG)
+POS.create_three_frames(page_pos)
+
+
+# --- หน้า Report (p3) ---
+# กัญญ์กณิษฐ์ เชื้อฉลาด 681310001
+page_report = tk.Frame(root, bg="#191919")
+page_report.place(**PAGE_CONFIG)
+ui_report.create_report_ui(page_report)
+
+
+# =========================================================================== #
+# ส่วนที่ 6: เริ่มต้นโปรแกรม
+# =========================================================================== #
+
+# สร้าง Loading Screen แล้วแสดงหน้า Main เป็นหน้าแรก
 init_loading_screen(root)
+switch(page_main)
 
-#เริ่มต้นให้หน้า 1 อยู่บนสุด
-switch(main)
-
-
-# สมมติว่า root คือชื่อตัวแปรหน้าต่างหลักของคุณ
-root.protocol("WM_DELETE_WINDOW", on_closing)
 root.mainloop()
-
-
-

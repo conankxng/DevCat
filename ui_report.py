@@ -1,16 +1,31 @@
+"""
+ไฟล์นี้รวมโค้ด GUI ของหน้า Report ทั้งหมด
+"""
 import customtkinter as ctk
 from tkinter import ttk
 import report
 from PIL import Image
 
-# ==========================================
-# พื้นที่เนื้อหาหลัก (เว้นขอบซ้ายขวา)
-# ==========================================
+
+# =========================================================================== #
+# ฟังก์ชันหลัก: สร้าง UI ของหน้า Report ทั้งหน้า
+# =========================================================================== #
+
 def create_report_ui(parent):
+    """
+    สร้าง UI หน้า Report ทั้งหน้าและวางลงใน parent
+    โครงสร้างหน้าจอ:
+    """
+    # พื้นที่หลักของหน้า
     content = ctk.CTkFrame(parent, fg_color="#191919")
     content.pack(fill="both", expand=True, padx=(15, 15), pady=(15, 0))
 
+    # =========================================================
+    # ส่วนที่ 1: ฟังก์ชัน Refresh (อัปเดต Label ทุกตัวพร้อมกัน)
+    # =========================================================
+
     def refresh_data():
+        """โหลดข้อมูลใหม่จาก report และอัปเดตทุก Label บนหน้าจอ"""
         total_of_year.configure(text=str(report.show_year_sales()))
         total_of_month.configure(text=str(report.show_month_sales()))
         total_of_day.configure(text=str(report.show_day_sales()))
@@ -19,281 +34,281 @@ def create_report_ui(parent):
         expense.configure(text=str(report.total_expense()))
         render_sales_table()
 
-    # --- 2. แถวของการ์ด 4 ใบ (Summary Cards) ---
+    # =========================================================
+    # ส่วนที่ 2: แถว Summary Cards (บนสุด)
+    # =========================================================
+
     cards_row = ctk.CTkFrame(content, fg_color="#191919", height=80)
     cards_row.pack(fill="x", pady=(0, 20))
     cards_row.pack_propagate(False)
-    
-    # แบ่งคัดเป็น 4 คอลัมน์เท่าๆ กัน
+
+    # แบ่ง 5 คอลัมน์ (4 การ์ด + 1 ปุ่ม Refresh)
     for i in range(5):
         cards_row.columnconfigure(i, weight=1, uniform="card")
 
-    # การ์ดใบที่ 1
-    card_1 = ctk.CTkFrame(cards_row, fg_color="white", height=130, corner_radius=15, border_width=5, border_color="#1e683e")
-    card_1.grid(row=0, column=0, sticky="nsew", padx=(10))
-    label1 = ctk.CTkLabel(card_1, text="รายได้ปีนี้", font=("Kanit", 30, "bold"), width=40, height=40, corner_radius=10, text_color="#144e2d")
-    label1.pack(side=ctk.TOP, pady=(20, 0))
-    total_of_year = ctk.CTkLabel(card_1, text=report.show_year_sales(), font=("Kanit", 50, "bold"), text_color="#144e2d")
-    total_of_year.pack(pady=(0, 10))
-    
+    # --- Helper: สร้างการ์ดสรุปยอด ---
+    def make_summary_card(col, title_text, value_widget_class, value_text):
+        """
+        สร้าง Card แสดงข้อมูลสรุป (Title + ตัวเลข)
+        คืนค่า: CTkLabel ที่แสดงตัวเลข (ใช้อัปเดตภายหลัง)
+        """
+        card = ctk.CTkFrame(
+            cards_row, fg_color="white",
+            height=130, corner_radius=15,
+            border_width=5, border_color="#1e683e"
+        )
+        card.grid(row=0, column=col, sticky="nsew", padx=10)
 
-    # การ์ดใบที่ 2
-    card_2 = ctk.CTkFrame(cards_row, fg_color="white", height=130, corner_radius=15, border_width=5, border_color="#1e683e")
-    card_2.grid(row=0, column=1, sticky="nsew", padx=(10))
-    label2 = ctk.CTkLabel(card_2, text="รายได้เดือนนี้", font=("Kanit", 30, "bold"), width=40, height=40, corner_radius=10, text_color="#144e2d")
-    label2.pack(side=ctk.TOP, pady=(20, 0))
-    total_of_month = ctk.CTkLabel(card_2, text=report.show_month_sales(), font=("Kanit", 50, "bold"), text_color="#144e2d")
-    total_of_month.pack(pady=(0, 10))
+        ctk.CTkLabel(
+            card, text=title_text,
+            font=("Kanit", 30, "bold"),
+            width=40, height=40,
+            corner_radius=10, text_color="#144e2d"
+        ).pack(side=ctk.TOP, pady=(20, 0))
 
-    # การ์ดใบที่ 3
-    card_3 = ctk.CTkFrame(cards_row, fg_color="white", height=130, corner_radius=15, border_width=5, border_color="#1e683e")
-    card_3.grid(row=0, column=2, sticky="nsew", padx=(10))
-    label3 = ctk.CTkLabel(card_3, text="รายได้วันนี้", font=("Kanit", 30, "bold"), width=40, height=40, corner_radius=10, text_color="#144e2d")
-    label3.pack(pady=(20, 0))
-    total_of_day = ctk.CTkLabel(card_3, text=report.show_day_sales(), font=("Kanit", 50, "bold"), text_color="#144e2d")
-    total_of_day.pack(pady=(0, 10))
+        value_lbl = ctk.CTkLabel(
+            card, text=value_text,
+            font=("Kanit", 50, "bold"), text_color="#144e2d"
+        )
+        value_lbl.pack(pady=(0, 10))
+        return value_lbl
 
-    # การ์ดใบที่ 4
-    card_4 = ctk.CTkFrame(cards_row, fg_color="white", height=130, corner_radius=15, border_width=5, border_color="#1e683e")
-    card_4.grid(row=0, column=3, sticky="nsew", padx=(10, 0))
-    label4 = ctk.CTkLabel(card_4, text="สมาชิกทั้งหมด", font=("Kanit", 30, "bold"), width=40, height=40, corner_radius=10, text_color="#144e2d")
-    label4.pack(side=ctk.TOP, pady=(20, 0))
-    total_members = ctk.CTkLabel(card_4, text=report.total_members(), font=("Kanit", 50, "bold"), text_color="#144e2d")
-    total_members.pack(pady=(0, 10))
+    # สร้างการ์ดทั้ง 4 ใบ
+    total_of_year  = make_summary_card(0, "รายได้ปีนี้",    ctk.CTkLabel, report.show_year_sales())
+    total_of_month = make_summary_card(1, "รายได้เดือนนี้", ctk.CTkLabel, report.show_month_sales())
+    total_of_day   = make_summary_card(2, "รายได้วันนี้",   ctk.CTkLabel, report.show_day_sales())
+    total_members  = make_summary_card(3, "สมาชิกทั้งหมด",  ctk.CTkLabel, report.total_members())
 
-    card_5 = ctk.CTkFrame(cards_row, fg_color="#191919", height=130)
-    card_5.grid(row=0, column=4, sticky="nsew", padx=(10, 0))
-    
+    # --- ปุ่ม Refresh (คอลัมน์ที่ 5) ---
+    card_refresh = ctk.CTkFrame(cards_row, fg_color="#191919", height=130)
+    card_refresh.grid(row=0, column=4, sticky="nsew", padx=(10, 0))
+
     refresh_img_normal = ctk.CTkImage(light_image=Image.open("img/Button_refresh_normal.png"), size=(358, 160))
-    refresh_img_hover = ctk.CTkImage(light_image=Image.open("img/Button_refresh_hover.png"), size=(358, 160))
-    
+    refresh_img_hover  = ctk.CTkImage(light_image=Image.open("img/Button_refresh_hover.png"),  size=(358, 160))
+
     refresh_btn = ctk.CTkButton(
-            card_5,
-            text="",
-            image=refresh_img_normal,
-            fg_color="transparent",
-            hover_color="#191919",
-            command=refresh_data
+        card_refresh, text="",
+        image=refresh_img_normal,
+        fg_color="transparent",
+        hover_color="#191919",
+        command=refresh_data
     )
     refresh_btn.pack(fill=ctk.BOTH, expand=True)
     refresh_btn.pack_propagate(False)
-    # 3. สร้างฟังก์ชันสำหรับเปลี่ยนรูป
+
     def on_enter(event):
-        refresh_btn.configure(image=refresh_img_hover) # เปลี่ยนเป็นรูปตอน Hover
+        """เปลี่ยนรูปปุ่ม Refresh ตอน Hover"""
+        refresh_btn.configure(image=refresh_img_hover)
 
     def on_leave(event):
-        refresh_btn.configure(image=refresh_img_normal) # กลับเป็นรูปปกติ
+        """คืนรูปปุ่ม Refresh ตอน Mouse Leave"""
+        refresh_btn.configure(image=refresh_img_normal)
 
-    # 4. เชื่อมต่อ (Bind) เหตุการณ์เข้ากับปุ่ม
     refresh_btn.bind("<Enter>", on_enter)
-    refresh_btn.bind("<Leave>", on_leave)   
+    refresh_btn.bind("<Leave>", on_leave)
 
-    # --- 3. แถวตรงกลาง (Chart กับ ก้อนขวา 2 อัน) ---
+    # =========================================================
+    # ส่วนที่ 3: แถวกลาง — ซ้าย (ตาราง Sales) / ขวา (Income + Best Sellers)
+    # =========================================================
+
+    # --- คอลัมน์ซ้าย ---
     mid_row_left = ctk.CTkFrame(content, fg_color="#191919")
-    mid_row_left.pack(side=ctk.LEFT, fill=ctk.BOTH, expand=True, pady=(0, 0))
-    
+    mid_row_left.pack(side=ctk.LEFT, fill=ctk.BOTH, expand=True)
+
+    # --- คอลัมน์ขวา ---
     mid_row_right = ctk.CTkFrame(content, fg_color="#191919")
-    mid_row_right.pack(side=ctk.RIGHT, fill=ctk.BOTH, expand=True, pady=(0, 0))
+    mid_row_right.pack(side=ctk.RIGHT, fill=ctk.BOTH, expand=True)
     mid_row_right.grid_columnconfigure(0, weight=1)
     mid_row_right.grid_rowconfigure(0, weight=1)
 
-    table_title = ctk.CTkLabel(
-            mid_row_left, 
-            text="รายการบิลสินค้า", 
-            font=("Kanit", 25, "bold"),
-            fg_color="#FFFFFF", # สีเทาอ่อนให้เข้ากับปุ่มด้านบน
-            text_color="#144e2d",
-            height=40,
-            corner_radius=10
-        )
-    table_title.pack(fill=ctk.X, pady=(0, 15)) # วางไว้ด้านบนสุดของ Frame
+    # =========================================================
+    # ส่วนที่ 4: ตาราง Master Sales (คอลัมน์ซ้าย)
+    # =========================================================
 
-    # 3.1 Frame กราฟ (ซ้าย) สีขาว (ใช้เป็นตารางแสดงข้อมูล Master Sales)
+    ctk.CTkLabel(
+        mid_row_left, text="รายการบิลสินค้า",
+        font=("Kanit", 25, "bold"),
+        fg_color="#FFFFFF", text_color="#144e2d",
+        height=40, corner_radius=10
+    ).pack(fill=ctk.X, pady=(0, 15))
+
     chart_frame = ctk.CTkFrame(mid_row_left, fg_color="white", height=400, corner_radius=15)
     chart_frame.pack(fill=ctk.BOTH, expand=True, pady=(0, 15))
 
-    # ปรับแต่งสไตล์ของ Treeview ให้เข้ากับแอป (Modern Look)
+    # ตั้งค่า Style ของ Treeview (ใช้ร่วมกันทั้งตาราง Sales และ Best Sellers)
     style = ttk.Style()
-    style.theme_use("clam") # ใช้ clam theme เพื่อเอาขอบแบบ Windows 98 ออก
-    
-    style.configure("Treeview", 
-                    background="white",
-                    foreground="#333333",
-                    rowheight=35,
-                    fieldbackground="white",
-                    font=("Kanit", 11),
-                    borderwidth=0) # ลบขอบตาราง
-    
-    style.configure("Treeview.Heading", 
-                    font=("Kanit", 12, "bold"), 
-                    background="#144e2d", 
-                    foreground="#FFFFFF",
-                    borderwidth=0,
-                    relief="flat") # ทำให้หัวตารางแบนเรียบ
-                    
-    style.map('Treeview', background=[('selected', '#E3F2FD')], foreground=[('selected', '#000000')])
-    style.map('Treeview.Heading', background=[('selected', '#004f20')])
+    style.theme_use("clam")
+    style.configure(
+        "Treeview",
+        background="white", foreground="#333333",
+        rowheight=35, fieldbackground="white",
+        font=("Kanit", 11), borderwidth=0
+    )
+    style.configure(
+        "Treeview.Heading",
+        font=("Kanit", 12, "bold"),
+        background="#144e2d", foreground="#FFFFFF",
+        borderwidth=0, relief="flat"
+    )
+    style.map("Treeview",         background=[("selected", "#E3F2FD")], foreground=[("selected", "#000000")])
+    style.map("Treeview.Heading", background=[("selected", "#004f20")])
 
     def render_sales_table(days_filter=None):
-        # เคลียร์ข้อมูลเก่าที่อาจซ้อนใน chart_frame (ถ้ามี Treeview เก่าอยู่ให้ลบออกก่อน)
+        """
+        แสดงตาราง Master Sales ภายใน chart_frame
+        พารามิเตอร์:
+            days_filter (int หรือ None): กรองข้อมูลย้อนหลังกี่วัน
+                                         ถ้า None = แสดงทั้งหมด
+        """
+        # ลบ Widget เก่าออกก่อนสร้างใหม่ (ป้องกันการซ้อนทับ)
         for widget in chart_frame.winfo_children():
             widget.destroy()
 
-        # สร้าง Treeview (ตาราง) แบบไม่มีเส้นขอบ
+        # สร้างตาราง Treeview
         columns = ("customer_type", "date_time", "items", "total")
         tree = ttk.Treeview(chart_frame, columns=columns, show="headings", height=15, selectmode="browse")
-        
-        # ปรับความกว้างและหัวข้อคอลัมน์
-        tree.heading("customer_type", text="ประเภทลูกค้า", anchor="w")
-        tree.column("customer_type", width=150, anchor="w")
 
-        tree.heading("date_time", text="วันเดือนปีเวลา", anchor="w")
-        tree.column("date_time", width=180, anchor="w")
+        tree.heading("customer_type", text="ประเภทลูกค้า",  anchor="w")
+        tree.column ("customer_type", width=150, anchor="w")
 
-        tree.heading("items", text="จำนวนไอเทม", anchor="center")
-        tree.column("items", width=100, anchor="center")
+        tree.heading("date_time",     text="วันเดือนปีเวลา", anchor="w")
+        tree.column ("date_time",     width=180, anchor="w")
 
-        tree.heading("total", text="Total", anchor="w")
-        tree.column("total", width=120, anchor="w")
+        tree.heading("items",         text="จำนวนไอเทม",    anchor="center")
+        tree.column ("items",         width=100, anchor="center")
 
-        # สร้าง Scrollbar สำหรับเลื่อนตารางขึ้น-ลง
+        tree.heading("total",         text="Total",          anchor="w")
+        tree.column ("total",         width=120, anchor="w")
+
+        # Scrollbar แนวตั้ง
         scrollbar = ttk.Scrollbar(chart_frame, orient="vertical", command=tree.yview)
         tree.configure(yscrollcommand=scrollbar.set)
 
-        # จัดวางตัว Treeview และ Scrollbar ลงใน Frame
-        tree.pack(side="left", fill="both", expand=True, padx=(15, 0), pady=15)
+        tree.pack(side="left",  fill="both", expand=True, padx=(15, 0), pady=15)
         scrollbar.pack(side="right", fill="y", padx=(0, 15), pady=15)
 
-        # ดึงข้อมูลมาจาก report
+        # ดึงข้อมูลจาก report และแสดงผล
         sales_data = report.get_master_sales_data(days_filter)
-        
-        # ใส่ tag เพื่อสลับสีแถว (Zebra striping)
-        tree.tag_configure('evenrow', background='#FFFFFF')
-        tree.tag_configure('oddrow', background='#F8F9FA')
-        
+
+        tree.tag_configure("evenrow", background="#FFFFFF")
+        tree.tag_configure("oddrow",  background="#F8F9FA")
+
         for idx, data in enumerate(sales_data):
-            # ประเภทลูกค้า
             customer_type = "Member" if "Member" in data["customer"] else "General Customer"
-            
-            # ยัดข้อมูลลงแถวของ Treeview พร้อมกำหนด tag สลับสี
-            tag = 'evenrow' if idx % 2 == 0 else 'oddrow'
+            tag = "evenrow" if idx % 2 == 0 else "oddrow"
             tree.insert("", "end", values=(customer_type, data["date"], data["items"], data["total"]), tags=(tag,))
 
-    # เรียกใช้งานแสดงตารางครั้งแรก
+    # โหลดตารางครั้งแรก (แสดงทั้งหมด)
     render_sales_table()
 
-# Frame บนขวา (Best Sellers)
-    best_sellers = ctk.CTkFrame(mid_row_right, fg_color="#191919", corner_radius=15)
-    best_sellers.grid(row=0, column=0, sticky="nsew", padx=(15, 0), pady=(0, 14))
-    
-    # ให้แถวที่ 0 (Income/Expense) สูงขึ้น (ปรับเลข 2 หรือ 3 ตามความสูงที่พอใจ)
-    best_sellers.grid_rowconfigure(0, weight=3)  
+    # =========================================================
+    # ส่วนที่ 5: กล่อง Income / Expense + Best Sellers (คอลัมน์ขวา)
+    # =========================================================
 
-    # แถวที่ 1 (สีแดง)
-    best_sellers.grid_rowconfigure(1, weight=1)  
+    right_panel = ctk.CTkFrame(mid_row_right, fg_color="#191919", corner_radius=15)
+    right_panel.grid(row=0, column=0, sticky="nsew", padx=(15, 0), pady=(0, 14))
 
-    # แถวที่ 2 (สีเขียว) ให้สูงที่สุดเพื่อโชว์รายการเยอะๆ
-    best_sellers.grid_rowconfigure(2, weight=5)  
+    # กำหนดสัดส่วนความสูงของแต่ละแถว
+    right_panel.grid_rowconfigure(0, weight=3)  # Income/Expense
+    right_panel.grid_rowconfigure(1, weight=1)  # ปุ่มกรองเวลา
+    right_panel.grid_rowconfigure(2, weight=5)  # Best Sellers
+    right_panel.grid_columnconfigure(0, weight=1)
+    right_panel.grid_columnconfigure(1, weight=1)
 
-    # ตั้งค่า Column ให้แบ่งครึ่งเท่ากัน (สำหรับ Income และ Expense)
-    best_sellers.grid_columnconfigure(0, weight=1)
-    best_sellers.grid_columnconfigure(1, weight=1)
-
-    # --- ส่วนของ Income ---
-    in_come = ctk.CTkFrame(best_sellers, fg_color="#FFFFFF", corner_radius=15, border_width=5, border_color="#1e683e")
+    # --- กล่อง Income ---
+    in_come = ctk.CTkFrame(right_panel, fg_color="#FFFFFF", corner_radius=15, border_width=5, border_color="#1e683e")
     in_come.grid(row=0, column=0, sticky="nsew", padx=(5, 5), pady=(0, 5))
 
-    lbl_inc_title = ctk.CTkLabel(in_come, text="Income", font=("Kanit", 30, "bold"), text_color="#1e683e")
-    lbl_inc_title.pack(side="top", pady=(10, 0))
-
+    ctk.CTkLabel(in_come, text="Income", font=("Kanit", 30, "bold"), text_color="#1e683e").pack(side="top", pady=(10, 0))
     income = ctk.CTkLabel(in_come, text=report.total_revenue(), font=("Kanit", 80, "bold"), text_color="#1e683e")
     income.pack(expand=True, fill="both", padx=10, pady=(0, 10))
 
-    # --- ส่วนของ Expense ---
-    out_come = ctk.CTkFrame(best_sellers, fg_color="#FFFFFF", corner_radius=15, border_width=5, border_color="#1e683e") # เปลี่ยนจากดำสนิทให้ดูมีมิติ
+    # --- กล่อง Expense ---
+    out_come = ctk.CTkFrame(right_panel, fg_color="#FFFFFF", corner_radius=15, border_width=5, border_color="#1e683e")
     out_come.grid(row=0, column=1, sticky="nsew", padx=5, pady=(0, 5))
 
-    lbl_exp_title = ctk.CTkLabel(out_come, text="Expense", font=("Kanit", 30, "bold"), text_color="#8e0000")
-    lbl_exp_title.pack(side="top", pady=(10, 0))
-
+    ctk.CTkLabel(out_come, text="Expense", font=("Kanit", 30, "bold"), text_color="#8e0000").pack(side="top", pady=(10, 0))
     expense = ctk.CTkLabel(out_come, text=report.total_expense(), font=("Kanit", 80, "bold"), text_color="#8e0000")
     expense.pack(expand=True, fill="both", padx=10, pady=(0, 10))
 
-    # --- ส่วนของ Custom (ปุ่ม) ---
-    in_out_come_custom = ctk.CTkFrame(best_sellers, fg_color="transparent", corner_radius=15)
-    in_out_come_custom.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=5, pady=(0, 5))
+    # --- แถวปุ่มกรองช่วงเวลาของตาราง Sales ---
+    filter_row = ctk.CTkFrame(right_panel, fg_color="transparent", corner_radius=15)
+    filter_row.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=5, pady=(0, 5))
 
-    # 1. สำคัญ: ต้องกำหนดให้ Row 0 ภายในเฟรมนี้ขยายตัวด้วย
-    in_out_come_custom.rowconfigure(0, weight=1) 
-
-    # 2. กำหนดให้ทั้ง 4 Column มีน้ำหนักเท่ากัน (คุณทำไว้แล้ว ดีมากครับ)
+    filter_row.rowconfigure(0, weight=1)
     for i in range(4):
-        in_out_come_custom.columnconfigure(i, weight=1)
+        filter_row.columnconfigure(i, weight=1)
 
-    # 3. ตรวจสอบว่าปุ่มทุกปุ่มมี sticky="nsew" (เพื่อให้ปุ่มยืดไปแตะขอบ Grid)
-    btn_all = ctk.CTkButton(in_out_come_custom, text="ทั้งหมด", font=("Kanit", 20, "bold"), command=lambda: render_sales_table(None), fg_color="#1e683e", hover_color="#002c13")
-    btn_all.grid(row=0, column=0, padx=(0, 5), pady=(5, 0), sticky="nsew")
+    # ปุ่มกรองทั้ง 4 ช่วง
+    filter_buttons = [
+        ("ทั้งหมด", None),
+        ("7 วัน",   7),
+        ("15 วัน",  15),
+        ("1 เดือน", 30),
+    ]
+    for col_idx, (label, days) in enumerate(filter_buttons):
+        padx = (0, 5) if col_idx == 0 else (5, 0) if col_idx == 3 else (5, 5)
+        ctk.CTkButton(
+            filter_row, text=label,
+            font=("Kanit", 20, "bold"),
+            command=lambda d=days: render_sales_table(d),
+            fg_color="#1e683e", hover_color="#002c13"
+        ).grid(row=0, column=col_idx, padx=padx, pady=(5, 0), sticky="nsew")
 
-    btn_7 = ctk.CTkButton(in_out_come_custom, text="7 วัน", font=("Kanit", 20, "bold"), command=lambda: render_sales_table(7), fg_color="#1e683e", hover_color="#002c13")
-    btn_7.grid(row=0, column=1, padx=5, pady=(5, 0), sticky="nsew")
+    # =========================================================
+    # ส่วนที่ 6: ตาราง Best Sellers (สินค้าขายดี)
+    # =========================================================
 
-    btn_15 = ctk.CTkButton(in_out_come_custom, text="15 วัน", font=("Kanit", 20, "bold"), command=lambda: render_sales_table(15), fg_color="#1e683e", hover_color="#002c13")
-    btn_15.grid(row=0, column=2, padx=5, pady=(5, 0), sticky="nsew")
-
-    btn_30 = ctk.CTkButton(in_out_come_custom, text="1 เดือน", font=("Kanit", 20, "bold"), command=lambda: render_sales_table(30), fg_color="#1e683e", hover_color="#002c13")
-    btn_30.grid(row=0, column=3, padx=(5, 0), pady=(5, 0), sticky="nsew")
-
-    # 3.2 Frame ขวาล่าง (Best Sellers Table)
-    best_sellers_frame = ctk.CTkFrame(best_sellers, fg_color="white", corner_radius=15)
+    best_sellers_frame = ctk.CTkFrame(right_panel, fg_color="white", corner_radius=15)
     best_sellers_frame.grid(row=2, column=0, columnspan=2, sticky="nsew", padx=5, pady=5)
-    
-    # เพิ่ม Label ชื่อตาราง
-    lbl_bs_title = ctk.CTkLabel(best_sellers_frame, text="🏆 สินค้าขายดี (Best Sellers)", font=("Kanit", 16, "bold"), text_color="#333333")
-    lbl_bs_title.pack(side="top", pady=(10, 5), padx=15, anchor="w")
+
+    ctk.CTkLabel(
+        best_sellers_frame,
+        text="🏆 สินค้าขายดี (Best Sellers)",
+        font=("Kanit", 16, "bold"), text_color="#333333"
+    ).pack(side="top", pady=(10, 5), padx=15, anchor="w")
 
     def render_best_sellers_table():
-        # สร้าง Frame เปล่าๆ สำหรับยัด Treeview กะ Scrollbar
+        """
+        สร้างและแสดงตาราง Best Sellers โดยเรียงจากสินค้าที่สต็อกเหลือน้อยสุด
+        (สินค้าที่ขายออกไปมาก = สต็อกเหลือน้อย)
+        """
+        # Frame สำหรับ Treeview + Scrollbar
         tv_frame = ctk.CTkFrame(best_sellers_frame, fg_color="transparent")
-        tv_frame.pack(fill="both", expand=True, padx=10, pady=(0, 0))
+        tv_frame.pack(fill="both", expand=True, padx=10)
 
-        # สร้าง Treeview (ตาราง) แบบไม่มีเส้นขอบ (ใช้ style เดิมที่เซ็ตไว้)
+        # สร้างตาราง
         columns = ("rank", "id", "name")
         tree_bs = ttk.Treeview(tv_frame, columns=columns, show="headings", height=8, selectmode="none")
-        
-        # ปรับความกว้างและหัวข้อคอลัมน์
-        tree_bs.heading("rank", text="อันดับ", anchor="center")
-        tree_bs.column("rank", width=50, anchor="center")
 
-        tree_bs.heading("id", text="รหัส", anchor="center")
-        tree_bs.column("id", width=60, anchor="center")
+        tree_bs.heading("rank", text="อันดับ",   anchor="center")
+        tree_bs.column ("rank", width=50,          anchor="center")
+
+        tree_bs.heading("id",   text="รหัส",      anchor="center")
+        tree_bs.column ("id",   width=60,          anchor="center")
 
         tree_bs.heading("name", text="ชื่อสินค้า", anchor="center")
-        tree_bs.column("name", width=150, anchor="center")
+        tree_bs.column ("name", width=150,          anchor="center")
 
-        # สร้าง Scrollbar สำหรับเลื่อนตารางขึ้น-ลง
+        # Scrollbar แนวตั้ง
         scrollbar_bs = ttk.Scrollbar(tv_frame, orient="vertical", command=tree_bs.yview)
         tree_bs.configure(yscrollcommand=scrollbar_bs.set)
 
-        # จัดวางตัว Treeview และ Scrollbar ลงใน Frame
-        tree_bs.pack(side="left", fill="both", expand=True)
+        tree_bs.pack(side="left",  fill="both", expand=True)
         scrollbar_bs.pack(side="right", fill="y")
 
-        # ดึงข้อมูลมาจาก report (คืนค่ามาเป็น list of dict)
-        bs_data = report.product_report()
-        
-        # เรียงตาม stock คงเหลือน้อยที่สุด
-        sorted_bs = sorted(bs_data, key=lambda item: item.get('stock', 0))
-        
-        # ใส่ tag เพื่อสลับสีแถว (Zebra striping)
-        tree_bs.tag_configure('evenrow', background='#FFFFFF')
-        tree_bs.tag_configure('oddrow', background='#F8F9FA')
-        
+        # ดึงข้อมูลสินค้าและเรียงตามสต็อกน้อยสุด
+        bs_data    = report.product_report()
+        sorted_bs  = sorted(bs_data, key=lambda item: item.get("stock", 0))
+
+        tree_bs.tag_configure("evenrow", background="#FFFFFF")
+        tree_bs.tag_configure("oddrow",  background="#F8F9FA")
+
         for idx, item in enumerate(sorted_bs):
-            # ยัดข้อมูลลงแถวของ Treeview พร้อมกำหนด tag สลับสี
-            tag = 'evenrow' if idx % 2 == 0 else 'oddrow'
-            pid = item.get('id', 'N/A')
-            name = item.get('name', 'Unknown')
+            pid  = item.get("id",   "N/A")
+            name = item.get("name", "Unknown")
+            tag  = "evenrow" if idx % 2 == 0 else "oddrow"
             tree_bs.insert("", "end", values=(f"#{idx + 1}", pid, name), tags=(tag,))
 
-    # เรียกใช้งานแสดงตารางสินค้าขายดี
+    # โหลดตาราง Best Sellers ครั้งแรก
     render_best_sellers_table()
