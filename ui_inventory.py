@@ -1,29 +1,44 @@
 import tkinter as tk
 from tkinter import ttk, messagebox #ttk คือ widget  messagebox คือหน้าต่างแจ้งเตือนpopup
+import customtkinter as ctk
 import product_manager as pm
 
 def setup_inventory_interface(parent):
     """
     ฟังก์ชันหลักสำหรับหน้า GUI คลังสินค้า
     """
-    default_font = ("Kanit", 12)  #เก็บตัวแปรฟอนต์ภาษาไทย
-    header_font = ("Kanit", 14, "bold") #เก็บตัวแปรฟอนต์ภาษาไทยแบบตัวหนา
+    default_font = ("Kanit", 15)  #เก็บตัวแปรฟอนต์ภาษาไทย
     
-    form_frame = tk.Frame(parent,bg="#f0f0f0",padx=20,pady=20) #กล่อง Frame parentพารามิตเตอร์ที่จะเอา Frame ไปว่างใน Main
-    form_frame.place(relwidth=0.3,relheight=1) #.place() ปรับตำแหน่งอิสระ กว้าง 30 สูง 100%
+    form_frame = ctk.CTkFrame(parent,fg_color="white",corner_radius=15) #กล่อง Frame parentพารามิตเตอร์ที่จะเอา Frame ไปว่างใน Main กำหนดโค้งมน 15
+    form_frame.place(relheight=0.96, relwidth=0.28, relx=0.01, rely=0.02) #.place() ปรับตำแหน่งอิสระ 
     
-    tk.Label(form_frame, text='ระบบจัดการคลังสินค้า (Inventory)', font=header_font,bg='#f0f0f0').pack(pady=20) #สร้างText บอกผู้ใช้ ให้มันแสดงใน form_frame .packให้แสดง padyเว้นระยะห่างส่วนบน 20
+    ctk.CTkLabel(
+        form_frame, 
+        text='ระบบจัดการคลังสินค้า', 
+        font=("Kanit", 25, "bold"), 
+        text_color="#1e683e"
+    ).pack(pady=(20, 20))    
     
     def create_input(label_text):
         """
         ฟังก์ชันสร้างช่องกรอกข้อมูล
         """
-        frame = tk.Frame(form_frame,bg='#f0f0f0') #สร้างแถวมาอยู่ใน form_frame 
-        frame.pack(fill='x',pady=8) #วางแถวนี้ลงบนหน้าจอ และให้ขยายเต็มความกว้าง และเว้นคนสูง 8
-        tk.Label(frame, text=label_text, font=default_font, bg='#f0f0f0', width=15,anchor='w').pack(side='left') #สร้างป้ายชื่อ textดึงข้อมูลมาแสดง และชิดซ้าย เพื่อให้ช่องกรอกอยู่บรรทัดเดียว w ด้านซ้าย
-        entry = tk.Entry(frame, font=default_font) #สร้างช่องไว้สำหรับป้อนข้อมูล
-        entry.pack(side='left',fill='x',expand=True) #างช่องกรอกไว้ต่อจากป้ายชื่อ และสั่งให้มันยืดขยายตัว (expand=True) ให้เต็มพื้นที่ที่เหลือในแถวนั้น
-        return entry #ส่งค่ากลับไปในฟังก์ชัน
+        frame = ctk.CTkFrame(form_frame,fg_color="transparent") #สร้างแถวมาอยู่ใน form_frame  #transparent โปร่งใส่
+        frame.pack(fill='x', pady=8, padx=10)  #วางแถวนี้ลงบนหน้าจอ และให้ขยายเต็มความกว้าง และเว้นคนสูง 8
+        
+        ctk.CTkLabel(frame, text=label_text,  font=("Kanit", 18, "bold"), width=120, anchor='w', text_color="#1e683e").pack(side='left') #สร้างป้ายชื่อ textดึงข้อมูลมาแสดง และชิดซ้าย เพื่อให้ช่องกรอกอยู่บรรทัดเดียว w ด้านซ้าย
+        
+        entry = ctk.CTkEntry(
+            frame, 
+            font=("Kanit", 18,), 
+            height=35, # ทำให้กล่องสูงขึ้นเพื่อให้คลิกง่าย
+            fg_color="white", # สีพื้นหลังช่องกรอก
+            border_color="#1e683e", #สีกรอบ
+            text_color="black", # สีตัวอักษรตอนพิมพ์
+            border_width=2, #ความหน้าของเส้นกรอบ
+        )
+        entry.pack(side='left', fill='x', expand=True) #Xยืดความกว้างออกไปทางขวา จนเต็มพื้นที่ True ถ้าหน้าต่างขยายใหญ่ขึ้น ให้ช่องกรอกนี้ยืดตามไปด้วย 
+        return entry
     
     entry_pid = create_input('รหัสสินค้า (ID):') #ส่งค่าไปในฟังก์ชันเพื่อใช้เลือก
     entry_name = create_input('ชื่อสินค้า:')
@@ -32,7 +47,7 @@ def setup_inventory_interface(parent):
     entry_cost = create_input('ต้นทุน:')
     
     def clear_form():
-        entry_pid.config(state='normal') #คำสั่งให้ปลดล็อค รหัสสิินค้าถึงจะเข้าไปลบข้างในได้
+        entry_pid.configure(state='normal') #คำสั่งให้ปลดล็อค รหัสสิินค้าถึงจะเข้าไปลบข้างในได้
         entry_pid.delete(0, tk.END) #คำสั่งลบข้อความออกจากช่องกรอก 0คือตั้งแต่ตัวแรก end ถึงตัวสุดท้าย
         entry_name.delete(0, tk.END)
         entry_price.delete(0, tk.END)
@@ -58,14 +73,19 @@ def setup_inventory_interface(parent):
     
     def update_summary():
         """
-        ฟังก์ชันสำหรับแสดง ยอดเงิน บนหน้า inventory
+        ฟังก์ชันสำหรับอัปเดตตัวเลขในกล่องการ์ดทั้ง 3 ใบ
         """
-        summary = pm.get_store_financial_summary() #ดึงตัวเลขสรุปผลมาเก็บไว้ในตัวแปร
-        summary_text = (f'ต้นทุนรวม: ฿{summary['total_cost']:,.2f}  |  ' # "จัดรูปแบบข้อความ" ให้สวยงามก่อนจะเอาไปโชว์ครับ
-                        f'รายได้ที่คาดหวัง: ฿{summary['total_revenue']:,.2f}  |  '
-                        f'กำไรคาดหวัง: ฿{summary['potential_profit']:,.2f}')
-        lbl_summary.config(text=summary_text)   #จะทำหน้าที่เปลี่ยนข้อความเก่าให้เป็นข้อความใหม่
+        summary = pm.get_store_financial_summary() 
         
+        lbl_cost_val.configure(text=f"ต้นทุนรวม: ฿ {summary['total_cost']:,.2f}")
+        lbl_rev_val.configure(text=f"รายได้ที่คาดหวัง: ฿ {summary['total_revenue']:,.2f}")
+        
+        # ถ้าร้านมีกำไร (เลขเป็นบวก) ให้สีตัวอักษรเป็นสีเขียว
+        if summary['potential_profit'] >= 0:
+            lbl_profit_val.configure(text=f"กำไรที่คาดหวัง: ฿ {summary['potential_profit']:,.2f}", text_color="green")
+        else:
+            lbl_profit_val.configure(text=f"กำไรที่คาดหวัง: ฿ {summary['potential_profit']:,.2f}", text_color="red")
+
     def check_low_stock():
         """
         ฟังก์ชันสำหรับเช็ค สินค้าใกล้หมด
@@ -81,16 +101,17 @@ def setup_inventory_interface(parent):
             
             details = 'รายการสินค้าที่ใกล้หมดสต๊อก:\n\n' #หัวข้อของข้อความ
             for item in low_stock_list: #ลูปสินค้าที่ใกล้หมด
-                details += f'- รหัส: {item['id']} | ชื่อ: {item['name']} | เหลือ: {item['stock']} ชิ้น\n' #เอาข้อความที่ใกล้หมดไปต่อที่หัวข้อคือตัวแปร
+                details += f"- รหัส: {item['id']} | ชื่อ: {item['name']} | เหลือ: {item['stock']} ชิ้น\n" #เอาข้อความที่ใกล้หมดไปต่อที่หัวข้อคือตัวแปร
                 
             messagebox.showwarning('เตือนสินค้าใกล้หมด!', details) #คำเด้งหน้าจอแจ้งเตือนขึ้นแล้วก็เรียกเนื้อหาขึ้นมา
         
         if low_stock_list:
-            #config เปลี่ยนคุณสมบัติป้ายชื่อ #cursor='hand2': เมื่อผู้ใช้ลากเมาส์ไปวางทับข้อความนี้ ลูกศรเมาส์จะเปลี่ยนเป็น "รูปมือจิ้ม" เหมือนเวลาเราจะกดลิงก์ในเว็บ เพื่อสื่อให้ผู้ใช้รู้ว่า "ป้ายนี้กดได้นะ"
-            lbl_alert.config(text = f'⚠️ แจ้งเตือน: มีสินค้าใกล้หมดสต๊อก {len(low_stock_list)} รายการ! คลิกเพื่อดู',fg='red',cursor='hand2') #ดึงจำนวนรายการมาแสดงโชว์ข้อความให้ผู้ใช้ 
+            #configure เปลี่ยนคุณสมบัติป้ายชื่อ #cursor='hand2': เมื่อผู้ใช้ลากเมาส์ไปวางทับข้อความนี้ ลูกศรเมาส์จะเปลี่ยนเป็น "รูปมือจิ้ม" เหมือนเวลาเราจะกดลิงก์ในเว็บ เพื่อสื่อให้ผู้ใช้รู้ว่า "ป้ายนี้กดได้นะ"
+            lbl_alert.configure(text = f'⚠️ แจ้งเตือน: มีสินค้าใกล้หมดสต๊อก {len(low_stock_list)} รายการ! คลิกเพื่อดู',text_color='red',cursor='hand2') #ดึงจำนวนรายการมาแสดงโชว์ข้อความให้ผู้ใช้ 
+            lbl_alert.unbind('<Button-1>') # ลบ event เก่าออกก่อนเสมอเพื่อป้องกันการแจ้งเตือนเด้งซ้อนกันหลายรอบ
             lbl_alert.bind('<Button-1>',show_low_stock_details) #ทำเหตุการณ์ ให้คลิก แล้วก็แสดงให้ popup ขึ้นมา
         else:                                                                       #cursor="arrow" คือการสั่งให้ "สัญลักษณ์ของเมาส์" กลับมาเป็น "รูปศรปกติ"
-            lbl_alert.config(text="✅ สถานะสต็อก: ปกติ", fg="green", cursor="arrow") #ถ้าไม่มีสินค้าใกล้หมดก็จะเข้าเงื่อนไขนี้ 
+            lbl_alert.configure(text="✅ สถานะสต็อก: ปกติ", text_color="green", cursor="arrow") #ถ้าไม่มีสินค้าใกล้หมดก็จะเข้าเงื่อนไขนี้ 
             lbl_alert.unbind('<Button-1>') #.unbind ยกเลิกการคลิกของผู้ใช้
     
     def add_item():
@@ -113,6 +134,7 @@ def setup_inventory_interface(parent):
             cost = float(cost)
         except ValueError: #ตรวจสอบข้อมูลว่าเป็นแบบที่เรากำหนดไหม ถ้าไม่ใช้ก็แสดงข้อมูลแจ้งเตือน
             messagebox.showwarning('เตือน!', 'ราคา, ต้นทุน ต้องเป็นตัวเลข \nและ สต๊อกต้องเป็นจำนวนเต็ม')
+            return
         
         # เรียกใช้ฟังก์ชันจาก product_manager
         success, msg = pm.add_product(pid, name, price, stock, cost) #success: จะได้รับค่าเป็น True (ถ้าบันทึกสำเร็จ) หรือ False (ถ้าล้มเหลว เช่น รหัสสินค้าซ้ำ)
@@ -135,6 +157,10 @@ def setup_inventory_interface(parent):
         
         if not pid: #เช็คว่ามีการเลือกรหัสสินไหมหรือช่องว่างเปล่าถ้าว่างทำการแจ้งเตือน
             messagebox.showwarning('เตือน!', 'กรุณาเลือกรหัสสินค้าเพื่อแก้ไขข้อมูล')
+            return
+        
+        if not name: #เช็คว่ามีการลบชื่อไหมหรือช่องว่างเปล่าถ้าว่างทำการแจ้งเตือน
+            messagebox.showwarning('เตือน!', 'ช่องชื่อสินค้าว่างเปล่า')
             return
         
         try:
@@ -199,7 +225,7 @@ def setup_inventory_interface(parent):
             
             clear_form() #เครียร์ฟร์อมเพื่อจะเอาข้อมูลใหม่ไปแสดง
             entry_pid.insert(0, values[0]) #แสดงช้อมูลลงไปในฟร์อม # values[0] = รหัสสินค้า (PID)
-            entry_pid.config(state="disabled") # ล็อกการแก้ไขรหัสสินค้า เพื่อป้องกัน Bug 
+            entry_pid.configure(state="disabled") # ล็อกการแก้ไขรหัสสินค้า เพื่อป้องกัน Bug 
             entry_name.insert(0, values[1])    # values[1] = ชื่อสินค้า (Name)
             entry_price.insert(0, values[2])   # values[2] = ราคา (Price)
             entry_stock.insert(0, values[3])   # values[3] = สต็อก (Stock)
@@ -210,65 +236,131 @@ def setup_inventory_interface(parent):
     # ==========================
     # ปุ่มในมุมฟอร์มฝั่งซ้าย
     # ==========================
-    btn_frame = tk.Frame(form_frame,bg='#f0f0f0')
-    btn_frame.pack(fill='x', pady=20)
+    btn_frame = ctk.CTkFrame(form_frame,fg_color="transparent")
+    btn_frame.pack(fill='x', pady=20,padx=10)
     
-    btn_add = tk.Button(btn_frame, text='เพิ่มสินค้า', font=default_font, bg='#4CAF50', command=add_item)
-    btn_add.pack(side='left', padx=5, fill='x', expand=True)
+    btn_add = ctk.CTkButton(
+        btn_frame, text='➕ เพิ่มสินค้าใหม่', font=("Kanit", 16, "bold"), height=50, # เพิ่มความสูงและทำตัวหนา
+        fg_color="#1e683e", hover_color="#003a17", #เมาส์ไปชี้เพื่อเปลี่ยนสี
+        command=add_item
+    )
+    btn_add.pack(fill='x', pady=(0, 10)) #xยืดความกว้างออกไปทางขวา
     
-    btn_update = tk.Button(btn_frame, text="แก้ไข", font=default_font, bg="#2196F3", fg="white", command=update_item)
-    btn_update.pack(side="left", padx=5, fill="x", expand=True)
+    sub_action_frame = ctk.CTkFrame(btn_frame, fg_color="transparent") #เว้นระยะ
+    sub_action_frame.pack(fill="x")
     
-    btn_delete = tk.Button(btn_frame, text="ลบ", font=default_font, bg="#f44336", fg="white", command=delete_item)
-    btn_delete.pack(side="left", padx=5, fill="x", expand=True)
+    btn_update = ctk.CTkButton(
+        sub_action_frame, text="✏️ แก้ไข", font=("Kanit", 16, "bold"), height=50,
+        fg_color="#2196F3", hover_color="#0d47a1", text_color="white",
+        command=update_item
+    )
+    btn_update.pack(side="left", fill="x", expand=True, padx=(0, 5))
     
-    btn_clear = tk.Button(form_frame, text="เคลียร์ข้อมูลในช่อง", font=default_font, command=clear_form)
-    btn_clear.pack(fill="x", pady=5)
+    btn_delete = ctk.CTkButton(
+        sub_action_frame, text="🗑️ ลบ", font=("Kanit", 16, "bold"), height=50, 
+        fg_color="#f44336", hover_color="#b71c1c", text_color="white",
+        command=delete_item
+    )
+    btn_delete.pack(side="left", fill="x", expand=True, padx=(5, 0))
+    
+    btn_clear = ctk.CTkButton(
+        form_frame, text="🧹 เคลียร์ข้อมูลในช่อง", font=("Kanit", 16, "bold"), height=50, 
+        fg_color="transparent", border_color="#1e683e", border_width=2, text_color="#1e683e",
+        hover_color="#f0f0f0",
+        command=clear_form
+    )
+    btn_clear.pack(fill="x", pady=(15, 5), padx=10)
 
     # ==========================
     # เฟรมขวา สำหรับแสดงรายการ และ ยอดสรุป
     # ==========================
-    data_frame = tk.Frame(parent, bg='#ffffff', padx=20,pady=20)
-    data_frame.place(relx=0.3, relwidth=0.7, relheight=1) #.place ทำให้เป็นเปอร์เซ็น
+    data_frame = ctk.CTkFrame(parent, fg_color="#F8F9FA", corner_radius=15)
+    data_frame.place(relwidth=0.68, relheight=0.96, relx=0.3, rely=0.02) #กำหนดขนาด จากอันที่กำหนดไว้ไม่ให้ทับกัน
     
     # กรอบสำหรับสรุปการเงิน และ แจ้งเตือนของใกล้หมด (ส่วนบนขวา)
-    dash_frame = tk.Frame(data_frame, bg='#e0f7fa', pady=10,padx=15,relief='ridge',bd=2) #relief='ridge',bd=2 สร้างขอบนูนแล้วปรับเส้นหนา 2
-    dash_frame.pack(fill='x', pady=(0, 15)) #ด้านบน 0 ด้านล่าง 15
+    dash_frame = ctk.CTkFrame(data_frame, fg_color="#E8F5E9", border_color="#1e683e", border_width=2, corner_radius=10)
+    dash_frame.pack(fill='x', pady=20, padx=20) 
     
-    lbl_summary = tk.Label(dash_frame, text='สรุปการเงิน: --',font=default_font,bg="#e0f7fa")
-    lbl_summary.pack(side='left')
+    #สร้างกล่องที่ 1
+    lbl_cost_val = ctk.CTkLabel(dash_frame, text="฿ 0.00", font=("Kanit", 16, "bold"), text_color="#f98404")
+    lbl_cost_val.pack(side="left", padx=15, pady=10)
     
-    lbl_alert = tk.Label(dash_frame, text="สถานะสต็อก: ปกติ", font=default_font, bg="#e0f7fa", fg="green")
-    lbl_alert.pack(side="right")
+    # สร้างกล่องที่ 2
+    lbl_rev_val = ctk.CTkLabel(dash_frame, text="฿ 0.00", font=("Kanit", 16, "bold"), text_color="#1565C0")
+    lbl_rev_val.pack(side="left", padx=15, pady=10)
     
-    # กรอบสำหรับค้นหา
-    search_frame = tk.Frame(data_frame, bg="#ffffff")
-    search_frame.pack(fill="x", pady=5)
+    # สร้างกล่องที่ 3
+    lbl_profit_val = ctk.CTkLabel(dash_frame, text="฿ 0.00", font=("Kanit", 16, "bold"), text_color="#2E7D32")
+    lbl_profit_val.pack(side="left", padx=15, pady=10)
+    
+    lbl_alert = ctk.CTkLabel(
+        dash_frame, text="✅ สถานะสต็อก: ปกติ", 
+        font=("Kanit", 16, "bold"), text_color="green" # เดี๋ยวสีแดงเราไปแก้ใน check_low_stock อีกที
+    )
+    lbl_alert.pack(side="right", padx=15, pady=10)
+    
+
     # ==========================
     # เฟรม ค้นหาสินค้า
     # ==========================
     # กรอบสำหรับค้นหา
-    search_frame = tk.Frame(data_frame, bg="#ffffff")
-    search_frame.pack(fill="x", pady=5)
+    search_frame = ctk.CTkFrame(data_frame, fg_color="transparent")
+    search_frame.pack(fill="x", padx=20, pady=(0, 10))
     
-    tk.Label(search_frame,text='ค้นหา (ชื่อ / รหัส):', font=default_font,bg='#ffffff').pack(side='left')
-    entry_search = tk.Entry(search_frame,font=default_font,width=30) #สร้างช่องกรอกข้อมูล
-    entry_search.pack(side='left',padx=10)
-    entry_search.bind('<Return>',lambda event: search_item()) #.bind นำเหตุการณ์  <Return> ปุ่ม ถ้าผู้ใช้กรอกช้อมูลแล้วกดปุ่ม ก็จะส่งไปให้ฟังก์ชันทำงาน
-    tk.Button(search_frame, text='ค้นหา',font=default_font,bg='#ffc107', command=search_item).pack(side='left',padx=5)
-    tk.Button(search_frame, text='รีเฟรชข้อมูล', font=default_font, command=refresh_data).pack(side='left', padx=5)
+    ctk.CTkLabel(search_frame, text='🔍 ค้นหา (ชื่อ/รหัส):', font=default_font, text_color="#1e683e").pack(side='left', padx=(0, 10))
+    
+    entry_search = ctk.CTkEntry(
+        search_frame, font=default_font, width=250, height=35,
+        border_color="#1e683e", border_width=2
+    )
+    entry_search.pack(side='left', padx=10)
+    entry_search.bind('<Return>', lambda event: search_item()) #.bind นำเหตุการณ์  <Return> ปุ่ม ถ้าผู้ใช้กรอกช้อมูลแล้วกดปุ่ม ก็จะส่งไปให้ฟังก์ชันทำงาน
+    
+    btn_search = ctk.CTkButton(
+        search_frame, text='ค้นหา', font=default_font, 
+        fg_color="#1e683e", hover_color="#003a17", text_color="white", width=100,
+        command=search_item
+    )
+    btn_search.pack(side='left', padx=5)
+    
+    btn_refresh = ctk.CTkButton(
+        search_frame, text='🔄 รีเฟรชข้อมูล', font=default_font, 
+        fg_color="transparent", border_color="#1e683e", border_width=2, text_color="#1e683e", hover_color="#f0f0f0", width=120,
+        command=refresh_data
+    )
+    btn_refresh.pack(side='left', padx=5)
     
     # ==========================
     # ตารางสินค้า (Treeview)
     # ==========================
+    tree_frame = ctk.CTkFrame(data_frame, fg_color="transparent")
+    tree_frame.pack(fill="both", expand=True, padx=20, pady=(0, 20))
     
     columns = ('PID', 'Name', 'Price', 'Stock', 'Cost') #สร้างชื่อตอลัมขึ้นมาแล้วก็เก็บในตัวแปร
-    tree = ttk.Treeview(data_frame, columns=columns, show='headings', height=20) #สร้างตาราง เอาคอลัมที่กำหนดมาแสดง สั่งให้แสดงเฉพาะหัวตาราง
+    tree = ttk.Treeview(tree_frame, columns=columns, show='headings', height=20, selectmode="browse")  #สร้างตาราง เอาคอลัมที่กำหนดมาแสดง สั่งให้แสดงเฉพาะหัวตาราง #browseเลือกได้ทีละแถวเดียวเท่านั้น
     
     # จัดการแสดงผลฟอนต์ไทยใน Treeview
-    style = ttk.Style() #เรียก .Style() มาตกแต่งให้ทั้งหมดเหมือนกัน
-    style.configure("Treeview.Heading", font=header_font) #กำหนดให้หัวตาราง ตัวใหญ่และเด่นทำให้รอมันคือคอลัมอะไร
-    style.configure("Treeview", font=default_font, rowheight=30)
+    style = ttk.Style() 
+    style.theme_use("clam")  # ลบขอบตารางแบบยุคเก่าออก
+    
+    style.configure("Treeview", 
+                    background="white",
+                    foreground="#333333",
+                    rowheight=35,            # ความสูงแต่ละแถว
+                    fieldbackground="white",
+                    font=("Kanit", 12),
+                    borderwidth=0)
+                    
+    style.configure("Treeview.Heading", 
+                    font=("Kanit", 14, "bold"), 
+                    background="#1e683e",  # สีเขียวเข้มของร้าน
+                    foreground="white",
+                    borderwidth=0,
+                    relief="flat")
+                    
+    # เปลี่ยนสีเวลาคลิกเลือกรายการ
+    style.map('Treeview', background=[('selected', '#C8E6C9')], foreground=[('selected', '#000000')])
+    style.map('Treeview.Heading', background=[('active', '#144e2d')])
     
     # กำหนดหัวตาราง
     tree.heading("PID", text="รหัสสินค้า") #กำหนดให้ตรงตามที่ลำเคยสร้างตัวแปรคอลัมว่ามันจะไปอยู่ส่วนไหน
@@ -288,8 +380,8 @@ def setup_inventory_interface(parent):
     tree.bind("<<TreeviewSelect>>", on_tree_select) # เหตุการณ์กระทำ เมื่อมีการกระทำ การคลิกแถว จะทำการ เรียกฟังก์ชัน
     
     # เพิ่ม Scrollbar ให้ตาราง                                                       #คือการผูกการทำงานของแถบเลื่อนเข้ากับมุมมองแนวตั้งของตาราง
-    scrollbar = ttk.Scrollbar(data_frame, orient="vertical", command=tree.yview) #เมื่อมีคนมาเลื่อนในส่วน data_frame ทำให้เลื่อนจากบนลงล่าง 
-    tree.configure(yscrollcommand=scrollbar.set) #เมื่อข้อมูลของ tree มันเยอะเกินหน้าจอ จะทำการสั่งให้เลื่อนสกอบาร์ได้
+    scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=tree.yview)  #เมื่อมีคนมาเลื่อนในส่วน tree_frame ทำให้เลื่อนจากบนลงล่าง 
+    tree.configure(yscrollcommand=scrollbar.set)  #เมื่อข้อมูลของ tree มันเยอะเกินหน้าจอ จะทำการสั่งให้เลื่อนสกอบาร์ได้
     
     tree.pack(side="left", fill="both", expand=True) #ให้ตารางอยู่ฝั่งซ้าย ให้ตารางเต็มพื้นที่ สั่งให้เต็มพื้นที่ขนาด
     scrollbar.pack(side="right", fill="y") #สั่งให้อยู่ฝั่งขวา พร้อมให้มันยาวลงมาเป็นแกนYเท่านั้น
