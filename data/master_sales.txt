@@ -1,2 +1,46 @@
-[2026-03-08 20:23:14] Total: 18056.25 THB | Member: TMK 01 (1234567890) | Items: 1
-[2026-03-08 20:28:29] Total: 749.00 THB | General Customer | Items: 1
+[2026-03-05 22:45:10] Total: 7490.00 THB | General Customer | Items: 2
+[2026-03-05 22:46:20] Total: 3745.00 THB | General Customer | Items: 1
+[2026-03-05 22:55:01] Total: 7490.00 THB | General Customer | Items: 1
+[2026-03-05 22:59:09] Total: 19260.00 THB | Member: Apr TMK (098-1234567) | Items: 1
+[2026-03-05 23:21:32] Total: 3210.00 THB | General Customer | Items: 1
+[2026-03-05 23:22:24] Total: 2407.50 THB | Member: Apr TMK (098-1234567) | Items: 1
+[2026-03-06 03:41:31] Total: 133750.00 THB | General Customer | Items: 1
+[2026-03-06 03:41:51] Total: 25680.00 THB | General Customer | Items: 1
+[2026-03-06 03:50:37] Total: 321.00 THB | General Customer | Items: 1
+[2026-03-06 03:51:06] Total: 6848.00 THB | General Customer | Items: 1
+[2026-03-06 03:51:38] Total: 22470.00 THB | General Customer | Items: 1
+[2026-03-06 03:52:51] Total: 802.50 THB | General Customer | Items: 1
+[2026-03-06 03:53:10] Total: 10272.00 THB | General Customer | Items: 1
+[2026-03-07 00:24:28] Total: 12840.00 THB | General Customer | Items: 1
+[2026-03-07 00:33:27] Total: 321.00 THB | General Customer | Items: 1
+[2026-03-07 01:44:18] Total: 10379.00 THB | General Customer | Items: 2
+[2026-03-07 02:16:34] Total: 7222.50 THB | Member: TMK 01 (1234567890) | Items: 1
+[2026-03-07 04:52:55] Total: 802.50 THB | Member: TMK 01 (1234567890) | Items: 1
+[2026-03-07 22:13:58] Total: 3531.00 THB | Member: TMK 01 (1234567890) | Items: 1
+[2026-03-07 22:18:32] Total: 3210.00 THB | General Customer | Items: 1
+[2026-03-07 22:52:14] Total: 6420.00 THB | General Customer | Items: 1
+[2026-03-01 10:15:22] Total: 12500.00 THB | Member: John Doe (081-1112222) | Items: 3
+[2026-03-01 18:30:45] Total: 450.00 THB | General Customer | Items: 1
+[2026-03-02 11:20:10] Total: 3210.00 THB | General Customer | Items: 1
+[2026-03-03 09:45:33] Total: 15400.00 THB | Member: Jane Smith (089-9998888) | Items: 2
+[2026-03-04 14:12:05] Total: 802.50 THB | General Customer | Items: 1
+[2026-03-04 21:05:50] Total: 22470.00 THB | Member: Apr TMK (098-1234567) | Items: 2
+[2026-02-22 08:30:12] Total: 350.00 THB | General Customer | Items: 1
+[2026-02-23 13:22:44] Total: 6848.00 THB | Member: TMK 01 (1234567890) | Items: 1
+[2026-02-24 16:40:11] Total: 12840.00 THB | General Customer | Items: 1
+[2026-02-25 10:15:00] Total: 45000.00 THB | Member: Rich Man (080-0000000) | Items: 5
+[2026-02-26 19:11:55] Total: 950.00 THB | General Customer | Items: 2
+[2026-02-27 12:05:30] Total: 10272.00 THB | Member: Apr TMK (098-1234567) | Items: 1
+[2026-02-28 23:55:18] Total: 321.00 THB | General Customer | Items: 1
+[2026-02-08 09:15:00] Total: 133750.00 THB | General Customer | Items: 1
+[2026-02-10 14:22:33] Total: 3210.00 THB | Member: TMK 01 (1234567890) | Items: 1
+[2026-02-12 11:05:44] Total: 7490.00 THB | General Customer | Items: 2
+[2026-02-15 17:50:01] Total: 19260.00 THB | Member: Jane Smith (089-9998888) | Items: 1
+[2026-02-18 10:30:22] Total: 3745.00 THB | General Customer | Items: 1
+[2026-02-20 22:15:40] Total: 802.50 THB | Member: Apr TMK (098-1234567) | Items: 1
+[2026-03-08 05:13:19] Total: 7222.50 THB | Member: TMK 01 (1234567890) | Items: 1
+[2026-03-08 05:13:59] Total: 25680.00 THB | General Customer | Items: 1
+[2026-03-08 05:14:13] Total: 240.75 THB | Member: TMK 01 (1234567890) | Items: 1
+[2026-03-08 05:57:12] Total: 24075.00 THB | General Customer | Items: 1
+[2026-03-08 05:57:54] Total: 8988.00 THB | General Customer | Items: 1
+[2026-03-08 19:37:41] Total: 9630.00 THB | General Customer | Items: 1

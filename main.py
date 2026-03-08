@@ -3,7 +3,7 @@ import POS
 import os
 from tkinter import messagebox  # ต้องเพิ่มบรรทัดนี้เพื่อใช้การแจ้งเตือน
 import customtkinter as ctk
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageSequence
 
 class AppState:
     current_page = None
@@ -162,16 +162,37 @@ ctk.CTkButton(about, text="Exit",
 
 main = tk.Frame(root, bg='red') #สร้างหน้าเข้าไปใน root และเปลี่ยนสี Bg
 main.place(x=0, y=90, width=1920, height=960) #วางแบบกำหนดค่าเองคือ แกน x และ y พร้อมกำหนดขนาด
-bg_image = Image.open("img/Main.png") # ใส่ชื่อไฟล์ภาพของคุณ
-bg_image = bg_image.resize((1920, 960)) # ปรับขนาดภาพให้เท่ากับ Frame
-bg_photo = ImageTk.PhotoImage(bg_image)
-# 3. สร้าง Label ไว้ใน main เพื่อแสดงภาพเป็น Background
-bg_label = tk.Label(main, image=bg_photo)
-bg_label.place(relwidth=1, relheight=1) # ทำให้ภาพเต็มพื้นที่ Frame ตลอดเวลา
+
+# 2. โหลดไฟล์ GIF และดึงเฟรมออกมาเก็บไว้ใน List
+gif_path = "gif/test1.gif"
+img = Image.open(gif_path)
+frames = [ImageTk.PhotoImage(frame.copy()) for frame in ImageSequence.Iterator(img)]
+# 3. สร้างตัวแปรไว้เก็บลำดับเฟรมปัจจุบัน
+current_frame = 0
+# 4. สร้าง Label ไว้แสดงภาพ
+label = tk.Label(main)
+label.pack(fill="both", expand=True)
+
+# 5. ฟังก์ชันสำหรับเปลี่ยนภาพไปเรื่อยๆ (Animation)
+def update_gif():
+    global current_frame
+    
+    # ดึงภาพเฟรมปัจจุบันมาโชว์
+    frame = frames[current_frame]
+    label.configure(image=frame)
+    
+    # เลื่อนลำดับเฟรม (ถ้าถึงเฟรมสุดท้ายให้วนกลับไป 0)
+    current_frame = (current_frame + 1) % len(frames)
+    
+    # สั่งให้ทำงานซ้ำทุกๆ 100 มิลลิวินาที
+    root.after(100, update_gif)
+
+# 6. เรียกใช้งานฟังก์ชันครั้งแรก
+update_gif()
 
 members = tk.Frame(root, bg='green') #สร้างหน้าเข้าไปใน root และเปลี่ยนสี Bg
 members.place(x=0, y=90, width=1920, height=960) #วางแบบกำหนดค่าเองคือ แกน x และ y พร้อมกำหนดขนาด
-members_image = Image.open("img/Members.png") # ใส่ชื่อไฟล์ภาพของคุณ
+members_image = Image.open("img/Main.png") # ใส่ชื่อไฟล์ภาพของคุณ
 members_image = members_image.resize((1920, 960)) # ปรับขนาดภาพให้เท่ากับ Frame
 members_photo = ImageTk.PhotoImage(members_image)
 # 3. สร้าง Label ไว้ใน main เพื่อแสดงภาพเป็น Background
