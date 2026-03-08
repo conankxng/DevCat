@@ -3,7 +3,7 @@ import POS
 import os
 from tkinter import messagebox  # ต้องเพิ่มบรรทัดนี้เพื่อใช้การแจ้งเตือน
 import customtkinter as ctk
-from PIL import Image
+from PIL import Image, ImageTk
 
 class AppState:
     current_page = None
@@ -63,16 +63,36 @@ header.grid_columnconfigure(2, weight=1)
 
 in_header_left = ctk.CTkFrame(header, fg_color="#FFFFFF") #สร้างเฟรมย่อยใน header เพื่อแยกส่วนซ้ายและขวา
 in_header_left.grid(row=0, column=0, sticky="nsew")
+    
 
 try:
     raw_img_logo = Image.open("img/Logo_devcat.png")
-    # แนะนำให้ตั้ง size ให้เท่ากับขนาดของ left_panel หรือใหญ่พอที่จะคลุมพื้นที่
+    
+    # กำหนดขนาดปุ่มและภาพให้สัมพันธ์กัน
     image_logo = ctk.CTkImage(light_image=raw_img_logo, dark_image=raw_img_logo, size=(200, 50)) 
-    img_logo = ctk.CTkLabel(in_header_left, image=image_logo, text="") 
-    img_logo.place(x=20, y=20) 
+    
+    # เปลี่ยนจาก ctk.CTkLabel เป็น ctk.CTkButton
+    btn_logo = ctk.CTkButton(
+        in_header_left, 
+        image=image_logo, 
+        text="",               # ลบข้อความออกเพื่อให้เห็นแต่รูป
+        fg_color="transparent", # ทำให้พื้นหลังปุ่มโปร่งใส (กลมกลืนกับ Header)
+        hover_color="#eeeeee",  # สีเวลาเอาเมาส์ไปวาง (ปรับตามใจชอบ)
+        width=200, 
+        height=50,
+        command=lambda: switch(main)
+    ) 
+    btn_logo.place(x=20, y=10) 
+
 except Exception as e:
     print(f"Error loading logo: {e}")
-    ctk.CTkLabel(in_header_left, text="DevCat Logo", font=("Kanit", 20, "bold")).place(x=20, y=20)
+    # กรณีโหลดภาพไม่ได้ ให้สร้างปุ่มข้อความแทน
+    ctk.CTkButton(
+        in_header_left, 
+        text="DevCat Logo", 
+        font=("Kanit", 20, "bold"),
+        command=lambda: print("Text Logo Clicked!")
+    ).place(x=20, y=20)
 
 in_header_right = ctk.CTkFrame(header, fg_color="#FFFFFF") #สร้างเฟรมย่อยใน header เพื่อแยกส่วนซ้ายและขวา
 in_header_right.grid(row=0, column=1 , sticky="nsew")
@@ -85,7 +105,7 @@ ctk.CTkButton(in_header_right, text="Inventory",
               font=("Kanit", 30, "bold"),
               height=70,
               fg_color="#FFFFFF",
-              hover_color="#fffbee",
+              hover_color="#eeeeee",
               text_color="#1e683e",
               border_width=2,
               border_color="#1e683e",
@@ -96,7 +116,7 @@ ctk.CTkButton(in_header_right, text="POS",
               font=("Kanit", 30, "bold"),
               height=70,
               fg_color="#FFFFFF",
-              hover_color="#fffbee",
+              hover_color="#eeeeee",
               text_color="#1e683e",
               border_width=2,
               border_color="#1e683e",
@@ -107,14 +127,56 @@ ctk.CTkButton(in_header_right, text="Report",
               font=("Kanit", 30, "bold"), 
               height=70, 
               fg_color="#FFFFFF",
-              hover_color="#fffbee",
+              hover_color="#eeeeee",
               text_color="#1e683e",
               border_width=2,
               border_color="#1e683e",
               corner_radius=10).grid(row=0, column=2, sticky="nsew", padx=10, pady=(10, 5))
 
+about = ctk.CTkFrame(header, fg_color="#FFFFFF")
+about.grid(row=0, column=2, sticky="nsew")
+about.grid_columnconfigure(0, weight=1) # ให้คอลัมน์ปุ่ม Members ขยาย
+about.grid_columnconfigure(1, weight=1) # ให้คอลัมน์ปุ่ม Exit ขยาย
+ctk.CTkButton(about, text="Members", 
+              command=lambda: switch(members), 
+              font=("Kanit", 30, "bold"),
+              height=70,
+              fg_color="#FFFFFF",
+              hover_color="#eeeeee",
+              text_color="#1e683e",
+              border_width=2,
+              border_color="#1e683e",
+              corner_radius=10).grid(row=0, column=0, sticky="nsew", padx=10, pady=(10, 5))
+
+ctk.CTkButton(about, text="Exit", 
+              command=lambda: root.destroy(), 
+              font=("Kanit", 30, "bold"),
+              height=70,
+              fg_color="#FFFFFF",
+              hover_color="#eeeeee",
+              text_color="#1e683e",
+              border_width=2,
+              border_color="#1e683e",
+              corner_radius=10).grid(row=0, column=1, sticky="nsew", padx=10, pady=(10, 5))
+
+
 main = tk.Frame(root, bg='red') #สร้างหน้าเข้าไปใน root และเปลี่ยนสี Bg
 main.place(x=0, y=90, width=1920, height=960) #วางแบบกำหนดค่าเองคือ แกน x และ y พร้อมกำหนดขนาด
+bg_image = Image.open("img/Main.png") # ใส่ชื่อไฟล์ภาพของคุณ
+bg_image = bg_image.resize((1920, 960)) # ปรับขนาดภาพให้เท่ากับ Frame
+bg_photo = ImageTk.PhotoImage(bg_image)
+# 3. สร้าง Label ไว้ใน main เพื่อแสดงภาพเป็น Background
+bg_label = tk.Label(main, image=bg_photo)
+bg_label.place(relwidth=1, relheight=1) # ทำให้ภาพเต็มพื้นที่ Frame ตลอดเวลา
+
+members = tk.Frame(root, bg='green') #สร้างหน้าเข้าไปใน root และเปลี่ยนสี Bg
+members.place(x=0, y=90, width=1920, height=960) #วางแบบกำหนดค่าเองคือ แกน x และ y พร้อมกำหนดขนาด
+members_image = Image.open("img/Members.png") # ใส่ชื่อไฟล์ภาพของคุณ
+members_image = members_image.resize((1920, 960)) # ปรับขนาดภาพให้เท่ากับ Frame
+members_photo = ImageTk.PhotoImage(members_image)
+# 3. สร้าง Label ไว้ใน main เพื่อแสดงภาพเป็น Background
+bg_label = tk.Label(members, image=members_photo)
+bg_label.place(relwidth=1, relheight=1) # ทำให้ภาพเต็มพื้นที่ Frame ตลอดเวลา
 
 """
 ส่วนของ เนส Inventory
