@@ -168,8 +168,8 @@ def create_three_frames(parent):
                     borderwidth=0,
                     relief="flat")
                     
-    style.map('Treeview', background=[('selected', '#C8E6C9')], foreground=[('selected', '#000000')])
-    style.map('Treeview.Heading', background=[('active', '#144e2d')])
+    style.map('Treeview', background=[('selected', 'black')], foreground=[('selected', '#000000')])
+    style.map('Treeview.Heading', background=[('active', 'black')])
     
     # กำหนดหัวข้อคอลัมน์ของตาราง
     cart_tree.heading("id", text="รหัสสินค้า")
@@ -192,7 +192,7 @@ def create_three_frames(parent):
     # สร้าง Frame 3 ก่อนเพื่อให้ reload_cart เรียกใช้ Label ได้
     frame3 = ctk.CTkFrame(parent, fg_color="#FFFFFF", width=600)
     frame3.pack_propagate(False)
-    frame3.pack(side=tk.LEFT, fill=tk.BOTH, padx=(5, 20), pady=(10, 15))
+    frame3.pack(side=tk.LEFT, fill=tk.BOTH, padx=(5, 15), pady=(10, 15))
     
     # ========================== ส่วนที่ 3 บน: สมาชิก ==========================
     member_frame = ctk.CTkFrame(frame3, border_width=5, fg_color="white", border_color="#1e683e", corner_radius=10)
@@ -230,14 +230,27 @@ def create_three_frames(parent):
         ent_lname.pack(fill="both", padx=30)
         
         def do_register():
-            success, msg = member_manager.register_member(ent_phone.get(), ent_fname.get(), ent_lname.get())
-            if success:
-                messagebox.showinfo("สำเร็จ", msg, parent=reg_pop)
-                reg_pop.destroy()
-            else:
-                messagebox.showwarning("แจ้งเตือน", msg, parent=reg_pop)
-                
-        ctk.CTkButton(reg_pop, text="ยืนยันสมาชิก", font=("Kanit", 20, "bold"), command=do_register, fg_color="#1e683e", hover_color="#003315", text_color="white").pack(pady=15)
+                    # 1. ดึงค่าจาก Entry ต่างๆ มาเก็บในตัวแปร
+                    phone = ent_phone.get().strip()
+                    fname = ent_fname.get().strip()
+                    lname = ent_lname.get().strip()
+
+                    # 2. ตรวจสอบว่ามีช่องไหนว่างหรือไม่
+                    if not phone or not fname or not lname:
+                        messagebox.showwarning("แจ้งเตือน", "กรุณากรอกข้อมูลให้ครบทุกช่อง", parent=reg_pop)
+                        return  # หยุดการทำงาน ไม่ให้ไปขั้นตอนถัดไป
+
+                    # 3. ถ้ากรอกครบแล้ว จึงทำการสมัครสมาชิก
+                    success, msg = member_manager.register_member(phone, fname, lname)
+                    if success:
+                        messagebox.showinfo("สำเร็จ", msg, parent=reg_pop)
+                        reg_pop.destroy()
+                    else:
+                        messagebox.showwarning("แจ้งเตือน", msg, parent=reg_pop)
+                    
+        ctk.CTkButton(reg_pop, text="ยืนยันสมาชิก", font=("Kanit", 20, "bold"), 
+                            command=do_register, fg_color="#1e683e", 
+                            hover_color="#003315", text_color="white").pack(pady=15)
 
     def popup_login():
         log_pop = ctk.CTkToplevel(parent)

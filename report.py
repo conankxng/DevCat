@@ -229,7 +229,8 @@ def get_master_sales_data(days_filter=None):
 
 # print(f"{y=}, {m=}, {d=}")
 
-
+a = total_expense() 
+print(a)
 '''
 print(show_day_sales())
 print(show_month_sales())
