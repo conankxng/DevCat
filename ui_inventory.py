@@ -63,7 +63,7 @@ def setup_inventory_interface(parent):
         
         products = pm.get_all_products() #อ่านข้อมูลล่าสุดแล้วมาเก็บในตัวแปร
         for pid, data in products.items(): #ทำการลูปเอาข้อมูลใส่ตาราง
-            tree.insert('', 'end', values=(pid, data['name'], data['price'], data['stock'], data['cost']))
+            tree.insert('', 'end', values=(pid, f'{data["name"]}', f'{data["price"]:,.2f}', data['stock'], f'{data["cost"]:,.2f}'))
         
         entry_search.delete(0,tk.END) #เคลียร์ช่องคนหาเมื่อกดรีเฟรช
         update_summary() # พอ รีเฟรช ก็แสดงจำนวนยอดเงินใหม่
@@ -106,7 +106,7 @@ def setup_inventory_interface(parent):
             messagebox.showwarning('เตือนสินค้าใกล้หมด!', details) #คำเด้งหน้าจอแจ้งเตือนขึ้นแล้วก็เรียกเนื้อหาขึ้นมา
         
         if low_stock_list:
-            #configure เปลี่ยนคุณสมบัติป้ายชื่อ #cursor='hand2': เมื่อผู้ใช้ลากเมาส์ไปวางทับข้อความนี้ ลูกศรเมาส์จะเปลี่ยนเป็น "รูปมือจิ้ม" เหมือนเวลาเราจะกดลิงก์ในเว็บ เพื่อสื่อให้ผู้ใช้รู้ว่า "ป้ายนี้กดได้นะ"
+            #cursor='hand2'เมื่อไปชี้จะเป็นรูปมือว่ากดได้
             lbl_alert.configure(text = f'⚠️ แจ้งเตือน: มีสินค้าใกล้หมดสต๊อก {len(low_stock_list)} รายการ! คลิกเพื่อดู',text_color='red',cursor='hand2') #ดึงจำนวนรายการมาแสดงโชว์ข้อความให้ผู้ใช้ 
             lbl_alert.unbind('<Button-1>') # ลบ event เก่าออกก่อนเสมอเพื่อป้องกันการแจ้งเตือนเด้งซ้อนกันหลายรอบ
             lbl_alert.bind('<Button-1>',show_low_stock_details) #ทำเหตุการณ์ ให้คลิก แล้วก็แสดงให้ popup ขึ้นมา
@@ -137,8 +137,8 @@ def setup_inventory_interface(parent):
             return
         
         # เรียกใช้ฟังก์ชันจาก product_manager
-        success, msg = pm.add_product(pid, name, price, stock, cost) #success: จะได้รับค่าเป็น True (ถ้าบันทึกสำเร็จ) หรือ False (ถ้าล้มเหลว เช่น รหัสสินค้าซ้ำ)
-        if success:                                                  #msg: จะได้รับ "ข้อความสรุป" เช่น 'เพิ่มสินค้าสำเร็จ!' หรือ 'รหัสสินค้านี้มีอยู่แล้ว!' เพื่อเอาไปโชว์ให้ผู้ใช้เห็น
+        success, msg = pm.add_product(pid, name, price, stock, cost) #success: จะได้รับค่าเป็น True กับ Flase
+        if success:                                                  #msg: จะได้รับ ค่าข้อความที่ ส่งมา
             messagebox.showinfo('สำเร็จ', msg)
             clear_form()    # ล้างข้อความในช่องกรอกให้ว่างเหมือนเดิม
             refresh_data()  # อัปเดตตารางให้สินค้าใหม่โผล่ขึ้นมาทันที
@@ -209,27 +209,28 @@ def setup_inventory_interface(parent):
         
         results = pm.search_product(query) #โปรแกรมจะส่ง query ไปให้ฟังก์ชัน ให้ช่วยหาว่ามีสินค้าตัวไหนที่มีชื่อกับรหัสเหมือนอันนี้บ้าง
         # เคลียร์ตารางเดิมทิ้ง
-        for row in tree.get_children(): #มันจะสั่งลบทันที ก่อนที่จะเริ่มแสดงผลการค้นหาครับ เพื่อเป็นการ 'ล้างกระดาน' ข้อมูลเก่าทั้งหมดออกไปก่อน
+        for row in tree.get_children(): #มันจะสั่งลบทันที ก่อนที่จะเริ่มแสดงผลการค้นหาครับ เพื่อเป็นการ ล้างกระดาน ข้อมูลเก่าทั้งหมดออกไปก่อน
             tree.delete(row)
         
         for pid, data in results.items():
-            tree.insert('','end',values=(pid, data["name"], data["price"], data["stock"], data["cost"])) #เป็นคำสั่ง "เขียนข้อมูล" ลงไปในตาราง แล้ว values= คือระบุว่าข้อมูลควรมีอะไรบ้างและเรียงตามลำดับ  end คือให้ต่อเป็นแถวๆไป  "" สร้างแถวใหม่ขึ้นมาเลย
+            tree.insert('','end',values=(pid, data["name"], f'{data["price"]:,.2f}', data["stock"], f'{data["cost"]:,.2f}')) #เป็นคำสั่ง เขียนข้อมูล ลงไปในตาราง แล้ว end คือให้ต่อเป็นแถวๆไป  "" สร้างแถวใหม่ขึ้นมาเลย
         
     def on_tree_select(event):
         """
         ฟังก์ชันสำหรับคลิกแถวของข้อมูลเพื่อจะ แก้ไข หรือ ลบ 
         """
-        try:                               #selection() นี่แหละคือตัวที่ทำหน้าที่บอกโปรแกรมว่า "ตอนนี้ผู้ใช้กำลังสนใจ (คลิก) แถวไหนอยู่"
+        try:                               #selection() คือผู้ใช้กำลังคลิกอันไหน
             selected = tree.selection()[0] #ให้ไปดูว่าผู้ใช้เลือกแถวไหน [0]คือกรณีเผลอเลือกหลายแถวก็จะให้เลือกแถวที่คลิกล่าสุด
             values = tree.item(selected, "values") #ไปดึงข้อมูลจากแถวนั้นออกมาเก็บไว้ในตัวแปร
             
             clear_form() #เครียร์ฟร์อมเพื่อจะเอาข้อมูลใหม่ไปแสดง
             entry_pid.insert(0, values[0]) #แสดงช้อมูลลงไปในฟร์อม # values[0] = รหัสสินค้า (PID)
             entry_pid.configure(state="disabled") # ล็อกการแก้ไขรหัสสินค้า เพื่อป้องกัน Bug 
-            entry_name.insert(0, values[1])    # values[1] = ชื่อสินค้า (Name)
-            entry_price.insert(0, values[2])   # values[2] = ราคา (Price)
+            entry_name.insert(0, str(values[1]).strip())    # values[1] = ชื่อสินค้า (Name) (ตัดช่องว่างข้างหน้าออกตอนดึงข้อมูลมา)
+            # ตัดลูกน้ำ ออกจากราคาและต้นทุนก่อนนำไปวางในช่องกรอก เพื่อให้ฟังก์ชัน update ทำงานได้ต่อ
+            entry_price.insert(0, str(values[2]).replace(',', ''))   # values[2] = ราคา (Price)
             entry_stock.insert(0, values[3])   # values[3] = สต็อก (Stock)
-            entry_cost.insert(0, values[4])    # values[4] = ต้นทุน (Cost)
+            entry_cost.insert(0, str(values[4]).replace(',', ''))    # values[4] = ต้นทุน (Cost)
         except IndexError: #คือการบอกคอมพิวเตอร์ว่า "ถ้าหาไม่เจอ ก็ไม่ต้องทำอะไรนะ นิ่งไว้ โปรแกรมไม่ต้องค้าง"
             pass
     
@@ -339,7 +340,7 @@ def setup_inventory_interface(parent):
     columns = ('PID', 'Name', 'Price', 'Stock', 'Cost') #สร้างชื่อตอลัมขึ้นมาแล้วก็เก็บในตัวแปร
     tree = ttk.Treeview(tree_frame, columns=columns, show='headings', height=20, selectmode="browse")  #สร้างตาราง เอาคอลัมที่กำหนดมาแสดง สั่งให้แสดงเฉพาะหัวตาราง #browseเลือกได้ทีละแถวเดียวเท่านั้น
     
-    # จัดการแสดงผลฟอนต์ไทยใน Treeview
+
     style = ttk.Style() 
     style.theme_use("clam")  # ลบขอบตารางแบบยุคเก่าออก
     
@@ -349,29 +350,29 @@ def setup_inventory_interface(parent):
                     rowheight=35,            # ความสูงแต่ละแถว
                     fieldbackground="white",
                     font=("Kanit", 12),
-                    borderwidth=0)
+                    borderwidth=0) #เอาเส้นขอบออก
                     
     style.configure("Treeview.Heading", 
                     font=("Kanit", 14, "bold"), 
                     background="#1e683e",  # สีเขียวเข้มของร้าน
                     foreground="white",
                     borderwidth=0,
-                    relief="flat")
+                    relief="flat") #ผิวเฟรมกับปุ่ม เรียบไปกับจอ
                     
-    # เปลี่ยนสีเวลาคลิกเลือกรายการ
+    # map เปลี่ยนสีเวลาคลิกเลือกรายการ 
     style.map('Treeview', background=[('selected', '#C8E6C9')], foreground=[('selected', '#000000')])
-    style.map('Treeview.Heading', background=[('active', '#144e2d')])
+    style.map('Treeview.Heading', background=[('active', '#144e2d')]) #เมื่อเอาเมาส์ไปชี้หัวตารางจะเปลี่ยนเป็นสีนี้
     
     # กำหนดหัวตาราง
-    tree.heading("PID", text="รหัสสินค้า") #กำหนดให้ตรงตามที่ลำเคยสร้างตัวแปรคอลัมว่ามันจะไปอยู่ส่วนไหน
-    tree.heading("Name", text="ชื่อสินค้า")
-    tree.heading("Price", text="ราคาขาย (บาท)")
-    tree.heading("Stock", text="สต็อกคงเหลือ")
-    tree.heading("Cost", text="ต้นทุน (บาท)")
+    tree.heading("PID", text="รหัสสินค้า", anchor="center") #กำหนดให้ตรงตามที่ลำเคยสร้างตัวแปรคอลัมว่ามันจะไปอยู่ส่วนไหน
+    tree.heading("Name", text="ชื่อสินค้า", anchor="center")
+    tree.heading("Price", text="ราคาขาย (บาท)", anchor="e")
+    tree.heading("Stock", text="สต็อกคงเหลือ", anchor="center")
+    tree.heading("Cost", text="ต้นทุน (บาท)", anchor="e")
     
     # กำหนดความกว้างคอลัมน์                          # Center (กลาง)  W (ซ้าย) E (ขวา)
     tree.column("PID", width=100, anchor="center") #กำหนดข้อความคอลัม width คือ ขนาดความกว้างที่กำหนดว่าส่วนนี้ของผมไม่ต้องมายุ่ง 
-    tree.column("Name", width=350, anchor="w")
+    tree.column("Name", width=350, anchor="center")
     tree.column("Price", width=120, anchor="e")
     tree.column("Stock", width=120, anchor="center")
     tree.column("Cost", width=120, anchor="e")
