@@ -16,8 +16,6 @@ def ensure_dirs():
 def record_sale(items, subtotal, discount, vat, grand_total, member_info):
     """
     บันทึกยอดขายลงไฟล์ master_sales.txt และสร้างใบเสร็จ PDF
-    items: list of dict -> [{"name": "cake", "qty": 2, "price": 50, "total": 100}, ...]
-    member_info: dict -> {"phone": "080...", "first_name": "John", ...} หรือ ไม่มีคือ None
     """
     ensure_dirs()
     now = datetime.now()
