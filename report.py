@@ -1,53 +1,19 @@
-import product_manager
 import storage_product as stock
 import product_manager as manage
 from datetime import datetime #นำเข้าเพื่อดึงปีและเดือนปัจจุบัน
 import os 
 
-# #ฟังก์ชั่นแสดงข้อมูลการขาย
-# def product_sale_data():
-#     sale_data = "master_sales.txt"
-#     if os.path.exists(sale_data): #เช็คว่าไฟล์มีอยู่จริงไหม
-#         sales = [] #สร้างลิสต์ว่าง ไว้เก็บข้อมูลยอดขายที่ดึงออกมาจากไฟล์ SALES_FILE  ทีละบรรทัด
-#         with open(sale_data,'r',encoding='utf-8') as f: #เปิดไฟล์เพื่ออ่านเป็นภาษาไทย
-#             lines= f.readlines() #อ่าน f ทีละบรรทัด
-#             for line in lines: #วนลูปเพื่ออ่านข้อมูลทีละบรรทัด
-#                 line = line.strip() #.strip เพื่อตัดช่องว่างหัว-ท้าย
-#                 if line: 
-#                     try:
-#                         parts = line.split(',') #แยกส่วนข้อมูลแต่ละพาร์ท ตามลูกน้ำ
-#                         # total_str คือข้อมูลยอดขายที่อยู่ใน SALES_FILE 
-#                         total_str = [item for item in parts if "Total:" in item] # หาค่าที่ขึ้นต้นด้วย "Total:"
-#                         if total_str:
-#                             #แปลงข้อมูลเป็น float #เข้าถึงค่าภายในด้วย index เพื่อเอายอดขาย #ใช้split()เพื่อเอาโคล่อนออก
-#                             total_value = float(total_str[0].split(':')[1].strip()) 
-#                             sales.append(total_value) #.append เพื่อเพิ่มtotal_valueเข้าไปเก็บเพิ่มในlist
-#                         else : 
-#                             # ถ้า total_str ไม่มีค่า "Total:" .ให้ใส่ 0.0 ลงไปแทน
-#                             sales.append(0.0)
-#                     except :
-#                         sales.append(0.0) #ถ้าเกิดerror ระหว่างการแปลงค่า ให้ใส่ 0.0 ลงไปแทน
-#         return sales
-#     return []
-
-#ฟังก์ชั่นแสดงรายรับรวมทั้งหมด
-def total_revenue():
-    revenue = product_sale_data()
-    total = sum(revenue)
-    # ใช้ f-string ในการใส่คอมมาและทศนิยม 2 ตำแหน่ง
-    return f"{total:,.2f}"
-
 def product_sale_data():
     sale_data = "data/master_sales.txt"
     if os.path.exists(sale_data):
-        sales = []
+        sales = [] #สร้างไว้เพื่อเก็บยอดขาย
         with open(sale_data, 'r', encoding='utf-8') as f:
             lines = f.readlines()
-            for line in lines:
-                line = line.strip()
+            for line in lines: #ลูปเพื่ออ่านทีละบรรทัด
+                line = line.strip() #ตัดช่องว่างหน้าหลัง
                 if line:
                     try:
-                        # 1. แยกด้วย '|' เพื่อเอาส่วนแรกที่มี "Total:" ออกมา
+                        # แยกด้วย '|' เพื่อเอาส่วนแรกที่มี "Total:" ออกมา
                         # ผลลัพธ์: "[2026-03-09 01:59:44] Total: 9630.00 THB "
                         first_part = line.split('|')[0]
                         
@@ -64,7 +30,14 @@ def product_sale_data():
                         # ถ้าบรรทัดไหนรูปแบบผิด หรือไม่มีคำว่า Total: ให้ใส่ 0.0
                         sales.append(0.0)
         return sales
-    return []
+    return [] #หาไม่เจอก็คืนค่า[]กลับไป
+
+#ฟังก์ชั่นแสดงรายรับรวมทั้งหมด
+def total_revenue():
+    revenue = product_sale_data()
+    total = sum(revenue)
+    # ใช้ f-string ในการใส่คอมมาและทศนิยม 2 ตำแหน่ง
+    return f"{total:,.2f}"
 
 #ฟังก์ชันแสดงรายจ่าย หรือ ต้นทุน
 def product_cost_data():
@@ -241,16 +214,3 @@ def get_master_sales_data(days_filter=None):
                     except Exception as e:
                         pass
     return sales_list
-
-# a = search_sale_history_custom("2026","03","05") #ทดสอบฟังก์ชันค้นหาประวัติจากขายแบบ Custom ผ่านวัน/เดือน/ปี
-# print(a)
-# y = show_year_sales()
-# m = show_month_sales()
-# d = show_day_sales()
-
-# print(f"{y=}, {m=}, {d=}")
-'''
-print(show_day_sales())
-print(show_month_sales())
-print(show_year_sales())
-'''
