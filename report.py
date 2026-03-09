@@ -89,7 +89,7 @@ def show_day_sales():
     today_str = now.strftime("%Y-%m-%d")  # เช่น "2026-03-09"
 
     # Path ของไฟล์ master_sales.txt
-    master_file = os.path.join(stock.DATA_DIR, "master_sales.txt")
+    master_file = "data/master_sales.txt"
     total_sales = 0.0
 
     if os.path.exists(master_file):
@@ -124,7 +124,7 @@ def show_month_sales():
     now = datetime.now()
     month_str = now.strftime("%Y-%m")  # เช่น "2026-03"
 
-    master_file = os.path.join(stock.DATA_DIR, "master_sales.txt")
+    master_file = "data/master_sales.txt"
     total_sales = 0.0
 
     if os.path.exists(master_file):
@@ -156,7 +156,7 @@ def show_year_sales():
     now = datetime.now()
     year_str = now.strftime("%Y")  # เช่น "2026"
 
-    master_file = os.path.join(stock.DATA_DIR, "master_sales.txt")
+    master_file = "data/master_sales.txt"
     total_sales = 0.0
 
     if os.path.exists(master_file):
@@ -181,7 +181,7 @@ def show_year_sales():
 
 #ฟังก์ชันแสดงจำนวนสมาชิกทั้งหมด
 def total_members():
-    member_file = os.path.join(stock.DATA_DIR, "members.txt")
+    member_file = "data/members.txt"
     count = 0
     if os.path.exists(member_file):
         with open(member_file, 'r', encoding='utf-8') as f:
@@ -192,7 +192,7 @@ def total_members():
 
 # ฟังก์ชันดึงข้อมูลจาก master_sales.txt เพื่อไปแสดงในตาราง
 def get_master_sales_data(days_filter=None):
-    master_file = os.path.join(stock.DATA_DIR, "master_sales.txt")
+    master_file = "data/master_sales.txt"
     sales_list = []
     
     now = datetime.now()

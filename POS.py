@@ -683,13 +683,13 @@ def create_three_frames(parent):
         # สร้าง Popup แสดงรายการบิลพัก
         recall_pop = ctk.CTkToplevel(parent)
         recall_pop.title("เลือกบิลที่ต้องการเรียกคืน")
-        recall_pop.geometry("300x300")
+        recall_pop.geometry("300x500+700+350")
         recall_pop.grab_set()
 
-        ctk.CTkLabel(recall_pop, text="รายการพักบิลทั้งหมด:", font=("Kanit", 10, "bold")).pack(pady=5)
+        ctk.CTkLabel(recall_pop, text="รายการพักบิลทั้งหมด", font=("Kanit", 20, "bold")).pack(pady=5)
 
         # Listbox แสดงชื่อบิลพัก
-        listbox = tk.Listbox(recall_pop, font=("Kanit", 10))
+        listbox = tk.Listbox(recall_pop, font=("Kanit", 12))
         listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
 
         for f in files:
@@ -713,8 +713,11 @@ def create_three_frames(parent):
 
         ctk.CTkButton(
             recall_pop, text="เรียกคืนบิลนี้",
-            command=do_recall, fg_color="lightblue"
-        ).pack(pady=10)
+            font=("Kanit", 20, "bold"),
+            fg_color= "#1e683e",
+            hover_color="#084622",
+            command=do_recall,
+        ).pack(pady=20)
 
 
     # สร้างปุ่มดำเนินการทั้ง 3 ปุ่ม
