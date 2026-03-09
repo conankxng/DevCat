@@ -72,3 +72,4 @@ pip install customtkinter Pillow fpdf playsound
 python main.py
 ```
 
+vscode-pdf
