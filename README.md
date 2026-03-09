@@ -71,5 +71,6 @@ pip install customtkinter Pillow fpdf playsound
 ```bash
 python main.py
 ```
+https://github.com/conankxng/DevCat
 
 vscode-pdf
