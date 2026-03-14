@@ -1,7 +1,9 @@
 import os
 
-DATA_DIR = "data"  # ชื่อโฟเดอร์ที่จะเก็บข้อมูลสต๊อกสินค้า
-os.makedirs(DATA_DIR, exist_ok=True)  # exist_ok=True จะไม่เกิด error ถ้ามีโฟลเดอร์อออยู่แล้ว
+BASE_DIR = os.path.dirname(os.path.abspath(__file__)) #หาไฟล์ตัวรันป้องกันการสร้างโฟเดอร์ทับแล้วทำการเก็บในตัวแปร
+
+DATA_DIR = os.path.join(BASE_DIR, "data") #ทำการดึงตัวแปรไฟล์ตัวรันเพื่อสร้างโฟเดอร์ในไฟล์ project
+os.makedirs(DATA_DIR, exist_ok=True) #สร้างโฟเดอร์ data ขึ้นมาถ้ามีอยู๋แล้วไม่ต้องทำไร
 
 
 # สร้างไฟล์ลิงค์ไปในโฟเดอร์ขของ Data แล้วทำการสร้างไฟล์ (os.path.join) คือสำหรับเส้นทางไฟล์ เพราะ Windows กับ Mac \ / มันต่างกัน
