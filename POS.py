@@ -12,6 +12,8 @@ from playsound import playsound
 import customtkinter as ctk    
 import pos_logic 
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 # ==============================================================
 # ส่วนที่ 1 Numpad ที่ใช้ร่วมกันทั้งระบบ (Shared Numpad Widget)
@@ -758,8 +760,8 @@ def create_three_frames(parent):
         if success:
             logout_member()  # Logout สมาชิกหลังชำระเงินเสร็จ รอลูกค้าคนต่อไป
             try:
-                playsound("sound/cat.mp3",          block=False)  # เล่นเสียงแมวร้อง
-                playsound("sound/money_pickup.mp3", block=False)  # เล่นเสียงรับเงิน
+                playsound(os.path.join(BASE_DIR, "sound", "cat.mp3"),          block=False)  # เล่นเสียงแมวร้อง
+                playsound(os.path.join(BASE_DIR, "sound", "money_pickup.mp3"), block=False)  # เล่นเสียงรับเงิน
             except Exception:
                 print("เล่นเสียงไม่ได้")  # ถ้าไฟล์เสียงไม่มีก็ไม่ Error
         else:
@@ -769,8 +771,8 @@ def create_three_frames(parent):
 
     # ปุ่มรูปแมวสำหรับยืนยันชำระเงิน
     # โหลดรูปแมว 2 แบบ: ปกติ และตอน Hover
-    cat_img_normal = ctk.CTkImage(light_image=Image.open("img/cat_normal.png"), size=(500, 150))
-    cat_img_hover  = ctk.CTkImage(light_image=Image.open("img/cat_hover.png"),  size=(500, 150))
+    cat_img_normal = ctk.CTkImage(light_image=Image.open(os.path.join(BASE_DIR, "img", "cat_normal.png")), size=(500, 150))
+    cat_img_hover  = ctk.CTkImage(light_image=Image.open(os.path.join(BASE_DIR, "img", "cat_hover.png")),  size=(500, 150))
 
     btn_cat = ctk.CTkButton(
         frame3,

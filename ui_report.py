@@ -7,6 +7,9 @@ import customtkinter as ctk
 from tkinter import ttk
 import report
 from PIL import Image
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 # ==============================================================
@@ -95,8 +98,8 @@ def create_report_ui(parent):
     card_refresh.grid(row=0, column=4, sticky="nsew", padx=(10, 0))
 
     # โหลดรูปปุ่ม Refresh 2 แบบ (ปกติ / ตอน Hover เมาส์)
-    refresh_img_normal = ctk.CTkImage(light_image=Image.open("img/Button_refresh_normal.png"), size=(358, 160))
-    refresh_img_hover  = ctk.CTkImage(light_image=Image.open("img/Button_refresh_hover.png"),  size=(358, 160))
+    refresh_img_normal = ctk.CTkImage(light_image=Image.open(os.path.join(BASE_DIR, "img", "Button_refresh_normal.png")), size=(358, 160))
+    refresh_img_hover  = ctk.CTkImage(light_image=Image.open(os.path.join(BASE_DIR, "img", "Button_refresh_hover.png")),  size=(358, 160))
 
     # สร้างปุ่ม Refresh (ใช้รูปแทนข้อความ)
     refresh_btn = ctk.CTkButton(

@@ -6,9 +6,12 @@
 import tkinter as tk
 import customtkinter as ctk
 from PIL import Image, ImageTk, ImageSequence
+import os
 import POS
 import ui_inventory
 import ui_report
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ==============================================================
 # คลาสเก็บสถานะของแอป
@@ -136,7 +139,7 @@ header_left = ctk.CTkFrame(header, fg_color="#FFFFFF")
 header_left.grid(row=0, column=0, sticky="nsew")  # วางในคอลัมน์ซ้าย ยืดเต็มพื้นที่
 
 # โหลดรูปโลโก้และสร้างปุ่มโลโก้ (กดแล้วไปหน้า Main)
-raw_logo = Image.open("img/Logo_devcat.png")
+raw_logo = Image.open(os.path.join(BASE_DIR, "img", "Logo_devcat.png"))
 image_logo = ctk.CTkImage(light_image=raw_logo, dark_image=raw_logo, size=(200, 50))
 ctk.CTkButton(
     header_left,
@@ -202,7 +205,7 @@ page_main.place(**PAGE_CONFIG)
 # โหลด GIF และแยกแต่ละเฟรมออกมาเก็บในลิสต์
 gif_frames_main = [
     ImageTk.PhotoImage(frame.copy())
-    for frame in ImageSequence.Iterator(Image.open("gif/main.gif"))
+    for frame in ImageSequence.Iterator(Image.open(os.path.join(BASE_DIR, "gif", "main.gif")))
 ]
 
 # ตัวแปรสำหรับติดตามว่าตอนนี้แสดงเฟรมที่เท่าไหร่
@@ -240,7 +243,7 @@ page_members.place(**PAGE_CONFIG)
 # โหลด GIF ของหน้า Members และแยกแต่ละเฟรม
 gif_frames_menbers = [
     ImageTk.PhotoImage(frame.copy())
-    for frame in ImageSequence.Iterator(Image.open("gif/members.gif"))
+    for frame in ImageSequence.Iterator(Image.open(os.path.join(BASE_DIR, "gif", "members.gif")))
 ]
 
 # ตัวแปรสำหรับติดตามเฟรมปัจจุบันของหน้า Members
